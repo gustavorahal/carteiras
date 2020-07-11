@@ -1,0 +1,2 @@
+class Carteira < ApplicationRecord
+end

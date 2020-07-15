@@ -1,6 +1,6 @@
-class CreateTrades < ActiveRecord::Migration[6.0]
+class CreateOperacoes < ActiveRecord::Migration[6.0]
   def change
-    create_table :trades do |t|
+    create_table :operacoes do |t|
       t.references :investidor, null: false, foreign_key: true
       t.references :ativo, null: false, foreign_key: true
       t.references :carteira, null: false, foreign_key: true
@@ -10,6 +10,7 @@ class CreateTrades < ActiveRecord::Migration[6.0]
       t.integer :operacao
       t.float :quantidade
       t.float :valor_unit
+      t.float :usdbrl, { default: 1 }
       t.float :co_taxa
       t.float :co_emolumentos
       t.float :co_corretagem

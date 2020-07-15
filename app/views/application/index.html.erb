@@ -1,0 +1,79 @@
+
+<div class="card-group">
+  <div class="card">
+    <div class="card-header">
+      Posição
+    </div>
+    <div class="card-body">
+      Total: <strong><%= number_to_currency @total_geral %></strong>
+                <small>(<%= display_porcentagem @rentabilidade_carteira %> dos <%= number_to_currency @total_investido %> investidos)</small><br>
+      <br>
+      <strong>Detalhes</strong><br>
+      Total ativos: <%= number_to_currency @total_ativos_atual %><br>
+      Saldo XP: <%= number_to_currency @saldo_xp %><br>
+      Saldo Avenue BRL: <%= number_to_currency @saldo_avenue_brl %><br>
+      Saldo Avenue USD: <%= @saldo_avenue_usd %><br>
+
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      Últimas operações
+    </div>
+    <div class="card-body">
+      <table class="table table-borderless table-sm">
+        <tbody>
+          <% @ultimas_operacoes.each do |operacao| %>
+            <tr>
+              <td><%= I18n.l operacao.data, format: :default %></td>
+              <td><%= operacao.ativo.nome %> </td>
+              <td><%= operacao.operacao %></td>
+              <td><%= operacao.quantidade %> </td>
+              <td><%= number_to_currency operacao.valor_unit %></td>
+              <td><%= diplay_moeda operacao.quantidade * operacao.valor_unit * operacao.usdbrl %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+<table class="table table-striped table-sm">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Ativo</th>
+      <th scope="col">% Carteira <br> <small>(% indicada)</small></th>
+      <th scope="col">Rendimento</th>
+      <th scope="col">Posição</th>
+      <th scope="col">Quantidade</th>
+      <th scope="col">Preço Compra</th>
+      <th scope="col">Preço Atual</th>
+    </tr>
+  </thead>
+
+  <tbody>
+      <% book_atual = '' %>
+      <% @carteira_completo.each do |ativo_nome, ativo_id, descricao, book, data_mon,
+                  valor_posicao, quantidade, preco_compra, preco_atual, preco_atual_data| %>
+        <% if book_atual != book %>
+          <tr class="table-primary text-center"><td colspan="7"><strong><%= book %></strong></td></tr>
+          <% book_atual = book %>
+        <% end %>
+        <tr>
+          <td><%= descricao %> (<%= ativo_nome %>) <small>desde <%= I18n.l data_mon, format: :default %> </small></td>
+          <td><%= number_to_percentage(valor_posicao/@total_geral * 100, precision: 2) %>
+                <small>(<%= number_to_percentage CarteiraAtivo.find_by_ativo_id(ativo_id).porcentagem, precision: 2 %>)</small></td>
+          <td><%= display_porcentagem ((preco_atual/preco_compra - 1) * 100) %></td>
+          <td><%= number_to_currency valor_posicao %></td>
+          <td><%= number_to_human quantidade %></td>
+          <td><%= number_to_currency preco_compra %></td>
+          <td><%= number_to_currency preco_atual %> <small>(<%= I18n.l preco_atual_data, format: :short %>)</small></td>
+        </tr>
+      <% end %>
+  </tbody>
+</table>

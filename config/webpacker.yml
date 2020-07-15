@@ -17,7 +17,7 @@ default: &default
   cache_manifest: false
 
   # Extract and emit a css file
-  extract_css: false
+  extract_css: true # See https://gist.github.com/bazzel/2c64e2e5804077f9a61938a93ed54823
 
   static_assets_extensions:
     - .jpg

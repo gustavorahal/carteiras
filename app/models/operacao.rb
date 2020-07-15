@@ -1,4 +1,4 @@
-class Trade < ApplicationRecord
+class Operacao < ApplicationRecord
   belongs_to :ativo
   belongs_to :investidor
   belongs_to :carteira

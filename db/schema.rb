@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_11_093740) do
+ActiveRecord::Schema.define(version: 2020_07_13_144931) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "ativos", force: :cascade do |t|
     t.string "nome"
+    t.string "descricao"
     t.integer "tipo"
     t.string "moeda"
     t.datetime "created_at", precision: 6, null: false
@@ -42,13 +43,35 @@ ActiveRecord::Schema.define(version: 2020_07_11_093740) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "cotacoes", force: :cascade do |t|
+    t.bigint "ativo_id", null: false
+    t.float "valor_unit"
+    t.datetime "data", precision: 6, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ativo_id"], name: "index_cotacoes_on_ativo_id"
+  end
+
+  create_table "extratos", force: :cascade do |t|
+    t.bigint "investidor_id", null: false
+    t.string "corretora"
+    t.date "liquidacao"
+    t.date "movimentacao"
+    t.string "descricao"
+    t.float "valor"
+    t.string "moeda"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["investidor_id"], name: "index_extratos_on_investidor_id"
+  end
+
   create_table "investidores", force: :cascade do |t|
     t.string "nome"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "trades", force: :cascade do |t|
+  create_table "operacoes", id: :bigint, default: -> { "nextval('trades_id_seq'::regclass)" }, force: :cascade do |t|
     t.bigint "investidor_id", null: false
     t.bigint "ativo_id", null: false
     t.bigint "carteira_id", null: false
@@ -66,6 +89,7 @@ ActiveRecord::Schema.define(version: 2020_07_11_093740) do
     t.float "co_outros"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.float "usdbrl", default: 1.0
     t.index ["ativo_id"], name: "index_trades_on_ativo_id"
     t.index ["carteira_id"], name: "index_trades_on_carteira_id"
     t.index ["investidor_id"], name: "index_trades_on_investidor_id"
@@ -74,7 +98,9 @@ ActiveRecord::Schema.define(version: 2020_07_11_093740) do
   add_foreign_key "carteira_ativos", "ativos"
   add_foreign_key "carteira_ativos", "carteiras"
   add_foreign_key "carteira_ativos", "investidores"
-  add_foreign_key "trades", "ativos"
-  add_foreign_key "trades", "carteiras"
-  add_foreign_key "trades", "investidores"
+  add_foreign_key "cotacoes", "ativos"
+  add_foreign_key "extratos", "investidores"
+  add_foreign_key "operacoes", "ativos"
+  add_foreign_key "operacoes", "carteiras"
+  add_foreign_key "operacoes", "investidores"
 end

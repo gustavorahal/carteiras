@@ -1,5 +1,5 @@
 class CarteiraAtivo < ApplicationRecord
-  belongs_to :carteira
+  has_many :operacoes
   belongs_to :ativo
-  belongs_to :investidor
+  belongs_to :carteira
 end

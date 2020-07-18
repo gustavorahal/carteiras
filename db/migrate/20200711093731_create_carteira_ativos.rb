@@ -3,7 +3,7 @@ class CreateCarteiraAtivos < ActiveRecord::Migration[6.0]
     create_table :carteira_ativos do |t|
       t.references :carteira, null: false, foreign_key: true
       t.references :ativo, null: false, foreign_key: true
-      t.references :investidor, null: false, foreign_key: true
+      t.boolean :valido
       t.string :book
       t.float :porcentagem
 

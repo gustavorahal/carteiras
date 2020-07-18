@@ -1,0 +1,28 @@
+
+<div class="container">
+  <table class="table table-striped table-sm">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Ativo</th>
+        <th scope="col">Moeda</th>
+        <th scope="col">Peso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% book, book_percent = @books_porcentagem.first %>
+      <tr class="table-primary text-center"><td colspan="3"><strong><%= book %> <%= display_porcentagem book_percent %></strong></td></tr>
+      <% @carteira_ativos.each do |cativos| %>
+        <% if book != cativos.book %>
+          <% book = cativos.book %>
+          <% book_percent = @books_porcentagem[book] %>
+          <tr class="table-primary text-center"><td colspan="3"><strong><%= book %> <%= display_porcentagem book_percent %></strong></td></tr>
+        <% end %>
+        <tr>
+          <td><%= cativos.ativo.nome %></td>
+          <td><%= cativos.ativo.moeda %></td>
+          <td><%= display_porcentagem cativos.porcentagem %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

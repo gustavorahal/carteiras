@@ -1,0 +1,20 @@
+<%= bootstrap_form_for(@operacao) do |f| %>
+
+  <% if @operacao.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @operacao.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= f.collection_select :investidor_id, Investidor.all.order(:nome), :id, :nome %>
+  <%= f.collection_select :ativo_id, Ativo.all.order(:nome), :id, :nome %>
+  <%= f.select :corretora, ['XP', 'Avenue'] %>
+  <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
+  <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a %>
+
+  <%= f.date_select :data %>
+  <%= f.number_field :quantidade, value: number_to_currency(f.object.valor_unit.to_f, delimiter: '', unit: ''), step: :any %>
+  <%= f.number_field :valor_unit, value: number_to_currency(f.object.valor_unit.to_f, delimiter: '', unit: ''), step: :any %>
+
+  <%= f.submit "Adicionar" %>
+<% end %>

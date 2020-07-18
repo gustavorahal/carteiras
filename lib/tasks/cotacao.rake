@@ -64,15 +64,30 @@ namespace :cotacao do
       end
     end
 
-    task fundo_dolar: :environment do
+    task xp_dolar: :environment do
       url = 'https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=2476'
       document = Nokogiri::HTML.parse(open(url))
-      #html = Nokogiri::HTML(document)
       table = document.css('table').first
       preco = table.css('tr')[1].css('td')[1].text.strip().gsub(',', '.').to_f
       puts preco
       ativo = Ativo.find_by_nome 'VOTORANTIM FIC FI CAMBIAL DÓLAR'
       Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+    end
+
+    task orama_ouro: :environment do
+      url = 'https://data.anbima.com.br/fundos/318396'
+      url = 'https://api.anbima.com.br/feed/fundos/v1/fundos/318396'
+
+      require 'oauth2'
+      client = OAuth2::Client.new('EXAMPLE_CLIENT_ID', 'EXAMPLE_CLIENT_SECRET', :site => 'https://api.anbima.com.br/oauth/access-token')
+
+      client.auth_code.authorize_url(:redirect_uri => 'https://api.anbima.com.br/feed/fundos')
+
+      token = client.auth_code.get_token('client_credentials', :redirect_uri => 'https://api.anbima.com.br/oauth/access-token',
+                                         :headers => {'Authorization' => "Basic #{Base64.encode64('EXAMPLE_CLIENT_ID:EXAMPLE_CLIENT_SECRET')}"})
+      response = token.get('/fundos/318396')
+      response.class.name
+
     end
 
     task usdbrl: :environment do
@@ -92,6 +107,21 @@ namespace :cotacao do
       ativo = Ativo.find_by_nome 'CURRENCY:BRLUSD'
       Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
     end
+
+    #task prov: :environment do
+      # Operacao.all.each do |operacao|
+      #   carteira_ativo = CarteiraAtivo.where(ativo_id: operacao.ativo_id,
+      #                                        carteira_id: operacao.carteira_id).first
+      #   operacao.carteira_ativo = carteira_ativo
+      #   operacao.save
+      # end
+      #
+      # Ativo.all.each do |ativo|
+      #   next if CarteiraAtivo.exists?(ativo_id: ativo.id)
+      #   CarteiraAtivo.create(carteira_id: 1, ativo_id: ativo.id, valido: false)
+      #   CarteiraAtivo.create(carteira_id: 2, ativo_id: ativo.id, valido: false)
+      # end
+      #end
 
   end
 

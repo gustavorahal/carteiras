@@ -1,79 +1,111 @@
 
-<div class="card-group">
-  <div class="card">
-    <div class="card-header">
-      Posição
-    </div>
-    <div class="card-body">
-      Total: <strong><%= number_to_currency @total_geral %></strong>
-                <small>(<%= display_porcentagem @rentabilidade_carteira %> dos <%= number_to_currency @total_investido %> investidos)</small><br>
-      <br>
-      <strong>Detalhes</strong><br>
-      Total ativos: <%= number_to_currency @total_ativos_atual %><br>
-      Saldo XP: <%= number_to_currency @saldo_xp %><br>
-      Saldo Avenue BRL: <%= number_to_currency @saldo_avenue_brl %><br>
-      Saldo Avenue USD: <%= @saldo_avenue_usd %><br>
+<h2>Carteira <%= @carteira.nome %>
+  <small>(<%= link_to 'ver referência', carteira_ativos_path(carteira_id: @carteira.id) %>)</small>
+</h2>
 
+<div class="row">
+  <div class="col-lg">
+  <div class="card-group">
+    <div class="card">
+      <div class="card-body">
+        <h3><%= display_moeda @total_geral %></h3>
+        <small class="text-muted"><%= display_porcentagem @rentabilidade_carteira, cores=TRUE %> dos <%= display_moeda @total_investido %> investidos</small>
+        <br>
+        <br>
+        <h6>
+          <%= display_moeda @total_ativos_atual %>
+          <small class="text-muted"> em ativos</small>
+        </h6>
+        <h6>
+          <%= display_moeda @saldo_xp %>
+          <small class="text-muted"> saldo XP
+            (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora:'XP') %>)
+          </small>
+        </h6>
+        <H6>
+          <%= display_moeda @saldo_avenue_brl %> + <%= display_moeda @saldo_avenue_usd, moeda='USD' %>
+          <small class="text-muted"> saldo Avenue
+            (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora:'Avenue') %>)
+          </small>
+        </H6>
+
+      </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-header">
-      Últimas operações
-    </div>
-    <div class="card-body">
-      <table class="table table-borderless table-sm">
-        <tbody>
-          <% @ultimas_operacoes.each do |operacao| %>
-            <tr>
-              <td><%= I18n.l operacao.data, format: :default %></td>
-              <td><%= operacao.ativo.nome %> </td>
-              <td><%= operacao.operacao %></td>
-              <td><%= operacao.quantidade %> </td>
-              <td><%= number_to_currency operacao.valor_unit %></td>
-              <td><%= diplay_moeda operacao.quantidade * operacao.valor_unit * operacao.usdbrl %></td>
-            </tr>
+
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-borderless table-sm">
+          <h5 class="card-title">Pesos</h5>
+          <% @books_porcentagem.each do |key, value| %>
+            <tr><td><%= key %></td><td><%= display_porcentagem value %></td></tr>
           <% end %>
-        </tbody>
-      </table>
+        </table>
+      </div>
+    </div>
 
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">
+          Últimas operações <small>(<%= link_to 'ver todas', operacoes_path(carteira_id: @carteira.id) %>)</small>
+        </h5>
+
+        <table class="table table-borderless table-sm">
+          <tbody>
+            <% @ultimas_operacoes.each do |operacao| %>
+              <tr>
+                <td><%= I18n.l operacao.data, format: :default %></td>
+                <td><%= operacao.carteira_ativo.ativo.nome %> </td>
+                <td><%= operacao.operacao %></td>
+                <td><%= operacao.quantidade %> </td>
+                <td><%= display_moeda operacao.valor_unit, cores=TRUE %></td>
+                <td><%= display_moeda operacao.quantidade * operacao.valor_unit * operacao.usdbrl, cores=TRUE %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
+</div>
 </div>
 
 
+<div class="row">
+  <div class="col-lg">
+  <table class="table table-striped table-sm">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Ativo</th>
+        <th scope="col">% Carteira <br> <small>(% indicada)</small></th>
+        <th scope="col">Rendimento</th>
+        <th scope="col">Posição</th>
+        <th scope="col">Quantidade</th>
+        <th scope="col">Preço Compra</th>
+        <th scope="col">Preço Atual</th>
+      </tr>
+    </thead>
 
-<table class="table table-striped table-sm">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Ativo</th>
-      <th scope="col">% Carteira <br> <small>(% indicada)</small></th>
-      <th scope="col">Rendimento</th>
-      <th scope="col">Posição</th>
-      <th scope="col">Quantidade</th>
-      <th scope="col">Preço Compra</th>
-      <th scope="col">Preço Atual</th>
-    </tr>
-  </thead>
-
-  <tbody>
-      <% book_atual = '' %>
-      <% @carteira_completo.each do |ativo_nome, ativo_id, descricao, book, data_mon,
-                  valor_posicao, quantidade, preco_compra, preco_atual, preco_atual_data| %>
-        <% if book_atual != book %>
-          <tr class="table-primary text-center"><td colspan="7"><strong><%= book %></strong></td></tr>
-          <% book_atual = book %>
+    <tbody>
+        <% book_atual = '' %>
+        <% @carteira_completo.each do |ativo_nome, ativo_id, descricao, book, data_mon,
+                    valor_posicao, quantidade, preco_compra, preco_atual, preco_atual_data, rentabilidade| %>
+          <% if book_atual != book %>
+            <tr class="table-primary text-center"><td colspan="7"><strong><%= book %> (<%= display_porcentagem @books_porcentagem[book] %>)</strong></td></tr>
+            <% book_atual = book %>
+          <% end %>
+          <tr>
+            <td><%= descricao %> (<%= ativo_nome %>) <small>desde <%= display_data data_mon %> </small></td>
+            <td><%= display_porcentagem(valor_posicao/@total_geral * 100) %>
+                  <small>(<%= display_porcentagem CarteiraAtivo.find_by_ativo_id(ativo_id).porcentagem %>)</small></td>
+            <td><%= display_porcentagem rentabilidade, cores=TRUE %></td>
+            <td><%= display_moeda valor_posicao, cores=TRUE %></td>
+            <td><%= number_to_human quantidade %></td>
+            <td><%= display_moeda preco_compra %></td>
+            <td><%= display_moeda preco_atual %> <small>(<%= display_data preco_atual_data %>)</small></td>
+          </tr>
         <% end %>
-        <tr>
-          <td><%= descricao %> (<%= ativo_nome %>) <small>desde <%= I18n.l data_mon, format: :default %> </small></td>
-          <td><%= number_to_percentage(valor_posicao/@total_geral * 100, precision: 2) %>
-                <small>(<%= number_to_percentage CarteiraAtivo.find_by_ativo_id(ativo_id).porcentagem, precision: 2 %>)</small></td>
-          <td><%= display_porcentagem ((preco_atual/preco_compra - 1) * 100) %></td>
-          <td><%= number_to_currency valor_posicao %></td>
-          <td><%= number_to_human quantidade %></td>
-          <td><%= number_to_currency preco_compra %></td>
-          <td><%= number_to_currency preco_atual %> <small>(<%= I18n.l preco_atual_data, format: :short %>)</small></td>
-        </tr>
-      <% end %>
-  </tbody>
-</table>
+    </tbody>
+  </table>
+</div>
+</div>

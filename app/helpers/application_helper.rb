@@ -18,7 +18,7 @@ module ApplicationHelper
     "<span class=\"#{css_color}\">#{valor_per}</span>".html_safe
   end
 
-  def display_moeda(valor, moeda = 'BRL', cores = FALSE)
+  def display_moeda(valor, moeda: 'BRL', cores: false)
     unidade = 'R$'
     unidade = 'US$' if moeda == 'USD'
 

@@ -5,4 +5,8 @@ class Cotacao < ApplicationRecord
     where(ativo_id: ativo_id).order(data: :desc).limit(1).first
   end
 
+  def self.ultima_cotacao_usdbrl
+    self.ultima_cotacao(Ativo.find_by_nome 'CURRENCY:USDBRL')
+  end
+
 end

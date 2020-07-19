@@ -12,9 +12,16 @@ class Operacao < ApplicationRecord
       desmontagem: 2
   }
 
-  def self.data_montagem(carteira_ativo_id)
-    where(carteira_ativo_id: carteira_ativo_id, mon_ou_des: 1)
-        .order(data: :desc).limit(1)[0].data
+  # def self.data_montagem(carteira_ativo_id)
+  #   where(carteira_ativo_id: carteira_ativo_id, mon_ou_des: 1)
+  #       .order(data: :desc).limit(1)[0].data
+  # end
+
+  def self.operacoes_carteira(carteira_id)
+    Operacao
+        .joins(carteira_ativo: :ativo)
+        .where("carteira_ativos.carteira_id = #{carteira_id}")
+        .order(created_at: :desc)
   end
 
   # Calcula preço médio de compra

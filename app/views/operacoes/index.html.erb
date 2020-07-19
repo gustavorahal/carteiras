@@ -22,8 +22,8 @@
           <td><%= operacao.operacao.capitalize %></td>
           <td><%= operacao.mon_ou_des %></td>
           <td><%= operacao.quantidade %></td>
-          <td><%= display_moeda operacao.valor_unit, moeda=operacao.carteira_ativo.ativo.moeda %></td>
-          <td><%= display_moeda (operacao.quantidade * operacao.valor_unit), moeda=operacao.carteira_ativo.ativo.moeda, cores=TRUE %></td>
+          <td><%= display_moeda operacao.valor_unit, moeda: operacao.carteira_ativo.ativo.moeda %></td>
+          <td><%= display_moeda (operacao.quantidade * operacao.valor_unit), moeda: operacao.carteira_ativo.ativo.moeda, cores: true %></td>
         </tr>
       <% end %>
     </tbody>

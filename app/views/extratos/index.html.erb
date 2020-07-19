@@ -18,7 +18,7 @@
         <td><%= display_data extrato.liquidacao %></td>
         <td><%= display_data extrato.movimentacao %></td>
         <td><%= extrato.descricao %></td>
-        <td><%= display_moeda extrato.valor, extrato.moeda, cores=TRUE %></td>
+        <td><%= display_moeda extrato.valor, moeda: extrato.moeda, cores: true %></td>
       </tr>
     <% end %>
     </tbody>

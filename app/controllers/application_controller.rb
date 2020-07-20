@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   def index
     data_fim = Date.today.strftime '%F'
     @carteira = Carteira.find params[:carteira_id]
-    carteira_posicao = @carteira.posicao(data_fim)
+    carteira_posicao = @carteira.posicao(data_fim: data_fim)
     @carteira_completo = []
     @total_ativos_atual = 0
 
@@ -45,6 +45,13 @@ class ApplicationController < ActionController::Base
       @books_porcentagem[book] = 0 unless book.in? @books_porcentagem
       @books_porcentagem[book] += (valor_posicao / @total_geral) * 100
     end
-
   end
+
+
+  def consolidado
+    carteira = Carteira.find params[:carteira_id]
+    @posicao_corretora_xp = carteira.posicao_corretora 'XP'
+    @posicao_corretora_avenue = carteira.posicao_corretora 'Avenue'
+  end
+
 end

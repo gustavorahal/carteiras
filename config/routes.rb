@@ -5,4 +5,6 @@ Rails.application.routes.draw do
   resources :operacoes
   resources :extratos
   resources :carteira_ativos
+
+  get '/consolidado', to: 'application#consolidado'
 end

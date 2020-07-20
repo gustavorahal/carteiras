@@ -9,7 +9,7 @@
   <%= f.collection_select :carteira_ativo_id, @carteira_ativos.order(:nome), :id, :nome_ativo %>
   <%= f.select :corretora, ['XP', 'Avenue'] %>
   <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
-  <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a %>
+  <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a, include_blank: true %>
 
   <%= f.date_select :data %>
   <%= f.number_field :quantidade, value: number_to_currency(f.object.valor_unit.to_f, delimiter: '', unit: ''), step: :any %>

@@ -29,6 +29,8 @@
           </small>
         </H6>
 
+        <h6>Ver carteira <%= link_to 'consolidada', consolidado_path(carteira_id: @carteira.id) %></h6>
+
       </div>
     </div>
 
@@ -54,7 +56,7 @@
           <tbody>
             <% @ultimas_operacoes.each do |operacao| %>
               <tr>
-                <td><%= I18n.l operacao.data, format: :default %></td>
+                <td><%= display_data operacao.data %></td>
                 <td><%= operacao.carteira_ativo.ativo.nome %> </td>
                 <td><%= operacao.operacao %></td>
                 <td><%= display_moeda operacao.quantidade * operacao.valor_unit * operacao.usdbrl, cores: true %></td>
@@ -103,7 +105,7 @@
                   <small>(<%= display_porcentagem carteira_ativo.porcentagem %>)</small></td>
             <td><%= display_porcentagem rentabilidade, cores=TRUE %></td>
             <td><%= display_moeda valor_posicao, cores: true %></td>
-            <td><%= number_to_human quantidade %></td>
+            <td><%= display_numero quantidade %></td>
             <td><%= display_moeda preco_compra %></td>
             <td><%= display_moeda preco_atual %> <small>(<%= display_data preco_atual_data %>)</small></td>
           </tr>

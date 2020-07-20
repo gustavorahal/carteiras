@@ -1,5 +1,9 @@
 module ApplicationHelper
 
+  def display_numero(numero)
+    number_to_human numero, precision: 10
+  end
+
   def display_data(data)
     I18n.l data, format: :default
   end

@@ -12,7 +12,7 @@ namespace :cotacao do
     request["x-rapidapi-key"] = 'ENV.fetch("RAPIDAPI_KEY")'
 
     response = http.request(request)
-    json_response = JSON.parse(response.read_body)
+    JSON.parse(response.read_body)
   end
 
   def get_preco_acao(ativo)
@@ -25,7 +25,7 @@ namespace :cotacao do
 
 
   namespace :atualiza do
-    
+
     task acoes: :environment do
       Ativo.connection
       Ativo.all.each do |ativo|
@@ -122,6 +122,38 @@ namespace :cotacao do
       #   CarteiraAtivo.create(carteira_id: 2, ativo_id: ativo.id, valido: false)
       # end
       #end
+
+    task extratoxp: :environment do
+      ### SETAR AQUI ###
+      investidor_id = 2
+
+      xlsx = Roo::Excelx.new("./Extrato 2540153 JUN 2020 a JUL 2020.xlsx")
+      sheet = xlsx.sheet(0)
+      i = 16 # até o momento é onde começa o extrato
+      extrato_file = []
+      loop do
+        row = sheet.row(i)
+        break unless row[0].is_a? Date
+        extrato_file.push row
+        i += 1
+      end
+
+      extrato_atual = Extrato
+                      .where(investidor_id: investidor_id, corretora: 'XP')
+                      .order(liquidacao: :desc)
+
+      extrato_file.each do |linha|
+        if extrato_atual.find_by(liquidacao: linha[0],
+                                 movimentacao: linha[1],
+                                 descricao: linha[2], valor: linha[3]).nil?
+          descricao = linha[2].gsub('* PROV * ', '')
+          puts "#{linha[0]} #{linha[1]} #{descricao} #{linha[3]}"
+          Extrato.create(investidor_id: investidor_id, corretora: 'XP',
+              liquidacao: linha[0], movimentacao: linha[1],
+                         descricao: descricao, valor: linha[3], moeda: 'BRL')
+        end
+      end
+    end
 
   end
 

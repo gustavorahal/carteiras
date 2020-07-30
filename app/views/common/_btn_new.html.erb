@@ -1,0 +1,8 @@
+<% size = local_assigns.fetch :size, '' %>
+<% disabled = local_assigns.fetch :disabled, false %>
+<% btn_label = local_assigns.fetch :btn_label, 'Novo' %>
+<% url = local_assigns.fetch :url, false %>
+<% url = polymorphic_path(resource, action: :new) unless url %>
+
+<%= link_to "<i class=\"fa fa-plus\"></i> #{btn_label}".html_safe,
+            url, class: "btn #{size} btn-success", disabled: disabled %>

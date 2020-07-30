@@ -1,14 +1,16 @@
 class OperacoesController < ApplicationController
 
   def index
+    @carteira = Carteira.find params[:carteira_id]
     @operacoes = Operacao.operacoes_carteira(params[:carteira_id])
   end
 
   def new
+    @carteira = Carteira.find params[:carteira_id]
     @operacao = Operacao.new
     @carteira_ativos = CarteiraAtivo
                        .joins(:ativo)
-                       .where(carteira_id: params[:carteira_id], valido: true)
+                       .where(carteira_id: @carteira.id, valido: true)
                        .order(:descricao)
   end
 
@@ -16,7 +18,7 @@ class OperacoesController < ApplicationController
     @operacao = Operacao.new secure_params
 
     if @operacao.save
-      redirect_to operacoes_path carteira_id: params[:carteira_id]
+      redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
     else
       render 'new'
     end

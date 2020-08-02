@@ -7,6 +7,7 @@ class CarteiraAtivo < ApplicationRecord
     operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
   end
 
+  # Utilizado em formulários
   def nome_ativo
     ativo.nome_completo
   end

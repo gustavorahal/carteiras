@@ -15,12 +15,22 @@ namespace :cotacao do
     JSON.parse(response.read_body)
   end
 
+  def get_preco_bitcoin_brl
+    url = "https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL"
+    api_host = 'coingecko.p.rapidapi.com'
+
+    json_response = get_rapidapi_json(url, api_host)
+    json_response['bitcoin']['brl']
+  end
+
   def get_preco_acao(ativo)
     # real time (ou quase isso)
     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-quotes?region=US&lang=en&symbols=#{ativo}"
     api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
     json_response = get_rapidapi_json(url, api_host)
-    json_response['quoteResponse']['result'][0]['regularMarketPrice']
+
+    result = json_response['quoteResponse']['result']
+    result[0]['regularMarketPrice'] unless result.empty?
   end
 
 
@@ -37,10 +47,16 @@ namespace :cotacao do
         end
 
         puts ativo_str
+        # Já foi atualizado na ultima hora? Então ignora
+        if Cotacao.where(ativo_id: ativo.id).where('created_at > ?', 1.hour.ago).exists?
+          puts 'Já atualizado na última hora'
+          next
+        end
+
         preco = get_preco_acao(ativo_str).to_f
         puts "Preço: #{preco}"
 
-        Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+        Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
 
       end
     end
@@ -60,7 +76,7 @@ namespace :cotacao do
         data = tags[3].text.to_datetime
         puts titulo, preco, data
         ativo = Ativo.find_by_nome titulo
-        Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+        Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
       end
     end
 
@@ -68,10 +84,10 @@ namespace :cotacao do
       url = 'https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=2476'
       document = Nokogiri::HTML.parse(open(url))
       table = document.css('table').first
-      preco = table.css('tr')[1].css('td')[1].text.strip().gsub(',', '.').to_f
+      preco = table.css('tr')[1].css('td')[1].text.strip.gsub(',', '.').to_f
       puts preco
       ativo = Ativo.find_by_nome 'VOTORANTIM FIC FI CAMBIAL DÓLAR'
-      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
     end
 
     task orama_ouro: :environment do
@@ -90,14 +106,15 @@ namespace :cotacao do
 
     end
 
-    task usdbrl: :environment do
+    task moedas: :environment do
       api_host = 'currency-converter5.p.rapidapi.com'
 
       url_usdbrl = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=USD&to=BRL&amount=1"
       json_response = get_rapidapi_json(url_usdbrl, api_host)
       preco = json_response['rates']['BRL']['rate'].to_f
       ativo = Ativo.find_by_nome 'CURRENCY:USDBRL'
-      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
+      puts "Cotação USDBRL: #{preco}"
 
       sleep(8) # api exige um tempo entre chamadas
 
@@ -105,7 +122,13 @@ namespace :cotacao do
       json_response = get_rapidapi_json(url_brlusd, api_host)
       preco = json_response['rates']['USD']['rate'].to_f
       ativo = Ativo.find_by_nome 'CURRENCY:BRLUSD'
-      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now())
+      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
+      puts "Cotação BRLUSD: #{preco}"
+
+      preco = get_preco_bitcoin_brl
+      ativo = Ativo.find_by_nome 'CURRENCY:BTCBRL'
+      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
+      puts "Cotação BTCBRL: #{preco}"
     end
 
     #task prov: :environment do

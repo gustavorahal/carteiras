@@ -8,28 +8,25 @@
   <div class="card-group">
     <div class="card">
       <div class="card-body">
-        <h3><%= display_moeda @total_geral %></h3>
-        <small class="text-muted"><%= display_porcentagem @rentabilidade_carteira, cores=true %> dos <%= display_moeda @total_investido %> investidos</small>
+        <h3><%= display_moeda @carteira_posicao.total_geral %></h3>
+        <small class="text-muted"><%= display_porcentagem @carteira_posicao.rentabilidade, cores=true %> dos
+                    <%= display_moeda @carteira_posicao.total_investido %> investidos</small>
         <br>
         <br>
         <h6>
-          <%= display_moeda @total_ativos_atual %>
+          <%= display_moeda @carteira_posicao.total_ativos %>
           <small class="text-muted"> em ativos</small>
         </h6>
-        <h6>
-          <%= display_moeda @saldo_xp %>
-          <small class="text-muted"> saldo XP
-            (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora:'XP') %>)
-          </small>
-        </h6>
-        <H6>
-          <%= display_moeda @saldo_avenue_brl %> + <%= display_moeda @saldo_avenue_usd, moeda: 'USD' %>
-          <small class="text-muted"> saldo Avenue
-            (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora:'Avenue') %>)
-          </small>
-        </H6>
 
-        <h6>Ver carteira <%= link_to 'consolidada', consolidado_carteira_path(@carteira.id) %></h6>
+        <% @carteira_posicao.saldo_cc_por_corretora.each do |corretora, moedas_saldos| %>
+          <% moedas_saldos.each do |moeda, saldo| %>
+            <h6>
+              <%= display_moeda saldo %> <small class="text-muted"> saldo <%= corretora %>
+                (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora: corretora) %>)
+              </small>
+            </h6>
+          <% end %>
+        <% end %>
 
       </div>
     </div>
@@ -38,7 +35,7 @@
       <div class="card-body">
         <table class="table table-borderless table-sm">
           <h5 class="card-title">Composição</h5>
-          <% @books_porcentagem.each do |key, value| %>
+          <% @carteira_posicao.porcentagem_por_book.each do |key, value| %>
             <tr><td><%= key %></td><td><%= display_porcentagem value %></td></tr>
           <% end %>
         </table>
@@ -54,7 +51,7 @@
 
         <table class="table table-borderless table-sm">
           <tbody>
-            <% @ultimas_operacoes.each do |operacao| %>
+            <% @carteira_posicao.ultimas_operacoes.each do |operacao| %>
               <tr>
                 <td><%= display_data operacao.data %></td>
                 <td><%= operacao.carteira_ativo.ativo.nome %> </td>
@@ -73,44 +70,28 @@
 
 <div class="row">
   <div class="col-lg">
-  <table class="table table-striped table-sm">
-    <thead class="thead-light">
-      <tr>
-        <th scope="col">Ativo</th>
-        <th scope="col">% Carteira <br> <small>(% indicada)</small></th>
-        <th scope="col">Rendimento</th>
-        <th scope="col">Posição</th>
-        <th scope="col">Quantidade</th>
-        <th scope="col">Preço Compra</th>
-        <th scope="col">Preço Atual</th>
-      </tr>
-    </thead>
+    <ul class="nav nav-tabs" id="posicoesTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="books-tab" data-toggle="tab"
+           href="#books" role="tab" aria-controls="books" aria-selected="true">
+          Posição por Book
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="corretoras-tab" data-toggle="tab"
+           href="#corretoras" role="tab" aria-controls="corretoras" aria-selected="false">
+          Posição por Corretora
+        </a>
+      </li>
+    </ul>
+    <div class="tab-content" id="posicoesTabContent">
+      <div class="tab-pane fade show active" id="books" role="tabpanel" aria-labelledby="books-tab">
+        <%= render 'posicao_books' %>
+      </div>
+      <div class="tab-pane fade" id="corretoras" role="tabpanel" aria-labelledby="corretoras-tab">
+        <%= render 'posicao_corretoras' %>
+      </div>
+    </div>
 
-    <tbody>
-        <% book_atual = '' %>
-        <% @carteira_completo.each do |carteira_ativo, data_mon, valor_posicao, quantidade,
-                                  preco_compra, preco_atual, preco_atual_data, rentabilidade| %>
-          <% if book_atual != carteira_ativo.book %>
-            <tr class="table-primary text-center">
-              <td colspan="7">
-                <h4><%= carteira_ativo.book %>
-                        (<%= display_porcentagem @books_porcentagem[carteira_ativo.book] %>)</h4>
-              </td>
-            </tr>
-            <% book_atual = carteira_ativo.book %>
-          <% end %>
-          <tr>
-            <td><%= carteira_ativo.ativo.nome_completo %> <small>desde <%= display_data data_mon %> </small></td>
-            <td><%= display_porcentagem(valor_posicao/@total_geral * 100) %>
-                  <small>(<%= display_porcentagem carteira_ativo.porcentagem %>)</small></td>
-            <td><%= display_porcentagem rentabilidade, cores=TRUE %></td>
-            <td><%= display_moeda valor_posicao, cores: true %></td>
-            <td><%= display_numero quantidade %></td>
-            <td><%= display_moeda preco_compra %></td>
-            <td><%= display_moeda preco_atual %> <small>(<%= display_data preco_atual_data %>)</small></td>
-          </tr>
-        <% end %>
-    </tbody>
-  </table>
-</div>
+  </div>
 </div>

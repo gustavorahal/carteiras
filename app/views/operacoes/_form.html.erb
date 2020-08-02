@@ -12,8 +12,9 @@
   <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a, include_blank: true %>
 
   <%= f.date_select :data %>
-  <%= f.number_field :quantidade, value: number_to_currency(f.object.valor_unit.to_f, delimiter: '', unit: ''), step: :any %>
+  <%= f.number_field :quantidade, step: :any %>
   <%= f.number_field :valor_unit, value: number_to_currency(f.object.valor_unit.to_f, delimiter: '', unit: ''), step: :any %>
+  <%= f.number_field :usdbrl, value: 1, help: 'Cotação do Dolar caso a operação seja em dolar', step: :any %>
 
   <%= f.submit "Adicionar" %>
 <% end %>

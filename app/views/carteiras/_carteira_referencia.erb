@@ -10,10 +10,10 @@
     </thead>
     <tbody>
       <% book = '' %>
-      <% @carteira_ativos.each do |cativos| %>
+      <% @carteira.carteira_ativos.where(valido: true).each do |cativos| %>
         <% if book != cativos.book %>
           <% book = cativos.book %>
-          <% book_percent = @books_porcentagem[book] %>
+          <% book_percent = @carteira.books_porcentagem[book] %>
           <tr class="table-primary text-center">
             <td colspan="3">
               <h5><%= book %> (<%= display_porcentagem book_percent %>)</h5>

@@ -1,9 +1,10 @@
 
 <table class="table table-striped table-sm">
-  <thead class="thead-light">
+  <thead class="thead-dark">
   <tr>
     <th scope="col">Corretora</th>
     <th scope="col">Ativo</th>
+    <th scope="col">Posição<br></th>
     <th scope="col">Quantidade<br></th>
     <th scope="col">Tipo</th>
   </tr>
@@ -15,6 +16,7 @@
           <tr>
             <td><%= corretora %></td>
             <td><%= ativo_posicao.nome_ativo %></td>
+            <td><%= display_moeda ativo_posicao.valor_posicao %></td>
             <td><%= display_numero ativo_posicao.quantidade %></td>
             <td><%= ativo_posicao.tipo_ativo %></td>
           </tr>

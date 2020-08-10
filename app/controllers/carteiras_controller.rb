@@ -5,7 +5,7 @@ class CarteirasController < ApplicationController
   end
 
   def show
-    data_fim = Date.today.strftime '%F'
+    data_fim = Date.today
     @carteira = Carteira.find params[:id]
     @carteira_posicao = CarteiraPosicao.new(@carteira, data_fim)
   end

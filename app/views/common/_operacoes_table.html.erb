@@ -1,0 +1,47 @@
+
+<% mostra_nome = local_assigns.fetch :mostra_nome, true %>
+<% operacoes = local_assigns.fetch :operacoes, [] %>
+
+<table class="table table-striped table-sm">
+  <thead class="thead-dark">
+  <tr>
+    <th scope="col">Data</th>
+    <% if mostra_nome  %>
+      <th scope="col">Ativo</th>
+    <% end %>
+    <th scope="col">Corretora</th>
+    <th scope="col">Oper.</th>
+    <th scope="col">M/D</th>
+    <th scope="col">Quant.</th>
+    <th scope="col">Valor Unit.</th>
+    <th scope="col">Valor Total</th>
+    <th scope="col">IRPF</th>
+    <th scope="col">USDBRL</th>
+    <th scope="col">C.O.</th>
+    <th scope="col"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <% operacoes.each do |oper| %>
+    <tr>
+      <td><%= display_data oper.data %></td>
+      <% if mostra_nome  %>
+        <td><%= link_to oper.carteira_ativo.nome_ativo,
+                        carteira_carteira_ativo_path(oper.carteira_ativo.carteira.id,
+                                                     oper.carteira_ativo.id) %></td>
+      <% end %>
+      <td><%= oper.corretora %></td>
+      <td><%= oper.operacao.capitalize %></td>
+      <td><%= oper.mon_ou_des %></td>
+      <td><%= oper.quantidade %></td>
+      <td><%= display_moeda oper.valor_unit, moeda: oper.carteira_ativo.ativo.moeda %></td>
+      <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.carteira_ativo.ativo.moeda, cores: true %></td>
+      <td><%= display_moeda oper.irpf %></td>
+      <td><%= display_moeda oper.usdbrl %></td>
+      <td><%= display_moeda oper.custos_operacionais, moeda: oper.carteira_ativo.ativo.moeda %></td>
+      <td><%= link_to 'Editar', edit_carteira_operacao_path(params[:carteira_id], oper) %></td>
+    </tr>
+  <% end %>
+  </tbody>
+
+</table>

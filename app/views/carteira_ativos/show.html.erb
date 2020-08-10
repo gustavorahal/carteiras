@@ -1,0 +1,8 @@
+
+<h5>Carteira <%= @carteira_ativo.carteira.nome %></h5>
+
+<h6><%= @carteira_ativo.ativo.nome_completo %></h6>
+
+<%= render 'common/operacoes_table',
+           operacoes: @carteira_ativo.operacoes.order(:data),
+           mostra_nome: false %>

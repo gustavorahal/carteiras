@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.float "porcentagem"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "valido"
     t.index ["ativo_id"], name: "index_carteira_ativos_on_ativo_id"
     t.index ["carteira_id"], name: "index_carteira_ativos_on_carteira_id"
   end
@@ -52,8 +53,7 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.index ["ativo_id"], name: "index_cotacoes_on_ativo_id"
   end
 
-  create_table "extratos", id: false, force: :cascade do |t|
-    t.bigserial "id", null: false
+  create_table "extratos", force: :cascade do |t|
     t.bigint "investidor_id", null: false
     t.string "corretora", null: false
     t.date "liquidacao", null: false
@@ -73,27 +73,23 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
   end
 
   create_table "operacoes", id: :bigint, default: -> { "nextval('trades_id_seq'::regclass)" }, force: :cascade do |t|
-    t.bigint "ativo_id", null: false
-    t.bigint "carteira_id", null: false
     t.date "data", null: false
     t.string "corretora", null: false
     t.integer "mon_ou_des"
     t.integer "operacao", null: false
     t.float "quantidade", null: false
     t.float "valor_unit", null: false
-    t.float "co_taxa"
-    t.float "co_emolumentos"
-    t.float "co_corretagem"
-    t.float "co_iss_iof"
-    t.float "co_irrf"
-    t.float "co_outros"
+    t.float "co_taxa", default: 0.0
+    t.float "co_emolumentos", default: 0.0
+    t.float "co_corretagem", default: 0.0
+    t.float "co_iss_iof", default: 0.0
+    t.float "co_irrf", default: 0.0
+    t.float "co_outros", default: 0.0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.float "usdbrl", default: 1.0
-    t.bigint "carteira_ativos_id", default: 1, null: false
-    t.index ["ativo_id"], name: "index_trades_on_ativo_id"
-    t.index ["carteira_ativos_id"], name: "index_operacoes_on_carteira_ativos_id"
-    t.index ["carteira_id"], name: "index_trades_on_carteira_id"
+    t.bigint "carteira_ativo_id", null: false
+    t.index ["carteira_ativo_id"], name: "index_operacoes_on_carteira_ativos_id"
   end
 
   add_foreign_key "carteira_ativos", "ativos"
@@ -101,7 +97,5 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
   add_foreign_key "carteiras", "investidores"
   add_foreign_key "cotacoes", "ativos"
   add_foreign_key "extratos", "investidores"
-  add_foreign_key "operacoes", "ativos"
-  add_foreign_key "operacoes", "carteira_ativos", column: "carteira_ativos_id"
-  add_foreign_key "operacoes", "carteiras"
+  add_foreign_key "operacoes", "carteira_ativos"
 end

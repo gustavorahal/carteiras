@@ -15,6 +15,7 @@ class CarteiraPosicao
   def ativos_posicoes
     return @ativos_posicoes unless @ativos_posicoes.nil?
 
+    data_fim_str = @data_fim.strftime '%F'
     # Para isso somamos a quantidade que temos de cada ativo
     # e o que for diferente de zero significa que temos o ativo na carteira.
     # Quantidade pode ser negativo. Exemplo: operação de short
@@ -23,7 +24,7 @@ class CarteiraPosicao
       FROM carteira_ativos
                INNER JOIN
            operacoes ON operacoes.carteira_ativo_id = carteira_ativos.id
-      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{@data_fim}'
+      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_fim_str}'
       GROUP BY carteira_ativos.id, operacoes.corretora
       HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
       ORDER BY book ASC;
@@ -35,7 +36,7 @@ class CarteiraPosicao
 
     resultado.each do |carteira_ativo_id, quantidade, corretora|
       ap = AtivoPosicao.new(CarteiraAtivo.includes(:ativo).find(carteira_ativo_id),
-                                       quantidade, corretora, @data_fim, @valor_usdbrl)
+                                       quantidade, corretora, @data_fim)
       @ativos_posicoes.push ap
     end
 

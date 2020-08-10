@@ -148,9 +148,9 @@ namespace :cotacao do
 
     task extratoxp: :environment do
       ### SETAR AQUI ###
-      investidor_id = 2
+      investidor_id = 1
 
-      xlsx = Roo::Excelx.new("./Extrato 2540153 JUN 2020 a JUL 2020.xlsx")
+      xlsx = Roo::Excelx.new("./Extrato 2064746 MAI 2020 a AGO 2020.xlsx")
       sheet = xlsx.sheet(0)
       i = 16 # até o momento é onde começa o extrato
       extrato_file = []

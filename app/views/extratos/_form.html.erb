@@ -1,0 +1,21 @@
+<h5><%= @investidor.nome %> corretora <%= @corretora %></h5>
+
+<%= bootstrap_form_for @extrato do |f| %>
+  <% if @extrato.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @extrato.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= hidden_field_tag 'extrato[investidor_id]', @investidor.id %>
+  <%= hidden_field_tag 'extrato[corretora]', @corretora %>
+
+  <%= f.date_select :liquidacao %>
+  <%= f.date_select :movimentacao %>
+  <%= f.text_field :descricao %>
+  <%= f.number_field :valor, step: :any %>
+  <%= f.select :moeda, %w[BRL USD] %>
+
+  <%= f.submit "Adicionar" %>
+
+<% end %>

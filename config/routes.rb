@@ -4,9 +4,9 @@ Rails.application.routes.draw do
 
   resources :ativos
   resources :extratos
-  resources :carteira_ativos
   resources :carteiras do
     resources :operacoes
+    resources :carteira_ativos
   end
 
 

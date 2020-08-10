@@ -8,10 +8,7 @@ class OperacoesController < ApplicationController
   def new
     @carteira = Carteira.find params[:carteira_id]
     @operacao = Operacao.new
-    @carteira_ativos = CarteiraAtivo
-                       .joins(:ativo)
-                       .where(carteira_id: @carteira.id, valido: true)
-                       .order(:descricao)
+    @carteira_ativos = @carteira.carteira_ativos_todos
   end
 
   def create
@@ -24,12 +21,30 @@ class OperacoesController < ApplicationController
     end
   end
 
+  def edit
+    @carteira = Carteira.find params[:carteira_id]
+    @operacao = Operacao.find params[:id]
+    # pego todos os ativos porque posso estar editando operações de ativos não mais válidos
+    @carteira_ativos = @carteira.carteira_ativos_todos
+  end
+
+  def update
+    @operacao = Operacao.find params[:id]
+    if @operacao.update(secure_params)
+      redirect_to carteira_operacoes_path carteira_id: params[:carteira_id],
+                                          notice: "Operação atualizada com sucesso!"
+    else
+      render 'edit'
+    end
+  end
+
   private
 
   def secure_params
     params.require(:operacao).permit(:carteira_ativo_id, :mon_ou_des,
                                      :data, :valor_unit, :quantidade, :corretora,
-                                     :operacao)
+                                     :operacao, :usdbrl, :co_corretagem, :co_taxa,
+                                     :co_emolumentos, :co_iss_iof, :co_irrf, :co_outros)
   end
 
 end

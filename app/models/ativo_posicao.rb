@@ -2,12 +2,11 @@
 
 class AtivoPosicao
 
-  def initialize(carteira_ativo, quantidade, corretora, data_fim, valor_usdbrl)
+  def initialize(carteira_ativo, quantidade, corretora, data_fim)
     @carteira_ativo = carteira_ativo # ActiveRecord CarteiraAtivo
     @quantidade = quantidade
     @corretora = corretora
     @data_fim = data_fim
-    @valor_usdbrl = valor_usdbrl
     @preco_atual = nil
     @preco_medio = nil
     @data_montagem = nil
@@ -34,10 +33,10 @@ class AtivoPosicao
     @carteira_ativo.ativo.tipo
   end
 
-  def cotacao_atual
+  def ultima_cotacao
     return @cotacao_atual unless @cotacao_atual.nil?
 
-    @cotacao_atual = Cotacao.ultima_cotacao(@carteira_ativo.ativo_id)
+    @cotacao_atual = @carteira_ativo.ultima_cotacao
   end
 
   def data_montagem
@@ -55,9 +54,9 @@ class AtivoPosicao
 
     @ultima_cotacao = Cotacao.ultima_cotacao(@carteira_ativo.ativo_id)
     if @carteira_ativo.ativo.moeda == 'USD'
-      @preco_atual = cotacao_atual.valor_unit * @valor_usdbrl
+      @preco_atual = ultima_cotacao.valor_unit * Cotacao.cotacao_usdbrl.valor_unit
     else
-      @preco_atual = cotacao_atual.valor_unit
+      @preco_atual = ultima_cotacao.valor_unit
     end
     @preco_atual
   end
@@ -69,7 +68,7 @@ class AtivoPosicao
   def preco_medio
     return @preco_medio unless @preco_medio.nil?
 
-    @preco_medio = Operacao.preco_medio(@carteira_ativo.id, @data_montagem, @data_fim)
+    @preco_medio = @carteira_ativo.preco_medio(@data_fim)
   end
 
   def rentabilidade

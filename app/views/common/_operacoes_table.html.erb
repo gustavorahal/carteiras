@@ -26,7 +26,7 @@
     <tr>
       <td><%= display_data oper.data %></td>
       <% if mostra_nome  %>
-        <td><%= link_to oper.carteira_ativo.nome_ativo,
+        <td><%= link_to oper.carteira_ativo.nome_amigavel,
                         carteira_carteira_ativo_path(oper.carteira_ativo.carteira.id,
                                                      oper.carteira_ativo.id) %></td>
       <% end %>

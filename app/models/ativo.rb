@@ -10,7 +10,7 @@ class Ativo < ApplicationRecord
       tesouro: 6
   }
 
-  def nome_completo
+  def nome_amigavel
     if descricao.blank?
       nome
     else

@@ -1,8 +1,13 @@
 
 <h5>Carteira <%= @carteira_ativo.carteira.nome %></h5>
 
-<h6><%= @carteira_ativo.ativo.nome_completo %></h6>
+<h6><%= @carteira_ativo.ativo.nome_amigavel %></h6>
+
+<% operacoes = @carteira_ativo.operacoes.order(:data)  %>
+
+<h6>Investido: <%= display_moeda operacoes.sum('valor_unit * quantidade * usdbrl'), moeda: @carteira_ativo.ativo.moeda %></h6>
+<h6>Quantidade: <%= operacoes.sum(:quantidade) %></h6>
 
 <%= render 'common/operacoes_table',
-           operacoes: @carteira_ativo.operacoes.order(:data),
+           operacoes: operacoes,
            mostra_nome: false %>

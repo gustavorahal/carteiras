@@ -1,0 +1,39 @@
+
+<div class="container">
+  <table class="table table-striped table-sm">
+    <thead class="thead-dark">
+    <tr>
+      <th scope="col">Ativo</th>
+      <th scope="col">Posição</th>
+      <th scope="col">Referência</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <% book = '' %>
+    <% @carteira_posicao.ativos_posicoes.each do |ativo_posicao| %>
+      <% if book != ativo_posicao.book %>
+        <tr class="table-primary text-center">
+          <td colspan="7">
+            <h5><%= ativo_posicao.book %>
+              (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ativo_posicao.book] %>)</h5>
+          </td>
+        </tr>
+        <% book = ativo_posicao.book %>
+      <% end %>
+      <tr>
+        <% carteira_ativo = @carteira.carteira_ativos.joins(:ativo).where('ativos.nome = ?', ativo_posicao.nome).first  %>
+        <% if carteira_ativo %>
+            <td><%= ativo_posicao.nome_amigavel %></td>
+            <td><%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %></td>
+            <td><%= display_porcentagem carteira_ativo.porcentagem %></td>
+        <% else %>
+            <td><del><%= ativo_posicao.nome %></del></td>
+            <td></td>
+            <td></td>
+        <% end %>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

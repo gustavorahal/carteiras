@@ -8,8 +8,8 @@ class CarteiraAtivo < ApplicationRecord
   end
 
   # Utilizado em formulários
-  def nome_ativo
-    ativo.nome_completo
+  def nome_amigavel
+    ativo.nome_amigavel
   end
 
 

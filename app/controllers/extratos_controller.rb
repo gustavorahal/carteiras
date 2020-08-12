@@ -20,8 +20,8 @@ class ExtratosController < ApplicationController
     @extrato = Extrato.new secure_params
 
     if @extrato.save
-      redirect_to extrato_path @extrato, investidor_id: @extrato.investidor_id,
-                               corretora: @extrato.corretora
+      redirect_to extratos_path investidor_id: @extrato.investidor_id,
+                                corretora: @extrato.corretora
     else
       render 'new'
     end

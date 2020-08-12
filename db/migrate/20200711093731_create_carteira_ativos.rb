@@ -5,6 +5,7 @@ class CreateCarteiraAtivos < ActiveRecord::Migration[6.0]
       t.references :ativo, null: false, foreign_key: true
       t.boolean :valido
       t.string :book
+      t.string :corretora, null: false
       t.float :porcentagem
 
       t.timestamps

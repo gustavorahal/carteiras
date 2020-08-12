@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
   enable_extension "plpgsql"
 
   create_table "ativos", force: :cascade do |t|
-    t.string "nome"
+    t.string "nome", unique: true
     t.integer "tipo"
     t.string "moeda"
     t.datetime "created_at", precision: 6, null: false
@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.bigint "carteira_id", null: false
     t.bigint "ativo_id", null: false
     t.string "book"
+    t.string "corretora", null: false
     t.float "porcentagem"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

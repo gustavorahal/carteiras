@@ -25,11 +25,11 @@
               </small>
             </h6>
           <% end %>
-
-          <h7>Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
-            <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
-          </h7>
         <% end %>
+
+        <h7>Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
+          <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
+        </h7>
 
       </div>
     </div>
@@ -38,8 +38,13 @@
       <div class="card-body">
         <table class="table table-borderless table-sm">
           <h5 class="card-title">Composição</h5>
-          <% @carteira_posicao.porcentagem_por_book.each do |key, value| %>
-            <tr><td><%= key %></td><td><%= display_porcentagem value %></td></tr>
+          <tr><td></td><td><strong>Posição</strong></td><td><strong>Referência</strong></td></tr>
+          <% @carteira_posicao.porcentagem_por_book.each do |book, porcentagem| %>
+            <tr>
+              <td><%= book %></td>
+              <td><%= display_porcentagem porcentagem %></td>
+              <td><%= display_porcentagem @carteira.ref_books_porcentagem[book] %></td>
+            </tr>
           <% end %>
         </table>
       </div>
@@ -49,7 +54,8 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">
-          Últimas operações <small>(<%= link_to 'ver todas', carteira_operacoes_path(carteira_id: @carteira.id) %>)</small>
+          Últimas operações <small>(<%= link_to 'ver todas', carteira_operacoes_path(carteira_id: @carteira.id) %>)
+          (<%= link_to 'nova', new_carteira_operacao_path(carteira_id: @carteira.id) %>)</small>
         </h5>
 
         <table class="table table-borderless table-sm">
@@ -93,6 +99,12 @@
           Carteira Referência
         </a>
       </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="referencia-posicao-tab" data-toggle="tab"
+           href="#referencia-posicao" role="tab" aria-controls="referencia-posicao" aria-selected="false">
+          Posição vs. Referência (em construção)
+        </a>
+      </li>
     </ul>
     <div class="tab-content" id="posicoesTabContent">
       <div class="tab-pane fade show active" id="books" role="tabpanel" aria-labelledby="books-tab">
@@ -106,6 +118,10 @@
       <div class="tab-pane fade" id="referencia" role="tabpanel" aria-labelledby="referencia-tab">
         <br>
         <%= render 'carteira_referencia' %>
+      </div>
+      <div class="tab-pane fade" id="referencia-posicao" role="tabpanel" aria-labelledby="referencia-posicao-tab">
+        <br>
+        <%= render 'posicao_vs_referencia' %>
       </div>
     </div>
 

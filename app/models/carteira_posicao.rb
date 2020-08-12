@@ -11,6 +11,10 @@ class CarteiraPosicao
     @saldo_cc_por_corretora = nil
   end
 
+  def contem?(nome_ativo)
+    @ativos_posicoes.each { |ap| return true if ap.nome == nome_ativo }
+  end
+
   # Quais ativos eu tenho na carteira até determinada data?
   def ativos_posicoes
     return @ativos_posicoes unless @ativos_posicoes.nil?
@@ -20,12 +24,12 @@ class CarteiraPosicao
     # e o que for diferente de zero significa que temos o ativo na carteira.
     # Quantidade pode ser negativo. Exemplo: operação de short
     sql = <<~SQL
-      SELECT carteira_ativos.id, ROUND(SUM(quantidade)::numeric, 10), operacoes.corretora
+      SELECT carteira_ativos.id, ROUND(SUM(quantidade)::numeric, 10)
       FROM carteira_ativos
                INNER JOIN
            operacoes ON operacoes.carteira_ativo_id = carteira_ativos.id
       WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_fim_str}'
-      GROUP BY carteira_ativos.id, operacoes.corretora
+      GROUP BY carteira_ativos.id
       HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
       ORDER BY book ASC;
     SQL
@@ -34,9 +38,9 @@ class CarteiraPosicao
 
     @ativos_posicoes = []
 
-    resultado.each do |carteira_ativo_id, quantidade, corretora|
+    resultado.each do |carteira_ativo_id, quantidade|
       ap = AtivoPosicao.new(CarteiraAtivo.includes(:ativo).find(carteira_ativo_id),
-                                       quantidade, corretora, @data_fim)
+                                       quantidade, @data_fim)
       @ativos_posicoes.push ap
     end
 
@@ -46,21 +50,12 @@ class CarteiraPosicao
   def ativos_posicoes_por_corretora
     pc = {}
     ativos_posicoes.each do |ativo_posicao|
-      corretora = ativo_posicao.corretora
+      corretora = ativo_posicao.carteira_ativo.corretora
       pc[corretora] = [] unless corretora.in? pc
       pc[corretora].push ativo_posicao
     end
 
     pc
-  end
-
-  def total_c_e_v
-    return @total_c_e_v unless @total_c_e_v.nil?
-
-    @total_c_e_v = CarteiraAtivo
-                       .joins(:operacoes)
-                       .where(carteira_id: @carteira.id)
-                       .sum('quantidade * valor_unit * usdbrl')
   end
 
   def total_ativos
@@ -81,7 +76,7 @@ class CarteiraPosicao
   def corretoras
     crrtrs = {}
     ativos_posicoes.each do |ativo_posicao|
-      crrtrs[ativo_posicao.corretora] = true
+      crrtrs[ativo_posicao.carteira_ativo.corretora] = true
     end
 
     crrtrs.keys
@@ -140,6 +135,19 @@ class CarteiraPosicao
 
   def ultimas_operacoes
     Operacao.operacoes_carteira(@carteira.id).limit(5)
+  end
+
+  def porcentagem_ativo_posicao(ativo_posicao)
+    ativo_posicao.valor_posicao / total_geral * 100
+  end
+
+  def total_c_e_v
+    return @total_c_e_v unless @total_c_e_v.nil?
+
+    @total_c_e_v = CarteiraAtivo
+                       .joins(:operacoes)
+                       .where(carteira_id: @carteira.id)
+                       .sum('quantidade * valor_unit * usdbrl')
   end
 
 end

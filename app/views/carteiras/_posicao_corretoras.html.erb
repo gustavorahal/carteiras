@@ -15,7 +15,7 @@
         <% ativos_posicao.each do |ativo_posicao| %>
           <tr>
             <td><%= corretora %></td>
-            <td><%= ativo_posicao.nome_ativo %></td>
+            <td><%= ativo_posicao.nome_amigavel %></td>
             <td><%= display_moeda ativo_posicao.valor_posicao %></td>
             <td><%= display_numero ativo_posicao.quantidade %></td>
             <td><%= ativo_posicao.tipo_ativo %></td>

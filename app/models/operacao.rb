@@ -16,7 +16,7 @@ class Operacao < ApplicationRecord
     Operacao
       .joins(carteira_ativo: :ativo)
       .where("carteira_ativos.carteira_id = #{carteira_id}")
-      .order(created_at: :desc)
+      .order(data: :desc)
   end
 
   def custos_operacionais

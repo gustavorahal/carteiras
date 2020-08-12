@@ -2,10 +2,11 @@
 
 class AtivoPosicao
 
-  def initialize(carteira_ativo, quantidade, corretora, data_fim)
+  attr_reader :quantidade, :carteira_ativo
+
+  def initialize(carteira_ativo, quantidade, data_fim)
     @carteira_ativo = carteira_ativo # ActiveRecord CarteiraAtivo
     @quantidade = quantidade
-    @corretora = corretora
     @data_fim = data_fim
     @preco_atual = nil
     @preco_medio = nil
@@ -13,20 +14,16 @@ class AtivoPosicao
     @cotacao_atual = nil
   end
 
-  def quantidade
-    @quantidade
-  end
-
-  def corretora
-    @corretora
-  end
-
   def book
     @carteira_ativo.book
   end
 
-  def nome_ativo
-    @carteira_ativo.ativo.nome_completo
+  def nome_amigavel
+    @carteira_ativo.ativo.nome_amigavel
+  end
+
+  def nome
+    @carteira_ativo.ativo.nome
   end
 
   def tipo_ativo

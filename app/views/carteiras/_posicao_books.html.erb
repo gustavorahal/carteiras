@@ -24,8 +24,8 @@
       <% book_atual = ativo_posicao.book %>
     <% end %>
     <tr>
-      <td><%= ativo_posicao.nome_ativo %> <small>desde <%= display_data ativo_posicao.data_montagem %> </small></td>
-      <td><%= display_porcentagem(ativo_posicao.valor_posicao/@carteira_posicao.total_geral * 100) %></td>
+      <td><%= ativo_posicao.nome_amigavel %> <small>desde <%= display_data ativo_posicao.data_montagem %> </small></td>
+      <td><%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %></td>
       <td><%= display_porcentagem ativo_posicao.rentabilidade, cores=TRUE %></td>
       <td><%= display_moeda ativo_posicao.valor_posicao, cores: true %></td>
       <td><%= display_numero ativo_posicao.quantidade %></td>

@@ -1,8 +1,14 @@
 class Carteira < ApplicationRecord
-  has_many :carteira_ativos
+  has_many :carteira_ativos, -> { includes :ativo }
+  has_many :ativos, through: :carteira_ativos
   belongs_to :investidor
 
-  def books_porcentagem
+
+  def ref_books_porcentagem_soma
+    ref_books_porcentagem.values.sum
+  end
+
+  def ref_books_porcentagem
     carteira_ativos.where(valido: true).group(:book).order(:book).sum(:porcentagem)
   end
 

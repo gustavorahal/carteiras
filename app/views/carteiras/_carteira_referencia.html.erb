@@ -5,24 +5,31 @@
       <tr>
         <th scope="col">Ativo</th>
         <th scope="col">Peso</th>
+        <th scope="col">Corretora</th>
         <th scope="col">Moeda</th>
       </tr>
     </thead>
     <tbody>
+      <tr class="table-primary text-center">
+        <td colspan="3">
+          <h5>Total <%= display_porcentagem @carteira.ref_books_porcentagem_soma %></h5>
+        </td>
+      </tr>
       <% book = '' %>
-      <% @carteira.carteira_ativos.where(valido: true).each do |cativos| %>
+      <% @carteira_ativos.each do |cativos| %>
         <% if book != cativos.book %>
           <% book = cativos.book %>
-          <% book_percent = @carteira.books_porcentagem[book] %>
+          <% book_percent = @carteira.ref_books_porcentagem[book] %>
           <tr class="table-primary text-center">
-            <td colspan="3">
-              <h5><%= book %> (<%= display_porcentagem book_percent %>)</h5>
+            <td colspan="4">
+              <h6><%= book %> (<%= display_porcentagem book_percent %>)</h6>
             </td>
           </tr>
       <% end %>
         <tr>
-          <td><%= cativos.ativo.nome_completo %></td>
+          <td><%= cativos.ativo.nome_amigavel %></td>
           <td><%= display_porcentagem cativos.porcentagem %></td>
+          <td><%= cativos.corretora %></td>
           <td><%= cativos.ativo.moeda %></td>
         </tr>
       <% end %>

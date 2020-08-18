@@ -1,5 +1,5 @@
 
 <%= link_to "<< Carteira #{@carteira.nome}", carteira_path(@carteira) %>
-<%= render 'common/btn_new', url: new_carteira_operacao_path, btn_label: 'Nova operação' %>
+<%= render 'common/btn_new', url: new_carteira_operacao_path, label: 'Nova operação' %>
 
 <%= render 'common/operacoes_table', operacoes: @operacoes %>

@@ -14,7 +14,7 @@
 <tbody>
   <% @ativos.each do |ativo| %>
     <tr>
-      <td><%= ativo.nome %></td>
+      <td><%= link_to ativo.nome_amigavel, ativo_cotacoes_path(ativo) %></td>
       <td><%= ativo.descricao %></td>
       <td><%= ativo.tipo %></td>
       <td><%= ativo.moeda %></td>

@@ -1,7 +1,7 @@
 
 <h5>Carteira <%= @carteira_ativo.carteira.nome %></h5>
 
-<h6><%= @carteira_ativo.ativo.nome_amigavel %></h6>
+<h6><%= @carteira_ativo.ativo.nome_amigavel %> (ver <%= link_to 'histórico cotações', ativo_cotacoes_path(@carteira_ativo.ativo) %>)</h6>
 
 <% operacoes = @carteira_ativo.operacoes.order(:data)  %>
 

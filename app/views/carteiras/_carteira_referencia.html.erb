@@ -11,7 +11,7 @@
     </thead>
     <tbody>
       <tr class="table-primary text-center">
-        <td colspan="3">
+        <td colspan="4">
           <h5>Total <%= display_porcentagem @carteira.ref_books_porcentagem_soma %></h5>
         </td>
       </tr>
@@ -29,7 +29,7 @@
         <tr>
           <td><%= cativos.ativo.nome_amigavel %></td>
           <td><%= display_porcentagem cativos.porcentagem %></td>
-          <td><%= cativos.corretora %></td>
+          <td><%= cativos.corretora.nome %></td>
           <td><%= cativos.ativo.moeda %></td>
         </tr>
       <% end %>

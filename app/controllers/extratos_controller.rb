@@ -3,11 +3,33 @@ class ExtratosController < ApplicationController
   def index
     @extratos = Extrato
                 .where(investidor_id: params[:investidor_id],
-                       corretora: params[:corretora])
+                       corretora_id: params[:corretora_id])
                 .order(liquidacao: :desc)
     @saldo = @extratos.sum(:valor)
-    @corretora = params[:corretora]
+    @corretora = Corretora.find params[:corretora_id]
     @investidor = Investidor.find params[:investidor_id]
+  end
+
+  def import
+    investidor = Investidor.find params[:investidor_id]
+    corretora = Corretora.find params[:corretora_id]
+    extrato_file = params[:file]
+    if corretora.nome == 'XP'
+      begin
+        ImportaExtrato.extrato_xp(investidor.id, extrato_file.path)
+        redirect_to extratos_path(investidor_id: investidor.id,
+                                  corretora_id: corretora.id),
+                    notice: 'Extrato importado com sucesso'
+      rescue TypeError => e
+        redirect_to extratos_path(investidor_id: investidor.id,
+                                  corretora_id: corretora.id),
+                    alert: e.message
+      end
+    else
+      redirect_to extratos_path(investidor_id: investidor.id,
+                                corretora_id: corretora.id),
+                  alert: 'Corretora não suportada'
+    end
   end
 
   def new
@@ -25,7 +47,6 @@ class ExtratosController < ApplicationController
     else
       render 'new'
     end
-
   end
 
   private
@@ -34,7 +55,8 @@ class ExtratosController < ApplicationController
     params.require(:extrato).permit(:liquidacao,
                                     :movimentacao,
                                     :descricao, :valor, :moeda,
-                                    :corretora, :investidor_id)
+                                    :corretora, :investidor_id, :corretora_id,
+                                    :file)
   end
 
-  end
+end

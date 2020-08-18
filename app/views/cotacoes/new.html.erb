@@ -1,0 +1,14 @@
+<h4>Adicionar cotação para <%= @ativo.nome_amigavel %></h4>
+
+<%= bootstrap_form_for [@ativo, @cotacao] do |f| %>
+  <% if @cotacao.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @cotacao.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= f.datetime_select :data %>
+  <%= f.number_field :valor_unit, step: :any %>
+
+  <%= f.submit "Adicionar" %>
+<% end %>

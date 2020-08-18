@@ -50,9 +50,9 @@ class CarteiraPosicao
   def ativos_posicoes_por_corretora
     pc = {}
     ativos_posicoes.each do |ativo_posicao|
-      corretora = ativo_posicao.carteira_ativo.corretora
-      pc[corretora] = [] unless corretora.in? pc
-      pc[corretora].push ativo_posicao
+      corretora_nome = ativo_posicao.carteira_ativo.corretora.nome
+      pc[corretora_nome] = [] unless corretora_nome.in? pc
+      pc[corretora_nome].push ativo_posicao
     end
 
     pc
@@ -73,25 +73,16 @@ class CarteiraPosicao
     total_ativos + saldo_cc_total
   end
 
-  def corretoras
-    crrtrs = {}
-    ativos_posicoes.each do |ativo_posicao|
-      crrtrs[ativo_posicao.carteira_ativo.corretora] = true
-    end
-
-    crrtrs.keys
-  end
-
   def saldo_cc_por_corretora
     return @saldo_cc_por_corretora unless @saldo_cc_por_corretora.nil?
 
     @saldo_cc_por_corretora = {}
-    corretoras.each do |corretora|
-      @saldo_cc_por_corretora[corretora] = {} unless corretora.in? @saldo_cc_por_corretora
+    Corretora.all.each do |corretora|
+      @saldo_cc_por_corretora[corretora.nome] = {} unless corretora.nome.in? @saldo_cc_por_corretora
       %w[BRL USD].each do |moeda|
-        @saldo_cc_por_corretora[corretora][moeda] = Extrato
+        @saldo_cc_por_corretora[corretora.nome][moeda] = Extrato
                                      .where(investidor_id: @carteira.investidor.id,
-                                     moeda: moeda, corretora: corretora)
+                                     moeda: moeda, corretora_id: corretora.id)
                                      .sum(:valor).round(2)
       end
     end

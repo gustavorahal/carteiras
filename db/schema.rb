@@ -10,29 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_18_010443) do
+ActiveRecord::Schema.define(version: 2020_07_13_144931) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "ativos", force: :cascade do |t|
-    t.string "nome", unique: true
+    t.string "nome"
     t.integer "tipo"
     t.string "moeda"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "descricao"
+    t.index ["nome"], name: "ativos_nome_uindex", unique: true
   end
 
   create_table "carteira_ativos", force: :cascade do |t|
     t.bigint "carteira_id", null: false
     t.bigint "ativo_id", null: false
     t.string "book"
-    t.string "corretora", null: false
     t.float "porcentagem"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "valido"
+    t.bigint "corretora_id", null: false
     t.index ["ativo_id"], name: "index_carteira_ativos_on_ativo_id"
     t.index ["carteira_id"], name: "index_carteira_ativos_on_carteira_id"
   end
@@ -45,6 +46,12 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.index ["investidor_id"], name: "index_carteiras_on_investidor_id"
   end
 
+  create_table "corretoras", force: :cascade do |t|
+    t.string "nome", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "cotacoes", force: :cascade do |t|
     t.bigint "ativo_id", null: false
     t.float "valor_unit"
@@ -54,9 +61,9 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.index ["ativo_id"], name: "index_cotacoes_on_ativo_id"
   end
 
-  create_table "extratos", force: :cascade do |t|
+  create_table "extratos", id: false, force: :cascade do |t|
+    t.bigserial "id", null: false
     t.bigint "investidor_id", null: false
-    t.string "corretora", null: false
     t.date "liquidacao", null: false
     t.date "movimentacao", null: false
     t.string "descricao", null: false
@@ -64,6 +71,7 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
     t.string "moeda", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "corretora_id", null: false
     t.index ["investidor_id"], name: "index_extratos_on_investidor_id"
   end
 
@@ -95,8 +103,10 @@ ActiveRecord::Schema.define(version: 2020_07_18_010443) do
 
   add_foreign_key "carteira_ativos", "ativos"
   add_foreign_key "carteira_ativos", "carteiras"
+  add_foreign_key "carteira_ativos", "corretoras", name: "carteira_ativos_corretoras_id_fk"
   add_foreign_key "carteiras", "investidores"
   add_foreign_key "cotacoes", "ativos"
+  add_foreign_key "extratos", "corretoras", name: "extratos_corretoras_id_fk"
   add_foreign_key "extratos", "investidores"
   add_foreign_key "operacoes", "carteira_ativos"
 end

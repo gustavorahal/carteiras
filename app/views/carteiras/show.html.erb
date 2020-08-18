@@ -16,12 +16,13 @@
           <small class="text-muted"> em ativos</small>
         </h6>
 
-        <% @carteira_posicao.saldo_cc_por_corretora.each do |corretora, moedas_saldos| %>
+        <% @carteira_posicao.saldo_cc_por_corretora.each do |corretora_nome, moedas_saldos| %>
           <% moedas_saldos.each do |moeda, saldo| %>
             <% next if saldo == 0  %>
             <h6>
-              <%= display_moeda saldo, moeda: moeda %> <small class="text-muted"> saldo <%= corretora %>
-                (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id, corretora: corretora) %>)
+              <%= display_moeda saldo, moeda: moeda %> <small class="text-muted"> saldo <%= corretora_nome %>
+                (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id,
+                                                      corretora_id: Corretora.find_by(nome: corretora_nome)) %>)
               </small>
             </h6>
           <% end %>

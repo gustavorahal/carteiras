@@ -15,7 +15,7 @@ class Ativo < ApplicationRecord
     if descricao.blank?
       nome
     else
-      "#{descricao} (#{nome})"
+      "#{nome} (#{descricao})"
     end
   end
 

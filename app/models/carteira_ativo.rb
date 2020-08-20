@@ -10,7 +10,7 @@ class CarteiraAtivo < ApplicationRecord
 
   # Utilizado em formulários
   def nome_amigavel
-    ativo.nome_amigavel
+    "#{ativo.nome_amigavel} - #{corretora.nome}"
   end
 
 

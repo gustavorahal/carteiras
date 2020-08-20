@@ -1,5 +1,6 @@
 class Operacao < ApplicationRecord
   belongs_to :carteira_ativo
+  belongs_to :corretora
 
   enum operacao: {
       C: 1,

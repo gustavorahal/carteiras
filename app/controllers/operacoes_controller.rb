@@ -13,6 +13,7 @@ class OperacoesController < ApplicationController
 
   def create
     @operacao = Operacao.new secure_params
+    @operacao.corretora_id = @operacao.carteira_ativo.corretora_id
 
     if @operacao.save
       redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]

@@ -26,11 +26,11 @@
     <tr>
       <td><%= display_data oper.data %></td>
       <% if mostra_nome  %>
-        <td><%= link_to oper.carteira_ativo.nome_amigavel,
+        <td><%= link_to oper.carteira_ativo.ativo.nome_amigavel,
                         carteira_carteira_ativo_path(oper.carteira_ativo.carteira.id,
                                                      oper.carteira_ativo.id) %></td>
       <% end %>
-      <td><%= oper.corretora %></td>
+      <td><%= oper.corretora.nome %></td>
       <td><%= oper.operacao.capitalize %></td>
       <td><%= oper.mon_ou_des %></td>
       <td><%= oper.quantidade %></td>

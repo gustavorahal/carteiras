@@ -8,7 +8,7 @@
   <% end %>
 
   <%= hidden_field_tag 'extrato[investidor_id]', @investidor.id %>
-  <%= hidden_field_tag 'extrato[corretora]', @corretora %>
+  <%= hidden_field_tag 'extrato[corretora_id]', @corretora.id %>
 
   <%= f.date_select :liquidacao %>
   <%= f.date_select :movimentacao %>

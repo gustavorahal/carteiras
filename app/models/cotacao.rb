@@ -6,9 +6,7 @@ class Cotacao < ApplicationRecord
   end
 
   def self.cotacao_usdbrl
-    Rails.cache.fetch 'cotacao_usdbrl', expires_in: 1.day do
-      ultima_cotacao Ativo.find_by_nome('CURRENCY:USDBRL').id
-    end
+    ultima_cotacao Ativo.find_by_nome('CURRENCY:USDBRL').id
   end
 
 

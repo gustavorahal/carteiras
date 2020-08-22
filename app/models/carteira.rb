@@ -23,7 +23,7 @@ class Carteira < ApplicationRecord
     CarteiraAtivo
         .where(carteira_id: id)
         .includes(:ativo)
-        .order('ativos.descricao')
+        .order('ativos.nome')
   end
 
 end

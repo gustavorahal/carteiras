@@ -34,7 +34,7 @@ class ExtratosController < ApplicationController
 
   def new
     @extrato = Extrato.new
-    @corretora = params[:corretora]
+    @corretora = Corretora.find params[:corretora_id]
     @investidor = Investidor.find params[:investidor_id]
   end
 
@@ -43,7 +43,7 @@ class ExtratosController < ApplicationController
 
     if @extrato.save
       redirect_to extratos_path investidor_id: @extrato.investidor_id,
-                                corretora: @extrato.corretora
+                                corretora_id: @extrato.corretora_id
     else
       render 'new'
     end

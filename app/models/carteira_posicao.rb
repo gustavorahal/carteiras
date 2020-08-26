@@ -116,6 +116,17 @@ class CarteiraPosicao
     pb
   end
 
+  def valor_por_book
+    vb = {}
+    ativos_posicoes.each do |ativo_posicao|
+      book = ativo_posicao.book
+      vb[book] = 0 unless book.in? vb
+      vb[book] += ativo_posicao.valor_posicao
+    end
+
+    vb
+  end
+
   def total_investido
     total_c_e_v + saldo_cc_total
   end

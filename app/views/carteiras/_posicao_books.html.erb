@@ -2,7 +2,6 @@
   <thead class="thead-dark">
   <tr>
     <th scope="col">Ativo</th>
-    <th scope="col">% Carteira</th>
     <th scope="col">Rendimento</th>
     <th scope="col">Posição</th>
     <th scope="col">Quantidade</th>
@@ -15,20 +14,28 @@
   <% book_atual = '' %>
   <% @carteira_posicao.ativos_posicoes.each do |ativo_posicao| %>
     <% if book_atual != ativo_posicao.book %>
-      <tr class="table-primary text-center">
-        <td colspan="7">
-          <h5><%= ativo_posicao.book %>
-            (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ativo_posicao.book] %>)</h5>
+      <tr class="table-primary">
+        <td>
+          <h6><%= ativo_posicao.book %></h6>
         </td>
+        <td> <!-- Rendimento --> </td>
+        <td>
+          <h6><%= display_moeda @carteira_posicao.valor_por_book[ativo_posicao.book] %>
+            (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ativo_posicao.book] %>) </h6>
+        </td>
+        <td><!-- Quantidade --></td>
+        <td><!-- Preço Médio --></td>
+        <td><!-- Preço Atual --></td>
       </tr>
       <% book_atual = ativo_posicao.book %>
     <% end %>
     <tr>
       <td><%= link_to ativo_posicao.nome_amigavel, carteira_carteira_ativo_path(@carteira, ativo_posicao.carteira_ativo.id) %>
                 <small>desde <%= display_data ativo_posicao.data_montagem %> </small></td>
-      <td><%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %></td>
       <td><%= display_porcentagem ativo_posicao.rentabilidade, cores=TRUE %></td>
-      <td><%= display_moeda ativo_posicao.valor_posicao, cores: true %></td>
+      <td><%= display_moeda ativo_posicao.valor_posicao, cores: true %>
+          (<%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %>)
+      </td>
       <td><%= display_numero ativo_posicao.quantidade %></td>
       <td><%= display_moeda ativo_posicao.preco_medio %></td>
       <td><%= display_moeda ativo_posicao.preco_atual %> <small>(<%= display_data ativo_posicao.preco_atual_data %>)</small></td>

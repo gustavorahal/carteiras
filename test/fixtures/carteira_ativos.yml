@@ -1,13 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  carteira: one
-  ativo: one
-  investidor: one
-  book: MyString
+itsa4_example_growth:
+  carteira: example_growth
+  ativo: itsa4
+  corretora: xp
+  book: Ações
+  valido: true
 
-two:
-  carteira: two
-  ativo: two
-  investidor: two
-  book: MyString
+bpan4_example_growth:
+  carteira: example_growth
+  ativo: bpan4
+  corretora: xp
+  book: Ações
+  valido: true

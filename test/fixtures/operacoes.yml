@@ -1,13 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  ativo: MyString
-  corretora: MyString
-  operacao: MyString
-  quantidade: 
-
-two:
-  ativo: MyString
-  corretora: MyString
-  operacao: MyString
-  quantidade: 
+<% 2.times do |n| %>
+  itsa4_op<%= n %>:
+    carteira_ativo: itsa4_example_growth
+    corretora: XP
+    operacao: 1
+    valor_unit: 10
+    quantidade: 100
+    data: 2020-08-08
+<% end %>

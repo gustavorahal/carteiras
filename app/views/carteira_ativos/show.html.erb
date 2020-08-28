@@ -1,12 +1,11 @@
 
-<h5>Carteira <%= @carteira_ativo.carteira.nome %></h5>
+<%= render 'common/voltar_carteira', carteira: @carteira_ativo.carteira %>
 
 <h6><%= @carteira_ativo.ativo.nome_amigavel %> (ver <%= link_to 'histórico cotações', ativo_cotacoes_path(@carteira_ativo.ativo) %>)</h6>
+<h6>Investido: <%= display_moeda @carteira_ativo.valor_investido, moeda: @carteira_ativo.ativo.moeda %></h6>
+<h6>Quantidade: <%= @carteira_ativo.quantidade %></h6>
 
 <% operacoes = @carteira_ativo.operacoes.order(:data)  %>
-
-<h6>Investido: <%= display_moeda operacoes.sum('valor_unit * quantidade * usdbrl'), moeda: @carteira_ativo.ativo.moeda %></h6>
-<h6>Quantidade: <%= operacoes.sum(:quantidade) %></h6>
 
 <%= render 'common/operacoes_table',
            operacoes: operacoes,

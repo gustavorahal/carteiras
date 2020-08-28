@@ -1,0 +1,6 @@
+
+<% carteira = local_assigns.fetch :carteira, @carteira %>
+
+<h4>
+<%= link_to bootstrap_icon("arrow-left-circle-fill", width: 30, height: 30), carteira_path(carteira) %> Carteira <%= carteira.nome %>
+</h4>

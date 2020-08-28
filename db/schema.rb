@@ -61,8 +61,7 @@ ActiveRecord::Schema.define(version: 2020_07_13_144931) do
     t.index ["ativo_id"], name: "index_cotacoes_on_ativo_id"
   end
 
-  create_table "extratos", id: false, force: :cascade do |t|
-    t.bigserial "id", null: false
+  create_table "extratos", force: :cascade do |t|
     t.bigint "investidor_id", null: false
     t.date "liquidacao", null: false
     t.date "movimentacao", null: false
@@ -81,9 +80,8 @@ ActiveRecord::Schema.define(version: 2020_07_13_144931) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "operacoes", id: :bigint, default: -> { "nextval('trades_id_seq'::regclass)" }, force: :cascade do |t|
+  create_table "operacoes", force: :cascade do |t|
     t.date "data", null: false
-    t.string "corretora", null: false
     t.integer "mon_ou_des"
     t.integer "operacao", null: false
     t.float "quantidade", null: false
@@ -98,6 +96,7 @@ ActiveRecord::Schema.define(version: 2020_07_13_144931) do
     t.datetime "updated_at", precision: 6, null: false
     t.float "usdbrl", default: 1.0
     t.bigint "carteira_ativo_id", null: false
+    t.bigint "corretora_id", null: false
     t.index ["carteira_ativo_id"], name: "index_operacoes_on_carteira_ativos_id"
   end
 

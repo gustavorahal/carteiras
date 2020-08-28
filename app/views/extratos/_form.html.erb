@@ -1,4 +1,4 @@
-<h5><%= @investidor.nome %> corretora <%= @corretora %></h5>
+<h5><%= @investidor.nome %> corretora <%= @corretora.nome %></h5>
 
 <%= bootstrap_form_for @extrato do |f| %>
   <% if @extrato.errors[:base].present? %>

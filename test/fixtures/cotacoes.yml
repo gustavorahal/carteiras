@@ -2,10 +2,6 @@
 
 one:
   ativo: one
-  preco: 1.5
+  valor_unit: 1.5
   data: 2020-07-11
 
-two:
-  ativo: two
-  preco: 1.5
-  data: 2020-07-11

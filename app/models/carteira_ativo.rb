@@ -4,6 +4,8 @@ class CarteiraAtivo < ApplicationRecord
   belongs_to :ativo
   belongs_to :carteira
 
+  before_save :abort_se_tem_na_carteira, if: :valido_changed?
+
   def data_montagem
     operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
   end
@@ -38,5 +40,23 @@ class CarteiraAtivo < ApplicationRecord
     Cotacao.ultima_cotacao(ativo.id)
   end
 
+  def quantidade
+    operacoes.sum(:quantidade)
+  end
+
+  def valor_investido
+    operacoes.sum('valor_unit * quantidade * usdbrl')
+  end
+
+
+  private
+
+  # Aborta operação de save se houver tentativa de desabilitar
+  # a carteira_ativo (valido = false) quanto ele ainda esta presente na carteira
+  # ou seja, sua quantidade diferente de 0
+  def abort_se_tem_na_carteira
+    new_value = valido_change_to_be_saved[1]
+    throw(:abort) if (new_value == false) && (quantidade != 0)
+  end
 
 end

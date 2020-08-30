@@ -1,4 +1,4 @@
-<h5><%= @investidor.nome %> corretora <%= @corretora.nome %></h5>
+<%= render 'common/titulo_pagina', titulo: "#{@investidor.nome} corretora #{@corretora.nome}" %>
 
 <%= bootstrap_form_for @extrato do |f| %>
   <% if @extrato.errors[:base].present? %>

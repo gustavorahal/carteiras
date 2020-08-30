@@ -1,3 +1,6 @@
+<%= render 'common/btn_new',
+           url: new_carteira_carteira_ativo_path(@carteira),
+           label: 'Novo ativo' %>
 
 <div class="container">
   <table class="table table-striped table-sm">
@@ -6,7 +9,7 @@
         <th scope="col">Ativo</th>
         <th scope="col">Peso</th>
         <th scope="col">Corretora</th>
-        <th scope="col">Moeda</th>
+        <th scope="col"></th>
       </tr>
     </thead>
     <tbody>
@@ -30,7 +33,7 @@
           <td><%= cativos.ativo.nome_amigavel %></td>
           <td><%= display_porcentagem cativos.porcentagem %></td>
           <td><%= cativos.corretora.nome %></td>
-          <td><%= cativos.ativo.moeda %></td>
+          <td><%= link_to 'editar', edit_carteira_carteira_ativo_path(@carteira, cativos) %></td>
         </tr>
       <% end %>
     </tbody>

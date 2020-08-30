@@ -1,0 +1,17 @@
+
+<%= bootstrap_form_for [@carteira, @carteira_ativo] do |f| %>
+  <% if @carteira_ativo.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @carteira_ativo.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel %>
+  <%= f.collection_select :corretora_id, @corretoras, :id, :nome %>
+  <%= f.text_field :book %>
+  <%= f.number_field :porcentagem, step: :any %>
+  <%= f.check_box :valido, checked: true, custom: :switch %>
+
+  <%= f.submit "Salvar" %>
+<% end %>
+

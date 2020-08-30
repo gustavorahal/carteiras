@@ -85,36 +85,36 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link active" id="books-tab" data-toggle="tab"
            href="#books" role="tab" aria-controls="books" aria-selected="true">
-          Posição por Book
+          Ativos por Book
         </a>
       </li>
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="corretoras-tab" data-toggle="tab"
            href="#corretoras" role="tab" aria-controls="corretoras" aria-selected="false">
-          Posição por Corretora
+          Ativos por Corretora
         </a>
       </li>
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="referencia-tab" data-toggle="tab"
            href="#referencia" role="tab" aria-controls="referencia" aria-selected="false">
-          Carteira Referência
+          Referência
         </a>
       </li>
       <li class="nav-item" role="presentation">
         <a class="nav-link" id="referencia-posicao-tab" data-toggle="tab"
            href="#referencia-posicao" role="tab" aria-controls="referencia-posicao" aria-selected="false">
-          Posição vs. Referência (em construção)
+          Atual vs. Referência (em construção)
         </a>
       </li>
     </ul>
-    <div class="tab-content" id="posicoesTabContent">
+    <div class="tab-content" id="ativosBookTabContent">
       <div class="tab-pane fade show active" id="books" role="tabpanel" aria-labelledby="books-tab">
         <br>
-        <%= render 'posicao_books' %>
+        <%= render 'ativos_books' %>
       </div>
       <div class="tab-pane fade" id="corretoras" role="tabpanel" aria-labelledby="corretoras-tab">
         <br>
-        <%= render 'posicao_corretoras' %>
+        <%= render 'ativos_corretoras' %>
       </div>
       <div class="tab-pane fade" id="referencia" role="tabpanel" aria-labelledby="referencia-tab">
         <br>

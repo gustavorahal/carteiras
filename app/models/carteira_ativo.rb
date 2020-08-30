@@ -4,6 +4,8 @@ class CarteiraAtivo < ApplicationRecord
   belongs_to :ativo
   belongs_to :carteira
 
+  validates :ativo_id, uniqueness: { scope: [ :carteira_id, :corretora_id ] }
+
   before_save :abort_se_tem_na_carteira, if: :valido_changed?
 
   def data_montagem

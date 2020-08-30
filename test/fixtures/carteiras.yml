@@ -4,3 +4,6 @@ example_growth:
   nome: Example Growth
   investidor: example_investor
 
+example_income:
+  nome: Example Income
+  investidor: claudio

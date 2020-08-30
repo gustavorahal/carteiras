@@ -4,5 +4,6 @@
 <% url = local_assigns.fetch :url, false %>
 <% url = polymorphic_path(resource, action: :new) unless url %>
 
-<%= link_to "<i class=\"fa fa-plus\"></i> #{label}".html_safe,
+
+<%= link_to bootstrap_icon("plus-circle") + " #{label}",
             url, class: "btn #{size} btn-success", disabled: disabled %>

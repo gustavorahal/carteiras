@@ -19,10 +19,12 @@ class RegistraCotacao
     Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: DateTime.now)
   end
 
-  def self.tesouro(titulo)
-    data, preco = BuscaCotacao.tesouro titulo
-    ativo = Ativo.find_by_nome titulo
-    Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: data)
+  def self.tesouro
+    Ativo.tesouro.each do |ativo|
+      data, preco = BuscaCotacao.tesouro ativo.nome
+      ativo = Ativo.find_by_nome ativo.nome
+      Cotacao.create(ativo_id: ativo.id, valor_unit: preco, data: data)
+    end
   end
 
   def self.acoes_e_fii
@@ -57,7 +59,7 @@ class RegistraCotacao
     btc_brl
     usd_brl
     brl_usd
-    Ativo.where(tipo: 6).each { |ativo| tesouro(ativo.nome) }
+    tesouro
     fundo_xp_dolar
   end
 

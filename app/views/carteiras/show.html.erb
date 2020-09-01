@@ -22,7 +22,8 @@
             <h6>
               <%= display_moeda saldo, moeda: moeda %> <small class="text-muted"> saldo <%= corretora_nome %>
                 (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id,
-                                                      corretora_id: Corretora.find_by(nome: corretora_nome)) %>)
+                                                      corretora_id: Corretora.find_by(nome: corretora_nome),
+                                                      moeda: moeda) %>)
               </small>
             </h6>
           <% end %>

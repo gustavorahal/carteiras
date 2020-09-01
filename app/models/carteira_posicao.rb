@@ -82,7 +82,8 @@ class CarteiraPosicao
       %w[BRL USD].each do |moeda|
         @saldo_cc_por_corretora[corretora.nome][moeda] = Extrato
                                      .where(investidor_id: @carteira.investidor.id,
-                                     moeda: moeda, corretora_id: corretora.id)
+                                            corretora_id: corretora.id,
+                                            moeda: moeda)
                                      .sum(:valor).round(2)
       end
     end

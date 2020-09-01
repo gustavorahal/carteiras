@@ -1,9 +1,11 @@
 class ExtratosController < ApplicationController
 
   def index
+    @moeda = params[:moeda]
     @extratos = Extrato
                 .where(investidor_id: params[:investidor_id],
-                       corretora_id: params[:corretora_id])
+                       corretora_id: params[:corretora_id],
+                       moeda: @moeda)
                 .order(liquidacao: :desc)
     @saldo = @extratos.sum(:valor)
     @corretora = Corretora.find params[:corretora_id]

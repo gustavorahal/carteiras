@@ -1,5 +1,9 @@
+<%= render 'common/voltar_carteira', carteira: @investidor.carteiras[0] %>
 
-<h4>Extrato <%= @corretora.nome %> - Saldo <%= @saldo %></h4>
+<%= render 'common/titulo_pagina', titulo: "Extrato #{@corretora.nome} de #{@investidor.nome}" %>
+
+<h6>Saldo <%= display_moeda @saldo, moeda: @moeda %></h6>
+
 <%= render 'common/btn_new', url: new_extrato_path(investidor_id: @investidor.id,
                                                    corretora_id: @corretora.id),
                                             label: 'Nova entrada' %>

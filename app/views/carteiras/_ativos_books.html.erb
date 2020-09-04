@@ -1,33 +1,33 @@
 <table class="table table-striped table-sm">
   <tbody>
   <% book_atual = '' %>
-  <% @carteira_posicao.ativos_posicoes.each do |ativo_posicao| %>
-    <% if book_atual != ativo_posicao.book %>
+  <% @carteira_posicao.carteira_ativos.each do |ca| %>
+    <% if book_atual != ca.book %>
       <tr class="table-primary">
         <td>
-          <h6><%= ativo_posicao.book %></h6>
+          <h6><%= ca.book %></h6>
         </td>
         <td> <!-- Rendimento --> </td>
         <td>
-          <h6><%= display_moeda @carteira_posicao.valor_por_book[ativo_posicao.book] %>
-            (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ativo_posicao.book] %>) </h6>
+          <h6><%= display_moeda @carteira_posicao.valor_por_book[ca.book] %>
+            (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ca.book] %>) </h6>
         </td>
         <td><!-- Quantidade --></td>
         <td>Preço Médio</td>
         <td>Preço Atual</td>
       </tr>
-      <% book_atual = ativo_posicao.book %>
+      <% book_atual = ca.book %>
     <% end %>
     <tr>
-      <td><%= link_to ativo_posicao.nome_amigavel, carteira_carteira_ativo_path(@carteira, ativo_posicao.carteira_ativo.id) %>
-                <small>desde <%= display_data ativo_posicao.data_montagem %> </small></td>
-      <td><%= display_porcentagem ativo_posicao.rentabilidade, cores=TRUE %></td>
-      <td><%= display_moeda ativo_posicao.valor_posicao, cores: true %>
-          (<%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %>)
+      <td><%= link_to ca.nome_amigavel, carteira_carteira_ativo_path(@carteira, ca) %>
+                <small>desde <%= display_data ca.data_montagem %> </small></td>
+      <td><%= display_porcentagem ca.rentabilidade(@data_fim), cores=true %></td>
+      <td><%= display_moeda ca.valor_posicao, cores: true %>
+          (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %>)
       </td>
-      <td><%= display_numero ativo_posicao.quantidade %></td>
-      <td><%= display_moeda ativo_posicao.preco_medio %></td>
-      <td><%= display_moeda ativo_posicao.preco_atual %> <small>(<%= display_data ativo_posicao.preco_atual_data %>)</small></td>
+      <td><%= display_numero ca.quantidade %></td>
+      <td><%= display_moeda ca.preco_medio(@data_fim) %></td>
+      <td><%= display_moeda ca.cotacao.valor_unit_moeda %> <small>(<%= display_data ca.cotacao.data %>)</small></td>
     </tr>
   <% end %>
   </tbody>

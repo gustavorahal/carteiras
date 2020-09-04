@@ -19,12 +19,18 @@ class CarteiraAtivo < ApplicationRecord
 
 
   # Calcula preço médio de compra
-  def preco_medio(data_fim)
+  def preco_medio(data_fim, moeda: 'BRL')
     data_fim_str = data_fim.strftime '%F'
     data_montagem_str = data_montagem.strftime '%F'
 
+    if ativo.moeda == 'USD' && moeda == 'BRL'
+      sum_str = 'quantidade * valor_unit * usdbrl'
+    else # não temos valor de BRL para USD
+      sum_str = 'quantidade * valor_unit'
+    end
+
     sql = <<~SQL
-        select sum(quantidade * valor_unit * usdbrl)/sum(quantidade) as preco_compra
+        select sum(#{sum_str})/sum(quantidade) as preco_compra
         from operacoes
         where carteira_ativo_id = #{id} and 
          operacao = 1 and 
@@ -38,16 +44,33 @@ class CarteiraAtivo < ApplicationRecord
   # Última cotação do Ativo
   #
   # @return Cotacao object
-  def ultima_cotacao
-    Cotacao.ultima_cotacao(ativo.id)
+  def cotacao
+    Cotacao.cotacao_ativo(ativo.id)
   end
 
   def quantidade
-    operacoes.sum(:quantidade)
+    Rails.cache.fetch("quantidade_ca_#{id}", expires_in: 5.seconds) do
+      operacoes.sum(:quantidade)
+    end
   end
 
-  def valor_investido
-    operacoes.sum('valor_unit * quantidade * usdbrl')
+  def valor_investido(moeda: 'BRL')
+    if moeda == 'BRL'
+      operacoes.sum('valor_unit * quantidade * usdbrl')
+    else # USD
+      # FIXME:
+      # não temos a cotacao brlusd armazenada a época para definir
+      # qual a cotação usar
+      operacoes.sum('valor_unit * quantidade')
+    end
+  end
+
+  def valor_posicao(moeda: 'BRL')
+    cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f
+  end
+
+  def rentabilidade(data_fim)
+    ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100
   end
 
 

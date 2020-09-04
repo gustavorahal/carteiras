@@ -4,20 +4,19 @@ class CarteiraPosicao
     @carteira = carteira # ActiveRecord Carteira
     @data_fim = data_fim
     @valor_usdbrl = Cotacao.cotacao_usdbrl.valor_unit
-    @total_c_e_v = nil
-    @total_geral = nil
-    @total_ativos = nil
-    @ativos_posicoes = nil
     @saldo_cc_por_corretora = nil
+    @carteira_ativos = [] # lista de ActiveRecord CarteiraAtivo
   end
 
   def contem?(nome_ativo)
-    @ativos_posicoes.each { |ap| return true if ap.nome == nome_ativo }
+    @carteira_ativos.each { |ca| return true if ca.ativo.nome == nome_ativo }
   end
 
   # Quais ativos eu tenho na carteira até determinada data?
-  def ativos_posicoes
-    return @ativos_posicoes unless @ativos_posicoes.nil?
+  #
+  # @return lista de ActiveRecord CarteiraAtivo
+  def carteira_ativos
+    return @carteira_ativos unless @carteira_ativos.empty?
 
     data_fim_str = @data_fim.strftime '%F'
     # Para isso somamos a quantidade que temos de cada ativo
@@ -36,43 +35,42 @@ class CarteiraPosicao
 
     resultado = ActiveRecord::Base.connection.execute(sql).values
 
-    @ativos_posicoes = []
-
     resultado.each do |carteira_ativo_id, quantidade|
-      ap = AtivoPosicao.new(CarteiraAtivo.includes(:ativo).find(carteira_ativo_id),
-                                       quantidade, @data_fim)
-      @ativos_posicoes.push ap
+      ca = CarteiraAtivo.includes(:ativo).find(carteira_ativo_id)
+      # FIXME: testar se rola fazer varias chamadas para quantidade
+      # #ca.set_quantidade quantidade
+      @carteira_ativos.push ca
     end
 
-    @ativos_posicoes
+    @carteira_ativos
   end
 
-  def ativos_posicoes_por_corretora
+  # FIXME usar activerecord query group by depois e desativar isso
+  def carteira_ativos_por_corretora
     pc = {}
-    ativos_posicoes.each do |ativo_posicao|
-      corretora_nome = ativo_posicao.carteira_ativo.corretora.nome
+    carteira_ativos.each do |ca|
+      corretora_nome = ca.corretora.nome
       pc[corretora_nome] = [] unless corretora_nome.in? pc
-      pc[corretora_nome].push ativo_posicao
+      pc[corretora_nome].push ca
     end
 
     pc
   end
 
   def total_ativos
-    return @total_ativos unless @total_ativos.nil?
-
-    @total_ativos = 0
-    ativos_posicoes.each do |ativo_posicao|
-      @total_ativos += ativo_posicao.valor_posicao
+    ta = 0
+    carteira_ativos.each do |ca|
+      ta += ca.valor_posicao
     end
 
-    @total_ativos
+    ta
   end
 
   def total_geral
     total_ativos + saldo_cc_total
   end
 
+  # FIXME: Converterem tabela conta_corrente
   def saldo_cc_por_corretora
     return @saldo_cc_por_corretora unless @saldo_cc_por_corretora.nil?
 
@@ -108,10 +106,10 @@ class CarteiraPosicao
 
   def porcentagem_por_book
     pb = {}
-    ativos_posicoes.each do |ativo_posicao|
-      book = ativo_posicao.book
+    carteira_ativos.each do |ca|
+      book = ca.book
       pb[book] = 0 unless book.in? pb
-      pb[book] += (ativo_posicao.valor_posicao / total_geral) * 100
+      pb[book] += (ca.valor_posicao / total_geral) * 100
     end
 
     pb
@@ -119,10 +117,10 @@ class CarteiraPosicao
 
   def valor_por_book
     vb = {}
-    ativos_posicoes.each do |ativo_posicao|
-      book = ativo_posicao.book
+    carteira_ativos.each do |ca|
+      book = ca.book
       vb[book] = 0 unless book.in? vb
-      vb[book] += ativo_posicao.valor_posicao
+      vb[book] += ca.valor_posicao
     end
 
     vb
@@ -140,17 +138,15 @@ class CarteiraPosicao
     Operacao.operacoes_carteira(@carteira.id).limit(5)
   end
 
-  def porcentagem_ativo_posicao(ativo_posicao)
-    ativo_posicao.valor_posicao / total_geral * 100
+  def porcentagem_carteira_ativo(carteira_ativo)
+    carteira_ativo.valor_posicao / total_geral * 100
   end
 
   def total_c_e_v
-    return @total_c_e_v unless @total_c_e_v.nil?
-
-    @total_c_e_v = CarteiraAtivo
-                       .joins(:operacoes)
-                       .where(carteira_id: @carteira.id)
-                       .sum('quantidade * valor_unit * usdbrl')
+    CarteiraAtivo
+               .joins(:operacoes)
+               .where(carteira_id: @carteira.id)
+               .sum('quantidade * valor_unit * usdbrl')
   end
 
 end

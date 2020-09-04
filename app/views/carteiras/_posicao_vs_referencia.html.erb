@@ -10,29 +10,30 @@
     </thead>
     <tbody>
 
-    <% book = '' %>
-    <% @carteira_posicao.ativos_posicoes.each do |ativo_posicao| %>
-      <% if book != ativo_posicao.book %>
-        <tr class="table-primary text-center">
-          <td colspan="7">
-            <h5><%= ativo_posicao.book %>
-              (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[ativo_posicao.book] %>)</h5>
+    <% @carteira_ativos_soma.each do |ca_book, carteira_ativos| %>
+        <tr class="table-primary">
+          <td>
+            <h6><%= ca_book %></h6>
+          </td>
+          <td>
+            <h6><%= display_porcentagem @carteira_posicao.porcentagem_por_book[ca_book] %></h6>
+          </td>
+          <td>
+            <h6><%= display_porcentagem @carteira.ref_books_porcentagem[ca_book] %></h6>
           </td>
         </tr>
-        <% book = ativo_posicao.book %>
-      <% end %>
-      <tr>
-        <% carteira_ativo = @carteira.carteira_ativos.joins(:ativo).where('ativos.nome = ?', ativo_posicao.nome).first  %>
-        <% if carteira_ativo %>
-            <td><%= ativo_posicao.nome_amigavel %></td>
-            <td><%= display_porcentagem @carteira_posicao.porcentagem_ativo_posicao(ativo_posicao) %></td>
-            <td><%= display_porcentagem carteira_ativo.porcentagem %></td>
-        <% else %>
-            <td><del><%= ativo_posicao.nome %></del></td>
-            <td></td>
-            <td></td>
+        <% carteira_ativos.each do |ca| %>
+          <% if @carteira_ativos_posicao.include?(ca) && @carteira_ativos.include?(ca) %>
+            <% span_class = 'font-weight-bold' %>
+          <% else %>
+            <% span_class = 'font-weight-light' %>
+          <% end %>
+          <tr>
+              <td><span class="<%= span_class %>"><%= ca.nome_amigavel %></span></td>
+              <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %></span></td>
+              <td><span class="<%= span_class %>"><%= display_porcentagem ca.porcentagem %></span></td>
+          </tr>
         <% end %>
-      </tr>
     <% end %>
     </tbody>
   </table>

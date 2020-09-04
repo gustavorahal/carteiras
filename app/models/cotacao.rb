@@ -1,13 +1,34 @@
 class Cotacao < ApplicationRecord
   belongs_to :ativo
 
-  def self.ultima_cotacao(ativo_id)
-    where(ativo_id: ativo_id).order(data: :desc).limit(1).first
+  def self.cotacao_ativo(ativo_id)
+    Rails.cache.fetch("cotacao_ativo_#{ativo_id}", expires_in: 5.seconds) do
+      where(ativo_id: ativo_id).order(data: :desc).limit(1).first
+    end
   end
 
   def self.cotacao_usdbrl
-    ultima_cotacao Ativo.find_by_nome('CURRENCY:USDBRL').id
+    Rails.cache.fetch('cotacao_usdbrl', expires_in: 5.seconds) do
+      cotacao_ativo Ativo.find_by_nome('CURRENCY:USDBRL').id
+    end
   end
 
+  def self.cotacao_brlusd
+    Rails.cache.fetch('cotacao_brlusd', expires_in: 5.seconds) do
+      cotacao_ativo Ativo.find_by_nome('CURRENCY:BRLUSD').id
+    end
+  end
+
+  def valor_unit_moeda(moeda: 'BRL')
+    Rails.cache.fetch("valor_unit_moeda_#{id}", expires_in: 5.seconds) do
+      if moeda == ativo.moeda
+        valor_unit
+      elsif moeda == 'BRL' # e ativo é USD
+        valor_unit * Cotacao.cotacao_usdbrl.valor_unit
+      elsif moeda == 'USD' # e ativo é BRL
+        valor_unit * Cotacao.cotacao_brlusd.valor_unit
+      end
+    end
+  end
 
 end

@@ -82,50 +82,41 @@
 
 <div class="row">
   <div class="col-lg">
-    <ul class="nav nav-pills nav-justified" id="posicoesTab" role="tablist">
-      <li class="nav-item" role="presentation">
-        <a class="nav-link active" id="books-tab" data-toggle="tab"
-           href="#books" role="tab" aria-controls="books" aria-selected="true">
+    <ul class="nav nav-pills nav-justified">
+      <li class="nav-item">
+        <a class="nav-link <%= 'active' if @view == 1 %>" href="<%= carteira_path(@carteira, view: 1) %>">
           Ativos por Book
         </a>
       </li>
-      <li class="nav-item" role="presentation">
-        <a class="nav-link" id="corretoras-tab" data-toggle="tab"
-           href="#corretoras" role="tab" aria-controls="corretoras" aria-selected="false">
+      <li class="nav-item">
+        <a class="nav-link <%= 'active' if @view == 2 %>" href="<%= carteira_path(@carteira, view: 2) %>">
           Ativos por Corretora
         </a>
       </li>
-      <li class="nav-item" role="presentation">
-        <a class="nav-link" id="referencia-tab" data-toggle="tab"
-           href="#referencia" role="tab" aria-controls="referencia" aria-selected="false">
+      <li class="nav-item">
+        <a class="nav-link <%= 'active' if @view == 3 %>" href="<%= carteira_path(@carteira, view: 3) %>">
           Referência
         </a>
       </li>
-      <li class="nav-item" role="presentation">
-        <a class="nav-link" id="referencia-posicao-tab" data-toggle="tab"
-           href="#referencia-posicao" role="tab" aria-controls="referencia-posicao" aria-selected="false">
+      <li class="nav-item">
+        <a class="nav-link <%= 'active' if @view == 4 %>" href="<%= carteira_path(@carteira, view: 4) %>">
           Atual vs. Referência
         </a>
       </li>
     </ul>
-    <div class="tab-content" id="ativosBookTabContent">
-      <div class="tab-pane fade show active" id="books" role="tabpanel" aria-labelledby="books-tab">
-        <br>
+    <br>
+    <% case @view %>
+      <% when 1 %>
         <%= render 'ativos_books' %>
-      </div>
-      <div class="tab-pane fade" id="corretoras" role="tabpanel" aria-labelledby="corretoras-tab">
-        <br>
+      <% when 2 %>
         <%= render 'ativos_corretoras' %>
-      </div>
-      <div class="tab-pane fade" id="referencia" role="tabpanel" aria-labelledby="referencia-tab">
-        <br>
+      <% when 3 %>
         <%= render 'carteira_referencia' %>
-      </div>
-      <div class="tab-pane fade" id="referencia-posicao" role="tabpanel" aria-labelledby="referencia-posicao-tab">
-        <br>
+      <% when 4 %>
         <%= render 'posicao_vs_referencia' %>
-      </div>
-    </div>
+      <% else %>
+        <h5>Escolha o que ver sobre a carteira</h5>
+      <% end %>
 
   </div>
 </div>

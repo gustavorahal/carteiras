@@ -15,7 +15,7 @@
         <% carteira_ativos.each do |ca| %>
           <tr>
             <td><%= corretora %></td>
-            <td><%= ca.nome_amigavel %></td>
+            <td><%= link_to ca.nome_amigavel, carteira_carteira_ativo_path(@carteira, ca) %></td>
             <td><%= display_moeda ca.valor_posicao %></td>
             <td><%= display_numero ca.quantidade %></td>
             <td><%= ca.ativo.tipo %></td>

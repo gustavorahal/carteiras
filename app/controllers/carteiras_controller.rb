@@ -5,6 +5,7 @@ class CarteirasController < ApplicationController
   end
 
   def show
+    @view = params[:view].to_i
     @data_fim = Date.today
     @carteira = Carteira.find params[:id]
     @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)

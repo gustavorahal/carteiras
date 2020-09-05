@@ -20,11 +20,13 @@ class ExtratosController < ApplicationController
       begin
         ImportaExtrato.extrato_xp(investidor.id, extrato_file.path)
         redirect_to extratos_path(investidor_id: investidor.id,
-                                  corretora_id: corretora.id),
+                                  corretora_id: corretora.id,
+                                  moeda: 'BRL'),
                     notice: 'Extrato importado com sucesso'
       rescue TypeError => e
         redirect_to extratos_path(investidor_id: investidor.id,
-                                  corretora_id: corretora.id),
+                                  corretora_id: corretora.id,
+                                  moeda: 'BRL'),
                     alert: e.message
       end
     else

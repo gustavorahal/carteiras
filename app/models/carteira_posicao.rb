@@ -138,8 +138,12 @@ class CarteiraPosicao
     Operacao.operacoes_carteira(@carteira.id).limit(5)
   end
 
-  def porcentagem_carteira_ativo(carteira_ativo)
-    carteira_ativo.valor_posicao / total_geral * 100
+  def porcentagem_carteira_ativo(ca)
+    ca.valor_posicao / total_geral * 100
+  end
+
+  def valor_teorico_carteira_ativo(ca)
+    total_geral * (ca.porcentagem / 100)
   end
 
   def total_c_e_v

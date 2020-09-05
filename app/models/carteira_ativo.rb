@@ -69,7 +69,7 @@ class CarteiraAtivo < ApplicationRecord
     cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f
   end
 
-  def rentabilidade(data_fim)
+  def rentabilidade(data_fim=Date.today)
     ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100
   end
 

@@ -1,5 +1,5 @@
 class Carteira < ApplicationRecord
-  has_many :carteira_ativos, -> { includes :ativo }
+  has_many :carteira_ativos, -> { includes :ativo, :corretora }
   has_many :ativos, through: :carteira_ativos
   belongs_to :investidor
 
@@ -15,14 +15,14 @@ class Carteira < ApplicationRecord
   def carteira_ativos_validos
     CarteiraAtivo
         .where(carteira_id: id, valido: true)
-        .includes(:ativo)
+        .includes(:ativo, :corretora)
         .order('ativos.descricao')
   end
 
   def carteira_ativos_todos
     CarteiraAtivo
         .where(carteira_id: id)
-        .includes(:ativo)
+        .includes(:ativo, :corretora)
         .order('ativos.nome')
   end
 

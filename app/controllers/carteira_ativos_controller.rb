@@ -1,7 +1,9 @@
 class CarteiraAtivosController < ApplicationController
 
   def show
+    @carteira = Carteira.find params[:carteira_id]
     @carteira_ativo = CarteiraAtivo.includes(:operacoes, :ativo).find(params[:id])
+    @carteira_posicao = CarteiraPosicao.new(@carteira, Date.today)
   end
 
   def edit

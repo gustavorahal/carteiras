@@ -19,9 +19,9 @@
         </td>
       </tr>
       <% book = '' %>
-      <% @carteira_ativos.each do |cativos| %>
-        <% if book != cativos.book %>
-          <% book = cativos.book %>
+      <% @carteira_ativos.each do |ca| %>
+        <% if book != ca.book %>
+          <% book = ca.book %>
           <% book_percent = @carteira.ref_books_porcentagem[book] %>
           <tr class="table-primary text-center">
             <td colspan="4">
@@ -30,10 +30,10 @@
           </tr>
       <% end %>
         <tr>
-          <td><%= cativos.ativo.nome_amigavel %></td>
-          <td><%= display_porcentagem cativos.porcentagem %></td>
-          <td><%= cativos.corretora.nome %></td>
-          <td><%= link_to 'editar', edit_carteira_carteira_ativo_path(@carteira, cativos) %></td>
+          <td><%= link_to ca.nome_amigavel, carteira_carteira_ativo_path(@carteira, ca) %></td>
+          <td><%= display_porcentagem ca.porcentagem %></td>
+          <td><%= ca.corretora.nome %></td>
+          <td><%= link_to 'editar', edit_carteira_carteira_ativo_path(@carteira, ca) %></td>
         </tr>
       <% end %>
     </tbody>

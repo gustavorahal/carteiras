@@ -6,7 +6,7 @@ class CarteiraAtivo < ApplicationRecord
 
   validates :ativo_id, uniqueness: { scope: [ :carteira_id, :corretora_id ] }
 
-  before_save :abort_se_tem_na_carteira, if: :valido_changed?
+  #before_save :abort_se_tem_na_carteira, if: :valido_changed?
 
   def data_montagem
     operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
@@ -76,12 +76,12 @@ class CarteiraAtivo < ApplicationRecord
 
   private
 
-  # Aborta operação de save se houver tentativa de desabilitar
-  # a carteira_ativo (valido = false) quanto ele ainda esta presente na carteira
-  # ou seja, sua quantidade diferente de 0
-  def abort_se_tem_na_carteira
-    new_value = valido_change_to_be_saved[1]
-    throw(:abort) if (new_value == false) && (quantidade != 0)
-  end
+  # # Aborta operação de save se houver tentativa de desabilitar
+  # # a carteira_ativo (valido = false) quanto ele ainda esta presente na carteira
+  # # ou seja, sua quantidade diferente de 0
+  # def abort_se_tem_na_carteira
+  #   new_value = valido_change_to_be_saved[1]
+  #   throw(:abort) if (new_value == false) && (quantidade != 0)
+  # end
 
 end

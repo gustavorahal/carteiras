@@ -66,11 +66,11 @@ class CarteiraAtivo < ApplicationRecord
   end
 
   def valor_posicao(moeda: 'BRL')
-    cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f
+    cotacao ? cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f : 0
   end
 
   def rentabilidade(data_fim=Date.today)
-    ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100
+    cotacao ? ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100 : 0
   end
 
 

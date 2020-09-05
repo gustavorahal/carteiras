@@ -1,7 +1,7 @@
 class CarteiraAtivosController < ApplicationController
 
   before_action :set_vars, only: [:show, :edit, :update, :create, :new]
-  before_action :set_carteira_ativo, only: [:show, :edit, :update, :create]
+  before_action :set_carteira_ativo, only: [:show, :edit, :update]
 
   def show
     @carteira_posicao = CarteiraPosicao.new(@carteira, Date.today)

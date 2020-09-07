@@ -1,7 +1,7 @@
 <table class="table table-striped table-sm">
   <tbody>
   <% book_atual = '' %>
-  <% @carteira_posicao.carteira_ativos.each do |ca| %>
+  <% @carteira_ativos_posicao.each do |ca| %>
     <% if book_atual != ca.book %>
       <tr class="table-primary">
         <td>
@@ -21,7 +21,7 @@
     <tr>
       <td><%= link_to ca.nome_amigavel, carteira_carteira_ativo_path(@carteira, ca) %>
                 <small>desde <%= display_data ca.data_montagem %> </small></td>
-      <td><%= display_porcentagem ca.rentabilidade(@data_fim), cores=true %></td>
+      <td><%= display_porcentagem ca.rentabilidade(@data_fim), cores: true %></td>
       <td><%= display_moeda ca.valor_posicao, cores: true %>
           (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %>)
       </td>

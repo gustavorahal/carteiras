@@ -1,6 +1,6 @@
 class Ativo < ApplicationRecord
   has_many :carteira_ativos, -> { where(valido: true) }
-  has_many :cotacaos
+  has_many :cotacoes
 
   enum tipo: {
       acao: 1,

@@ -9,7 +9,9 @@ class CarteiraAtivo < ApplicationRecord
   #before_save :abort_se_tem_na_carteira, if: :valido_changed?
 
   def data_montagem
-    operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
+    Rails.cache.fetch("data_montagem_ca_id#{id}", expires_in: 5.seconds) do
+      operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
+    end
   end
 
   # Utilizado em formulários
@@ -20,25 +22,27 @@ class CarteiraAtivo < ApplicationRecord
 
   # Calcula preço médio de compra
   def preco_medio(data_fim, moeda: 'BRL')
-    data_fim_str = data_fim.strftime '%F'
-    data_montagem_str = data_montagem.strftime '%F'
+    Rails.cache.fetch("preco_medio_ca_id#{id}", expires_in: 5.seconds) do
+      data_fim_str = data_fim.strftime '%F'
+      data_montagem_str = data_montagem.strftime '%F'
 
-    if ativo.moeda == 'USD' && moeda == 'BRL'
-      sum_str = 'quantidade * valor_unit * usdbrl'
-    else # não temos valor de BRL para USD
-      sum_str = 'quantidade * valor_unit'
+      if ativo.moeda == 'USD' && moeda == 'BRL'
+        sum_str = 'quantidade * valor_unit * usdbrl'
+      else # não temos valor de BRL para USD
+        sum_str = 'quantidade * valor_unit'
+      end
+
+      sql = <<~SQL
+          select sum(#{sum_str})/sum(quantidade) as preco_medio
+          from operacoes
+          where carteira_ativo_id = #{id} and 
+           operacao = 1 and 
+           data >= '#{data_montagem_str}' and
+           data <= '#{data_fim_str}'
+      SQL
+
+      ActiveRecord::Base.connection.execute(sql).values[0][0]
     end
-
-    sql = <<~SQL
-        select sum(#{sum_str})/sum(quantidade) as preco_compra
-        from operacoes
-        where carteira_ativo_id = #{id} and 
-         operacao = 1 and 
-         data >= '#{data_montagem_str}' and
-         data <= '#{data_fim_str}'
-    SQL
-
-    ActiveRecord::Base.connection.execute(sql).values[0][0]
   end
 
   # Última cotação do Ativo
@@ -69,7 +73,7 @@ class CarteiraAtivo < ApplicationRecord
     cotacao ? cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f : 0
   end
 
-  def rentabilidade(data_fim=Date.today)
+  def rentabilidade(data_fim = Date.today)
     cotacao ? ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100 : 0
   end
 

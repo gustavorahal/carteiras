@@ -2,10 +2,14 @@ class CarteiraPosicao
 
   def initialize(carteira, data_fim)
     @carteira = carteira # ActiveRecord Carteira
+    @investidor = carteira.investidor
     @data_fim = data_fim
     @valor_usdbrl = Cotacao.cotacao_usdbrl.valor_unit
     @saldo_cc_por_corretora = nil
     @carteira_ativos = [] # lista de ActiveRecord CarteiraAtivo
+    @valor_por_book = nil
+    @porcentagem_por_book = nil
+    @total_ativos = nil
   end
 
   def contem?(nome_ativo)
@@ -36,7 +40,7 @@ class CarteiraPosicao
     resultado = ActiveRecord::Base.connection.execute(sql).values
 
     resultado.each do |carteira_ativo_id, quantidade|
-      ca = CarteiraAtivo.includes(:ativo).find(carteira_ativo_id)
+      ca = CarteiraAtivo.includes(:corretora, ativo: :cotacoes).find(carteira_ativo_id)
       # FIXME: testar se rola fazer varias chamadas para quantidade
       # #ca.set_quantidade quantidade
       @carteira_ativos.push ca
@@ -58,12 +62,14 @@ class CarteiraPosicao
   end
 
   def total_ativos
-    ta = 0
+    return @total_ativos unless @total_ativos.nil?
+
+    @total_ativos = 0
     carteira_ativos.each do |ca|
-      ta += ca.valor_posicao
+      @total_ativos += ca.valor_posicao
     end
 
-    ta
+    @total_ativos
   end
 
   def total_geral
@@ -71,35 +77,42 @@ class CarteiraPosicao
   end
 
   def saldo_cc_total
-    total_brl = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
-                                                     'conta_correntes.moeda': 'BRL').sum(:valor)
-    total_usd = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
-                                                     'conta_correntes.moeda': 'USD').sum(:valor)
-    total_usdbrl = total_usd * @valor_usdbrl
+    Rails.cache.fetch("saldo_cc_total_#{@investidor.id}", expires_in: 5.seconds) do
+      total_brl = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
+                                                       'conta_correntes.moeda': 'BRL').sum(:valor)
+      total_usd = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
+                                                       'conta_correntes.moeda': 'USD').sum(:valor)
+      total_usdbrl = total_usd * @valor_usdbrl
 
-    total_brl + total_usdbrl
+      total_brl + total_usdbrl
+    end
   end
 
   def porcentagem_por_book
-    pb = {}
+    return @porcentagem_por_book unless @porcentagem_por_book.nil?
+
+    @porcentagem_por_book = {}
+
     carteira_ativos.each do |ca|
       book = ca.book
-      pb[book] = 0 unless book.in? pb
-      pb[book] += (ca.valor_posicao / total_geral) * 100
+      @porcentagem_por_book[book] = 0 unless book.in? @porcentagem_por_book
+      @porcentagem_por_book[book] += (ca.valor_posicao / total_geral) * 100
     end
 
-    pb
+    @porcentagem_por_book
   end
 
   def valor_por_book
-    vb = {}
+    return @valor_por_book unless @valor_por_book.nil?
+
+    @valor_por_book = {}
     carteira_ativos.each do |ca|
       book = ca.book
-      vb[book] = 0 unless book.in? vb
-      vb[book] += ca.valor_posicao
+      @valor_por_book[book] = 0 unless book.in? @valor_por_book
+      @valor_por_book[book] += ca.valor_posicao
     end
 
-    vb
+    @valor_por_book
   end
 
   def total_investido

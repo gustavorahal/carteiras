@@ -8,7 +8,7 @@ module ApplicationHelper
     I18n.l data, format: :default
   end
 
-  def display_porcentagem(valor, cores = false)
+  def display_porcentagem(valor, cores: false)
     valor_per = number_to_percentage(valor.to_f, precision: 2)
     css_color = ""
     if cores

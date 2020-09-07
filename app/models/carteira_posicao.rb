@@ -31,10 +31,12 @@ class CarteiraPosicao
       FROM carteira_ativos
                INNER JOIN
            operacoes ON operacoes.carteira_ativo_id = carteira_ativos.id
+               INNER JOIN
+           ativos on carteira_ativos.ativo_id = ativos.id
       WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_fim_str}'
-      GROUP BY carteira_ativos.id
+      GROUP BY carteira_ativos.id, ativos.nome
       HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
-      ORDER BY book ASC;
+      ORDER BY book, ativos.nome ASC;
     SQL
 
     resultado = ActiveRecord::Base.connection.execute(sql).values

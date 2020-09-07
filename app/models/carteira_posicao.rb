@@ -63,6 +63,16 @@ class CarteiraPosicao
     pc
   end
 
+  def total_ativos_por_corretora
+    tc = {}
+    carteira_ativos.each do |ca|
+      tc[ca.corretora] = 0 unless ca.corretora.in? tc
+      tc[ca.corretora] += ca.valor_posicao
+    end
+
+    tc
+  end
+
   def total_ativos
     return @total_ativos unless @total_ativos.nil?
 

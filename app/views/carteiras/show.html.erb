@@ -22,10 +22,14 @@
                     <%= display_moeda @carteira_posicao.total_investido %> investidos</small>
         <br>
         <br>
-        <h6>
-          <%= display_moeda @carteira_posicao.total_ativos %>
-          <small class="text-muted"> em ativos</small>
-        </h6>
+        <h6><%= display_moeda @carteira_posicao.total_ativos %><small class="text-muted"> em ativos</small></h6>
+        <% @carteira_posicao.total_ativos_por_corretora.each do |corretora, total| %>
+          <span class="font-weight-light">
+            <%= corretora.nome %> <%= total %>
+          </span>
+          <br>
+        <% end %>
+        <br>
         <h6><%= display_moeda @carteira_posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h6>
         <% @contas_correntes.each do |cc| %>
             <% next if cc.saldo == 0  %>

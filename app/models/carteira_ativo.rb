@@ -22,27 +22,25 @@ class CarteiraAtivo < ApplicationRecord
 
   # Calcula preço médio de compra
   def preco_medio(data_fim, moeda: 'BRL')
-    Rails.cache.fetch("preco_medio_ca_id#{id}", expires_in: 5.seconds) do
-      data_fim_str = data_fim.strftime '%F'
-      data_montagem_str = data_montagem.strftime '%F'
+    data_fim_str = data_fim.strftime '%F'
+    data_montagem_str = data_montagem.strftime '%F'
 
-      if ativo.moeda == 'USD' && moeda == 'BRL'
-        sum_str = 'quantidade * valor_unit * usdbrl'
-      else # não temos valor de BRL para USD
-        sum_str = 'quantidade * valor_unit'
-      end
-
-      sql = <<~SQL
-          select sum(#{sum_str})/sum(quantidade) as preco_medio
-          from operacoes
-          where carteira_ativo_id = #{id} and 
-           operacao = 1 and 
-           data >= '#{data_montagem_str}' and
-           data <= '#{data_fim_str}'
-      SQL
-
-      ActiveRecord::Base.connection.execute(sql).values[0][0]
+    if ativo.moeda == 'USD' && moeda == 'BRL'
+      sum_str = 'quantidade * valor_unit * usdbrl'
+    else # não temos valor de BRL para USD
+      sum_str = 'quantidade * valor_unit'
     end
+
+    sql = <<~SQL
+        select sum(#{sum_str})/sum(quantidade) as preco_medio
+        from operacoes
+        where carteira_ativo_id = #{id} and 
+         operacao = 1 and 
+         data >= '#{data_montagem_str}' and
+         data <= '#{data_fim_str}'
+    SQL
+
+    ActiveRecord::Base.connection.execute(sql).values[0][0]
   end
 
   # Última cotação do Ativo

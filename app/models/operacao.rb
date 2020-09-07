@@ -16,6 +16,7 @@ class Operacao < ApplicationRecord
   def self.operacoes_carteira(carteira_id)
     Operacao
       .joins(carteira_ativo: :ativo)
+      .includes(:carteira_ativo)
       .where("carteira_ativos.carteira_id = #{carteira_id}")
       .order(data: :desc)
   end

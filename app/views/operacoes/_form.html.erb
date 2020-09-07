@@ -6,7 +6,7 @@
     <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
   <% end %>
 
-  <%= f.collection_select :carteira_ativo_id, @carteira_ativos.order(:nome), :id, :nome_amigavel %>
+  <%= f.collection_select :carteira_ativo_id, @carteira_ativos, :id, :nome_amigavel %>
   <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
   <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a, include_blank: true %>
 

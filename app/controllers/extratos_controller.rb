@@ -1,53 +1,33 @@
 class ExtratosController < ApplicationController
 
-  def index
-    @moeda = params[:moeda]
-    @extratos = Extrato
-                .where(investidor_id: params[:investidor_id],
-                       corretora_id: params[:corretora_id],
-                       moeda: @moeda)
-                .order(liquidacao: :desc)
-    @saldo = @extratos.sum(:valor)
-    @corretora = Corretora.find params[:corretora_id]
-    @investidor = Investidor.find params[:investidor_id]
-  end
-
   def import
-    investidor = Investidor.find params[:investidor_id]
-    corretora = Corretora.find params[:corretora_id]
+    cc = ContaCorrente.find params[:conta_corrente_id]
     extrato_file = params[:file]
-    if corretora.nome == 'XP'
+    if cc.corretora.nome == 'XP'
       begin
-        ImportaExtrato.extrato_xp(investidor.id, extrato_file.path)
-        redirect_to extratos_path(investidor_id: investidor.id,
-                                  corretora_id: corretora.id,
-                                  moeda: 'BRL'),
-                    notice: 'Extrato importado com sucesso'
+        ImportaExtrato.extrato_xp(cc, extrato_file.path)
+        redirect_to conta_corrente_path(cc), notice: 'Extrato importado com sucesso'
       rescue TypeError => e
-        redirect_to extratos_path(investidor_id: investidor.id,
-                                  corretora_id: corretora.id,
-                                  moeda: 'BRL'),
-                    alert: e.message
+        redirect_to conta_corrente_path(cc), alert: e.message
       end
     else
-      redirect_to extratos_path(investidor_id: investidor.id,
-                                corretora_id: corretora.id),
-                  alert: 'Corretora não suportada'
+      redirect_to conta_corrente_path(cc), alert: 'Corretora não suportada'
     end
   end
 
   def new
     @extrato = Extrato.new
-    @corretora = Corretora.find params[:corretora_id]
-    @investidor = Investidor.find params[:investidor_id]
+    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    @investidor = @conta_corrente.investidor
   end
 
   def create
     @extrato = Extrato.new secure_params
+    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    @investidor = @conta_corrente.investidor
 
     if @extrato.save
-      redirect_to extratos_path investidor_id: @extrato.investidor_id,
-                                corretora_id: @extrato.corretora_id
+      redirect_to conta_corrente_path(@conta_corrente)
     else
       render 'new'
     end
@@ -56,11 +36,7 @@ class ExtratosController < ApplicationController
   private
 
   def secure_params
-    params.require(:extrato).permit(:liquidacao,
-                                    :movimentacao,
-                                    :descricao, :valor, :moeda,
-                                    :corretora, :investidor_id, :corretora_id,
-                                    :file)
+    params.require(:extrato).permit(:liquidacao, :movimentacao, :descricao, :valor, :file, :conta_corrente_id)
   end
 
 end

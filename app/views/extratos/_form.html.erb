@@ -1,20 +1,18 @@
-<%= render 'common/titulo_pagina', titulo: "#{@investidor.nome} corretora #{@corretora.nome}" %>
+<%= render 'common/titulo_pagina', titulo: "Conta Corrente corretora #{@conta_corrente.corretora.nome} de #{@investidor.nome} em #{@conta_corrente.moeda}" %>
 
-<%= bootstrap_form_for @extrato do |f| %>
+<%= bootstrap_form_for [@conta_corrente, @extrato] do |f| %>
   <% if @extrato.errors[:base].present? %>
     <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @extrato.errors[:base][0] %>
   <% else %>
     <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
   <% end %>
 
-  <%= hidden_field_tag 'extrato[investidor_id]', @investidor.id %>
-  <%= hidden_field_tag 'extrato[corretora_id]', @corretora.id %>
+  <%= hidden_field_tag 'extrato[conta_corrente_id]', @conta_corrente.id %>
 
   <%= f.date_select :liquidacao %>
   <%= f.date_select :movimentacao %>
   <%= f.text_field :descricao %>
   <%= f.number_field :valor, step: :any %>
-  <%= f.select :moeda, %w[BRL USD] %>
 
   <%= f.submit "Adicionar" %>
 

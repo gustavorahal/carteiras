@@ -6,9 +6,12 @@ Rails.application.routes.draw do
     resources :cotacoes
   end
   resources :corretoras
-  resources :extratos do
-    collection { post 'import' }
+  resources :conta_correntes do
+    resources :extratos do
+      collection { post 'import' }
+    end
   end
+  resources :investidores
   resources :carteiras do
     resources :operacoes
     resources :carteira_ativos

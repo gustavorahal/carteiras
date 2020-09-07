@@ -1,5 +1,16 @@
 
-<h2>Carteira <%= @carteira.nome %></h2>
+<div class="row">
+  <div class="col">
+    <h2>Carteira <%= @carteira.nome %></h2>
+  </div>
+  <div class="col">
+    <p>Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
+      <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
+    </p>
+  </div>
+  <div class="col">
+  </div>
+</div>
 
 <div class="row">
   <div class="col-lg">
@@ -15,23 +26,16 @@
           <%= display_moeda @carteira_posicao.total_ativos %>
           <small class="text-muted"> em ativos</small>
         </h6>
-
-        <% @carteira_posicao.saldo_cc_por_corretora.each do |corretora_nome, moedas_saldos| %>
-          <% moedas_saldos.each do |moeda, saldo| %>
-            <% next if saldo == 0  %>
-            <h6>
-              <%= display_moeda saldo, moeda: moeda %> <small class="text-muted"> saldo <%= corretora_nome %>
-                (<%= link_to 'extrato', extratos_path(investidor_id: @carteira.investidor.id,
-                                                      corretora_id: Corretora.find_by(nome: corretora_nome),
-                                                      moeda: moeda) %>)
+        <h6><%= display_moeda @carteira_posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h6>
+        <% @contas_correntes.each do |cc| %>
+            <% next if cc.saldo == 0  %>
+            <span class="font-weight-light">
+              <%= display_moeda cc.saldo, moeda: cc.moeda %> <small class="text-muted"> saldo <%= cc.corretora.nome %>
+                (<%= link_to 'extrato', conta_corrente_path(cc) %>)
               </small>
-            </h6>
-          <% end %>
+            </span>
+            <br>
         <% end %>
-
-        <h7>Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
-          <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
-        </h7>
 
       </div>
     </div>

@@ -1,0 +1,3 @@
+class InvestidoresController < ApplicationController
+
+end

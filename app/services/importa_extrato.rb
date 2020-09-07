@@ -1,8 +1,7 @@
 class ImportaExtrato
 
-  def self.extrato_xp(investidor_id, file_path)
+  def self.extrato_xp(conta_corrente, file_path)
     xlsx = Roo::Excelx.new(file_path)
-    corretora_xp = Corretora.find_by(nome: 'XP')
     sheet = xlsx.sheet(0)
     i = 16 # até o momento é onde começa o extrato
     extrato_file = []
@@ -14,10 +13,7 @@ class ImportaExtrato
       i += 1
     end
 
-    extrato_atual = Extrato
-                    .where(investidor_id: investidor_id,
-                           corretora_id: corretora_xp.id)
-                    .order(liquidacao: :desc)
+    extrato_atual = conta_corrente.extratos
 
     extrato_file.each do |linha|
       liquidacao = linha[0]
@@ -30,12 +26,11 @@ class ImportaExtrato
                                         descricao: descricao,
                                         valor: valor).nil?
 
-      Extrato.create(investidor_id: investidor_id,
-                     corretora_id: corretora_xp.id,
+      Extrato.create(conta_corrente: conta_corrente,
                      liquidacao: liquidacao,
                      movimentacao: movimentacao,
                      descricao: descricao,
-                     valor: valor, moeda: 'BRL')
+                     valor: valor)
     end
   end
 end

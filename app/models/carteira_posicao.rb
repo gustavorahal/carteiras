@@ -70,38 +70,14 @@ class CarteiraPosicao
     total_ativos + saldo_cc_total
   end
 
-  # FIXME: Converterem tabela conta_corrente
-  def saldo_cc_por_corretora
-    return @saldo_cc_por_corretora unless @saldo_cc_por_corretora.nil?
-
-    @saldo_cc_por_corretora = {}
-    Corretora.all.each do |corretora|
-      @saldo_cc_por_corretora[corretora.nome] = {} unless corretora.nome.in? @saldo_cc_por_corretora
-      %w[BRL USD].each do |moeda|
-        @saldo_cc_por_corretora[corretora.nome][moeda] = Extrato
-                                     .where(investidor_id: @carteira.investidor.id,
-                                            corretora_id: corretora.id,
-                                            moeda: moeda)
-                                     .sum(:valor).round(2)
-      end
-    end
-
-    @saldo_cc_por_corretora
-  end
-
   def saldo_cc_total
-    total = 0
-    saldo_cc_por_corretora.each do |corretora, moedas_saldo|
-      moedas_saldo.each do |moeda, saldo|
-        if moeda == 'USD'
-          total += (saldo * @valor_usdbrl)
-        else
-          total += saldo
-        end
-      end
-    end
+    total_brl = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
+                                                     'conta_correntes.moeda': 'BRL').sum(:valor)
+    total_usd = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
+                                                     'conta_correntes.moeda': 'USD').sum(:valor)
+    total_usdbrl = total_usd * @valor_usdbrl
 
-    total
+    total_brl + total_usdbrl
   end
 
   def porcentagem_por_book

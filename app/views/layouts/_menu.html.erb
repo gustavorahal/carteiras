@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <% if @carteira %>
+    <a class="navbar-brand" href="<%= carteira_path(@carteira) %>">Carteira <%= @carteira.nome %></a>
+  <% else %>
+    <a class="navbar-brand" href="<%= root_path %>">Carteiras</a>
+  <% end %>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+
+      <% if @carteira %>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Posição
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="<%= carteira_carteira_posicoes_path(@carteira, view: 'book') %>">Por book</a>
+            <a class="dropdown-item" href="<%= carteira_carteira_posicoes_path(@carteira, view: 'corretoras') %>">Por corretoras</a>
+          </div>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Referência
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="<%= carteira_carteira_referencias_path(@carteira, view: 'ref') %>">Referência</a>
+            <a class="dropdown-item" href="<%= carteira_carteira_referencias_path(@carteira, view: 'atual_vs_ref') %>">Atual vs. Referência</a>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="<%= carteira_operacoes_path(@carteira) %>">Operações</a>
+        </li>
+      <% end %>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Admin
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="<%= carteiras_path %>">Carteiras</a>
+          <a class="dropdown-item" href="<%= ativos_path %>">Ativos</a>
+        </div>
+      </li>
+    </ul>
+    <span class="navbar-text">
+          Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
+      <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
+      </span>
+  </div>
+</nav>

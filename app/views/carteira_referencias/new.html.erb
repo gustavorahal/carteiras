@@ -1,0 +1,8 @@
+<%= render 'common/titulo_pagina', titulo: "Novo ativo para carteira #{@carteira.nome}" %>
+
+<%= bootstrap_form_for [@carteira, @carteira_ativo],
+                       url: carteira_carteira_referencias_path(@carteira),
+                       method: :post do |f| %>
+  <%= render 'form', f: f %>
+
+<% end %>

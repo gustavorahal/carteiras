@@ -1,5 +1,3 @@
-<%= render 'common/voltar_carteira', carteira: @investidor.carteiras[0] %>
-
 <%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} de #{@investidor.nome} em #{@conta_corrente.moeda}" %>
 
 <h6>Saldo <%= display_moeda @conta_corrente.saldo, moeda: @conta_corrente.moeda %></h6>

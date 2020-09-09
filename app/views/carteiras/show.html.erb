@@ -1,18 +1,5 @@
 
 <div class="row">
-  <div class="col">
-    <h2>Carteira <%= @carteira.nome %></h2>
-  </div>
-  <div class="col">
-    <p>Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
-      <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
-    </p>
-  </div>
-  <div class="col">
-  </div>
-</div>
-
-<div class="row">
   <div class="col-lg">
   <div class="card-group">
     <div class="card">
@@ -44,22 +31,6 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-body">
-        <table class="table table-borderless table-sm">
-          <h5 class="card-title">Composição</h5>
-          <tr><td></td><td><strong>Posição</strong></td><td><strong>Referência</strong></td></tr>
-          <% @carteira_posicao.porcentagem_por_book.each do |book, porcentagem| %>
-            <tr>
-              <td><%= book %></td>
-              <td><%= display_porcentagem porcentagem %></td>
-              <td><%= display_porcentagem @carteira.ref_books_porcentagem[book] %></td>
-            </tr>
-          <% end %>
-        </table>
-      </div>
-    </div>
-
 
     <div class="card">
       <div class="card-body">
@@ -88,43 +59,4 @@
 
 <br>
 
-<div class="row">
-  <div class="col-lg">
-    <ul class="nav nav-pills nav-justified">
-      <li class="nav-item">
-        <a class="nav-link <%= 'active' if @view == 1 %>" href="<%= carteira_path(@carteira, view: 1) %>">
-          Ativos por Book
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link <%= 'active' if @view == 2 %>" href="<%= carteira_path(@carteira, view: 2) %>">
-          Ativos por Corretora
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link <%= 'active' if @view == 3 %>" href="<%= carteira_path(@carteira, view: 3) %>">
-          Referência
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link <%= 'active' if @view == 4 %>" href="<%= carteira_path(@carteira, view: 4) %>">
-          Atual vs. Referência
-        </a>
-      </li>
-    </ul>
-    <br>
-    <% case @view %>
-      <% when 1 %>
-        <%= render 'ativos_books' %>
-      <% when 2 %>
-        <%= render 'ativos_corretoras' %>
-      <% when 3 %>
-        <%= render 'carteira_referencia' %>
-      <% when 4 %>
-        <%= render 'posicao_vs_referencia' %>
-      <% else %>
-        <h5>Escolha o que ver sobre a carteira</h5>
-      <% end %>
-
-  </div>
 </div>

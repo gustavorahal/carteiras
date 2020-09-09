@@ -13,8 +13,9 @@ Rails.application.routes.draw do
   end
   resources :investidores
   resources :carteiras do
+    resources :carteira_referencias
+    resources :carteira_posicoes
     resources :operacoes
-    resources :carteira_ativos
   end
 
 

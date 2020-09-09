@@ -1,0 +1,11 @@
+<%= render 'common/btn_new',
+           url: new_carteira_carteira_referencia_path(@carteira, @carteira_ativo),
+           label: 'Novo ativo' %>
+
+<% if @view == 'ref' %>
+  <%= render 'index_ref' %>
+<% elsif @view == 'atual_vs_ref' %>
+  <%= render 'index_atual_vs_ref' %>
+<% else %>
+  <h4>View não disponível</h4>
+<% end %>

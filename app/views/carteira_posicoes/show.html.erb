@@ -1,13 +1,10 @@
-
-<%= render 'common/voltar_carteira', carteira: @carteira_ativo.carteira %>
-
 <h6><%= @carteira_ativo.ativo.nome_amigavel %> (ver <%= link_to 'histórico cotações', ativo_cotacoes_path(@carteira_ativo.ativo) %>)</h6>
 <h6>Investido: <%= display_moeda @carteira_ativo.valor_investido, moeda: @carteira_ativo.ativo.moeda %></h6>
 <h6>Valor posição: <%= display_moeda @carteira_ativo.valor_posicao, moeda: @carteira_ativo.ativo.moeda %>
   (<%= display_porcentagem @carteira_ativo.rentabilidade, cores: true %>)</h6>
 <h6>Quantidade: <%= @carteira_ativo.quantidade %></h6>
 <h6>Porcentagem na carteira: <%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo @carteira_ativo %></h6>
-<h6>Porcentagem teórica: <%= display_porcentagem @carteira_ativo.porcentagem %> (<%= link_to 'editar', edit_carteira_carteira_ativo_path(@carteira, @carteira_ativo) %>)</h6>
+<h6>Porcentagem teórica: <%= display_porcentagem @carteira_ativo.porcentagem %> (<%= link_to 'editar', edit_carteira_carteira_referencia_path(@carteira, @carteira_ativo) %>)</h6>
 
 <% operacoes = @carteira_ativo.operacoes.order(:data)  %>
 

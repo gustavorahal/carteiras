@@ -61,7 +61,7 @@ class BuscaCotacao
 
   # Real time (ou quase isso)
   def self.acao(ativo)
-    url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-quotes?region=US&lang=en&symbols=#{ativo}"
+    url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo}"
     api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
     json_response = fetch_rapidapi_json(url, api_host)
 

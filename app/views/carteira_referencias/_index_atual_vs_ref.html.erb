@@ -1,0 +1,58 @@
+<div class="card">
+  <div class="card-body">
+    <table class="table table-borderless table-sm">
+      <h5 class="card-title">Composição</h5>
+      <tr><td></td><td><strong>Posição</strong></td><td><strong>Referência</strong></td></tr>
+      <% @carteira_posicao.porcentagem_por_book.each do |book, porcentagem| %>
+        <tr>
+          <td><%= book %></td>
+          <td><%= display_porcentagem porcentagem %></td>
+          <td><%= display_porcentagem @carteira.ref_books_porcentagem[book] %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <table class="table table-striped table-sm">
+    <thead class="thead-dark">
+    <tr>
+      <th scope="col">Ativo</th>
+      <th scope="col">Posição</th>
+      <th scope="col">Referência</th>
+      <th scope="col">Diff valor</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <% @carteira_ativos_soma.each do |ca_book, carteira_ativos| %>
+      <tr class="table-primary">
+        <td>
+          <h6><%= ca_book %></h6>
+        </td>
+        <td>
+          <h6><%= display_porcentagem @carteira_posicao.porcentagem_por_book[ca_book] %></h6>
+        </td>
+        <td>
+          <h6><%= display_porcentagem @carteira.ref_books_porcentagem[ca_book] %></h6>
+        </td>
+        <td></td>
+      </tr>
+      <% carteira_ativos.each do |ca| %>
+        <% if @carteira_ativos_posicao.include?(ca) && @carteira_ativos.include?(ca) %>
+          <% span_class = 'font-weight-bold' %>
+        <% else %>
+          <% span_class = 'font-weight-light' %>
+        <% end %>
+        <tr>
+          <td><span class="<%= span_class %>"><%= link_to ca.nome_amigavel, carteira_carteira_posicao_path(@carteira, ca) %></span></td>
+          <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %></span></td>
+          <td><span class="<%= span_class %>"><%= display_porcentagem ca.porcentagem %></span></td>
+          <td><span class="<%= span_class %>"><%= display_moeda(ca.valor_posicao - @carteira_posicao.valor_teorico_carteira_ativo(ca), cores: true) %></span></td>
+        </tr>
+      <% end %>
+    <% end %>
+    </tbody>
+  </table>
+</div>

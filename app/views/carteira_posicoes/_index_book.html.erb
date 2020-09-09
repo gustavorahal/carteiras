@@ -19,11 +19,11 @@
       <% book_atual = ca.book %>
     <% end %>
     <tr>
-      <td><%= link_to ca.nome_amigavel, carteira_carteira_ativo_path(@carteira, ca) %>
-                <small>desde <%= display_data ca.data_montagem %> </small></td>
+      <td><%= link_to ca.nome_amigavel, carteira_carteira_posicao_path(@carteira, ca) %>
+        <small>desde <%= display_data ca.data_montagem %> </small></td>
       <td><%= display_porcentagem ca.rentabilidade(@data_fim), cores: true %></td>
       <td><%= display_moeda ca.valor_posicao, cores: true %>
-          (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %>)
+        (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(ca) %>)
       </td>
       <td><%= display_numero ca.quantidade %></td>
       <td><%= display_moeda ca.preco_medio(@data_fim) %></td>

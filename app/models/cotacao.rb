@@ -20,7 +20,7 @@ class Cotacao < ApplicationRecord
   end
 
   def valor_unit_moeda(moeda: 'BRL')
-    Rails.cache.fetch("valor_unit_moeda_#{id}", expires_in: 5.seconds) do
+    Rails.cache.fetch("valor_unit_#{moeda}_#{id}", expires_in: 5.seconds) do
       if moeda == ativo.moeda
         valor_unit
       elsif moeda == 'BRL' # e ativo é USD

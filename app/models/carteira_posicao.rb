@@ -66,8 +66,8 @@ class CarteiraPosicao
   def total_ativos_por_corretora
     tc = {}
     carteira_ativos.each do |ca|
-      tc[ca.corretora] = 0 unless ca.corretora.in? tc
-      tc[ca.corretora] += ca.valor_posicao
+      tc[ca.corretora] = { ca.ativo.moeda => 0 } unless ca.corretora.in? tc
+      tc[ca.corretora][ca.ativo.moeda] += ca.valor_posicao(moeda: ca.ativo.moeda)
     end
 
     tc

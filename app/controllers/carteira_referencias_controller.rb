@@ -27,8 +27,17 @@ class CarteiraReferenciasController < ApplicationController
   end
 
   def create
-    @carteira_ativo = CarteiraAtivo.new secure_params
-    @carteira_ativo.carteira = @carteira
+    @carteira_ativo = CarteiraAtivo.find_by carteira_id: @carteira.id,
+                                            ativo_id: secure_params[:ativo_id],
+                                            corretora_id: secure_params[:corretora_id]
+    if @carteira_ativo
+      # já existe o ativo adicionado, vamos reutilizado
+      @carteira_ativo.porcentagem = secure_params[:porcentagem]
+      @carteira_ativo.valido = true
+    else
+      @carteira_ativo = CarteiraAtivo.new secure_params
+      @carteira_ativo.carteira = @carteira
+    end
 
     if @carteira_ativo.save
       redirect_to carteira_carteira_referencias_path(@carteira, view: 'ref'),

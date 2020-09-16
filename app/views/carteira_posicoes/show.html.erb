@@ -9,7 +9,7 @@
 <% operacoes = @carteira_ativo.operacoes.order(:data)  %>
 
 <br>
-<h5>Operações</h5>
+<h5>Operações (<%= link_to 'registrar operação', new_carteira_operacao_path(@carteira) %>)</h5>
 <%= render 'common/operacoes_table',
            operacoes: operacoes,
            mostra_nome: false %>

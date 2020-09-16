@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_06_204726) do
+ActiveRecord::Schema.define(version: 2020_09_16_233346) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,7 +32,6 @@ ActiveRecord::Schema.define(version: 2020_09_06_204726) do
     t.float "porcentagem"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.boolean "valido"
     t.bigint "corretora_id", null: false
     t.index ["ativo_id", "carteira_id", "corretora_id"], name: "index_ca_on_ativo_id_and_carteira_id_and_corretora_id", unique: true
     t.index ["ativo_id"], name: "index_carteira_ativos_on_ativo_id"

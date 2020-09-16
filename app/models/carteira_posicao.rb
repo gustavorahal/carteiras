@@ -144,6 +144,7 @@ class CarteiraPosicao
   end
 
   def valor_teorico_carteira_ativo(ca)
+    return 0 if ca.porcentagem.nil? or ca.porcentagem.zero?
     total_geral * (ca.porcentagem / 100)
   end
 

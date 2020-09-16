@@ -7,7 +7,7 @@ class CarteiraReferenciasController < ApplicationController
     @view = params[:view]
     @data_fim = Date.today
     @carteira = Carteira.find params[:carteira_id]
-    @carteira_ativos = @carteira.carteira_ativos.where(valido: true).order(:book).order('ativos.nome')
+    @carteira_ativos = @carteira.carteira_ativos_validos_por_book
 
     if @view == 'atual_vs_ref'
       @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)
@@ -33,7 +33,6 @@ class CarteiraReferenciasController < ApplicationController
     if @carteira_ativo
       # já existe o ativo adicionado, vamos reutilizado
       @carteira_ativo.porcentagem = secure_params[:porcentagem]
-      @carteira_ativo.valido = true
     else
       @carteira_ativo = CarteiraAtivo.new secure_params
       @carteira_ativo.carteira = @carteira
@@ -74,7 +73,7 @@ class CarteiraReferenciasController < ApplicationController
 
   def secure_params
     params.require(:carteira_ativo).permit(:carteira_id, :ativo_id,
-                                           :book, :porcentagem, :valido, :corretora_id)
+                                           :book, :porcentagem, :corretora_id)
   end
 
 end

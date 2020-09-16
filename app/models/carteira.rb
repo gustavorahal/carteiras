@@ -9,21 +9,17 @@ class Carteira < ApplicationRecord
   end
 
   def ref_books_porcentagem
-    carteira_ativos.where(valido: true).group(:book).order(:book).sum(:porcentagem)
+    carteira_ativos.where.not(porcentagem: 0).group(:book).order(:book).sum(:porcentagem)
   end
 
-  def carteira_ativos_validos
-    CarteiraAtivo
-        .where(carteira_id: id, valido: true)
-        .includes(:ativo, :corretora)
-        .order('ativos.descricao')
+  def carteira_ativos_validos_por_book
+    carteira_ativos
+        .where.not(porcentagem: 0)
+        .order(:book, 'ativos.nome')
   end
 
   def carteira_ativos_todos
-    CarteiraAtivo
-        .where(carteira_id: id)
-        .includes(:ativo, :corretora)
-        .order('ativos.nome')
+    carteira_ativos.order('ativos.nome')
   end
 
 end

@@ -6,8 +6,6 @@ class CarteiraAtivo < ApplicationRecord
 
   validates :ativo_id, uniqueness: { scope: [ :carteira_id, :corretora_id ] }
 
-  #before_save :abort_se_tem_na_carteira, if: :valido_changed?
-
   def data_montagem
     Rails.cache.fetch("data_montagem_ca_id#{id}", expires_in: 5.seconds) do
       operacoes.where(mon_ou_des: 1).order(data: :desc).limit(1)[0].data
@@ -74,16 +72,5 @@ class CarteiraAtivo < ApplicationRecord
   def rentabilidade(data_fim = Date.today)
     cotacao ? ((cotacao.valor_unit_moeda / preco_medio(data_fim)) - 1) * 100 : 0
   end
-
-
-  private
-
-  # # Aborta operação de save se houver tentativa de desabilitar
-  # # a carteira_ativo (valido = false) quanto ele ainda esta presente na carteira
-  # # ou seja, sua quantidade diferente de 0
-  # def abort_se_tem_na_carteira
-  #   new_value = valido_change_to_be_saved[1]
-  #   throw(:abort) if (new_value == false) && (quantidade != 0)
-  # end
 
 end

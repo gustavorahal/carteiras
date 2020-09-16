@@ -17,7 +17,7 @@ class CarteiraPosicoesController < ApplicationController
     @carteira = Carteira.find params[:carteira_id]
     @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)
     @carteira_ativos_posicao = @carteira_posicao.carteira_ativos
-    @carteira_ativos = @carteira.carteira_ativos.where(valido: true).order(:book).order('ativos.nome')
+    @carteira_ativos = @carteira.carteira_ativos_validos_por_book
   end
 
 end

@@ -27,6 +27,7 @@ class BuscaCotacao
   end
 
   def self.fundo_xp_dolar
+    # url da anbima https://data.anbima.com.br/fundos/072176
     url = 'https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=2476'
     document = Nokogiri::HTML.parse(open(url))
     table = document.css('table').first

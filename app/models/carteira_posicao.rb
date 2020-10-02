@@ -56,11 +56,21 @@ class CarteiraPosicao
     pc = {}
     carteira_ativos.each do |ca|
       corretora_nome = ca.corretora.nome
-      pc[corretora_nome] = [] unless corretora_nome.in? pc
-      pc[corretora_nome].push ca
+      tipo = ca.ativo.tipo
+      pc[corretora_nome] = {} unless corretora_nome.in? pc
+      pc[corretora_nome][tipo] = [] unless tipo.in? pc[corretora_nome]
+      pc[corretora_nome][tipo].push ca
     end
 
-    pc
+    # fazer o sort agora por tamanho de posição. Este é o padrão de display na XP por exemplo
+    pc_sorted = pc.clone
+    pc.each do |corretora_nome, tipos|
+      tipos.each do |tipo, carteira_ativos|
+        pc_sorted[corretora_nome][tipo] = carteira_ativos.sort_by { |ca| ca.valor_posicao }.reverse
+      end
+    end
+
+    pc_sorted
   end
 
   def total_ativos_por_corretora

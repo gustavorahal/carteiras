@@ -8,23 +8,24 @@
   </thead>
 
   <tbody>
-  <% @carteira_posicao.carteira_ativos_por_corretora.each do |corretora_nome, tipos|  %>
+  <% @carteira_posicao.carteira_ativos_posicoes_por_corretora.each do |corretora_nome, tipos|  %>
     <tr class="table-primary">
       <td colspan="3">
         <h6><%= corretora_nome %></h6>
       </td>
     </tr>
-    <% tipos.each do |tipo, carteira_ativos| %>
+    <% tipos.each do |tipo, carteira_ativos_posicoes| %>
       <tr class="table-dark">
         <td colspan="3">
           <h6><%= tipo.upcase %></h6>
         </td>
       </tr>
-      <% carteira_ativos.each do |ca| %>
+      <% carteira_ativos_posicoes.each do |cap| %>
+        <% ca = cap.carteira_ativo %>
         <tr>
           <td><%= link_to ca.nome_amigavel, carteira_carteira_posicao_path(@carteira, ca) %></td>
-          <td><%= display_moeda ca.valor_posicao %></td>
-          <td><%= display_numero ca.quantidade %></td>
+          <td><%= display_moeda cap.valor_posicao %></td>
+          <td><%= display_numero cap.quantidade %></td>
         </tr>
       <% end %>
     <% end %>

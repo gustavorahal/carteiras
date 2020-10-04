@@ -7,16 +7,21 @@ class CarteiraPosicoesController < ApplicationController
   end
 
   def show
-    @carteira_ativo = CarteiraAtivo.includes(:operacoes, :ativo).find(params[:id])
+    @carteira_ativo_posicao = CarteiraAtivoPosicao.new(params[:id], @data)
+    @carteira_ativo = @carteira_ativo_posicao.carteira_ativo
   end
 
   private
 
   def set_vars
-    @data_fim = Date.today
+    @data = if params[:data].present?
+              params[:data].to_date
+            else
+              Date.today
+            end
     @carteira = Carteira.find params[:carteira_id]
-    @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)
-    @carteira_ativos_posicao = @carteira_posicao.carteira_ativos
+    @carteira_posicao = CarteiraPosicao.new(@carteira, @data)
+    @carteira_posicao_caps = @carteira_posicao.carteira_ativos_posicoes
     @carteira_ativos = @carteira.carteira_ativos_validos_por_book
   end
 

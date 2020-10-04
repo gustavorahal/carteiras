@@ -1,21 +1,30 @@
 class Cotacao < ApplicationRecord
   belongs_to :ativo
 
-  def self.cotacao_ativo(ativo_id)
+  # Cotação de um ativo
+  #
+  # @param data: considera a cotação mais próxima da data especificada
+  def self.cotacao_ativo(ativo_id, data: Date.today)
+    data_str = data.strftime '%F'
     Rails.cache.fetch("cotacao_ativo_#{ativo_id}", expires_in: 5.seconds) do
-      where(ativo_id: ativo_id).order(data: :desc).limit(1).first
+      where(ativo_id: ativo_id)
+          .where("data <= '#{data_str}'")
+          .order(data: :desc)
+          .limit(1).first
     end
   end
 
-  def self.cotacao_usdbrl
+  # @param data: considera a cotação mais próxima da data especificada
+  def self.cotacao_usdbrl(data: Date.today)
     Rails.cache.fetch('cotacao_usdbrl', expires_in: 5.seconds) do
-      cotacao_ativo Ativo.find_by_nome('CURRENCY:USDBRL').id
+      cotacao_ativo Ativo.find_by_nome('CURRENCY:USDBRL').id, data: data
     end
   end
 
-  def self.cotacao_brlusd
+  # @param data: considera a cotação mais próxima da data especificada
+  def self.cotacao_brlusd(data: Date.today)
     Rails.cache.fetch('cotacao_brlusd', expires_in: 5.seconds) do
-      cotacao_ativo Ativo.find_by_nome('CURRENCY:BRLUSD').id
+      cotacao_ativo Ativo.find_by_nome('CURRENCY:BRLUSD').id, data: data
     end
   end
 

@@ -1,6 +1,6 @@
-<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} de #{@investidor.nome} em #{@conta_corrente.moeda}" %>
+<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} (#{@conta_corrente.moeda}) de #{@investidor.nome} em #{display_data @data}" %>
 
-<h6>Saldo <%= display_moeda @conta_corrente.saldo, moeda: @conta_corrente.moeda %></h6>
+<h6>Saldo <%= display_moeda @conta_corrente.saldo(@data), moeda: @conta_corrente.moeda %></h6>
 
 <%= render 'common/btn_new', url: new_conta_corrente_extrato_path(@conta_corrente), label: 'Nova entrada' %>
 

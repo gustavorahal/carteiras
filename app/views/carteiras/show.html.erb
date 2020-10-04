@@ -4,7 +4,7 @@
   <div class="card-group">
     <div class="card">
       <div class="card-body">
-        <h3><%= display_moeda @carteira_posicao.total_geral %></h3>
+        <h3><%= display_moeda @carteira_posicao.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
         <small class="text-muted"><%= display_porcentagem @carteira_posicao.rentabilidade, cores: true %> dos
           <%= display_moeda @carteira_posicao.total_investido %> investidos</small>
         <br>
@@ -13,10 +13,7 @@
         <% @carteira_posicao.total_ativos_por_corretora.each do |corretora, moeda_total| %>
             <% moeda_total.each do |moeda, total| %>
               <span class="font-weight-lighter">
-                <%= display_moeda total, moeda: moeda %>
-                  <small class="text-muted">
-                    <%= corretora.nome %>
-                  </small>
+                <%= display_moeda total, moeda: moeda %> <small class="text-muted"><%= corretora.nome %></small>
               </span>
             <% end %>
           <br>
@@ -24,12 +21,12 @@
         <br>
         <h5><%= display_moeda @carteira_posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
         <% @contas_correntes.each do |cc| %>
-            <% next if cc.saldo == 0  %>
+            <% saldo = cc.saldo(@data)  %>
+            <% next if saldo == 0  %>
             <span class="font-weight-lighter">
-              <%= display_moeda cc.saldo, moeda: cc.moeda %>
+              <%= display_moeda saldo, moeda: cc.moeda %>
               <small class="text-muted">
-                saldo <%= cc.corretora.nome %>
-                (<%= link_to 'extrato', conta_corrente_path(cc) %>)
+                <%= cc.corretora.nome %> (<%= link_to 'extrato', conta_corrente_path(cc, data: @data) %>)
               </small>
             </span>
             <br>
@@ -45,7 +42,6 @@
           Últimas operações <small>(<%= link_to 'ver todas', carteira_operacoes_path(carteira_id: @carteira.id) %>)
           (<%= link_to 'nova', new_carteira_operacao_path(carteira_id: @carteira.id) %>)</small>
         </h5>
-
         <table class="table table-borderless table-sm">
           <tbody>
             <% @carteira_posicao.ultimas_operacoes.each do |operacao| %>
@@ -60,10 +56,7 @@
         </table>
       </div>
     </div>
+
   </div>
 </div>
-</div>
-
-<br>
-
 </div>

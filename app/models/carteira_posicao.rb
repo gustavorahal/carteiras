@@ -1,31 +1,31 @@
 class CarteiraPosicao
 
-  def initialize(carteira, data_fim)
+  def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira
     @investidor = carteira.investidor
-    @data_fim = data_fim
-    @valor_usdbrl = Cotacao.cotacao_usdbrl.valor_unit
+    @data = data
+    @valor_usdbrl = Cotacao.cotacao_usdbrl(data: data).valor_unit
     @saldo_cc_por_corretora = nil
-    @carteira_ativos = [] # lista de ActiveRecord CarteiraAtivo
+    @carteira_ativos_posicoes = [] # lista de CarteiraAtivoPosicao
     @valor_por_book = nil
     @porcentagem_por_book = nil
     @total_ativos = nil
   end
 
   def contem?(nome_ativo)
-    @carteira_ativos.each { |ca| return true if ca.ativo.nome == nome_ativo }
+    @carteira_ativos_posicoes.each { |cap| return true if cap.carteira_ativo.ativo.nome == nome_ativo }
   end
 
   # Quais ativos eu tenho na carteira até determinada data?
   #
-  # @return lista de ActiveRecord CarteiraAtivo
-  def carteira_ativos
-    return @carteira_ativos unless @carteira_ativos.empty?
+  # @return lista de CarteiraAtivoPosicao
+  def carteira_ativos_posicoes
+    return @carteira_ativos_posicoes unless @carteira_ativos_posicoes.empty?
 
-    data_fim_str = @data_fim.strftime '%F'
+    data_str = @data.strftime '%F'
     # Para isso somamos a quantidade que temos de cada ativo
     # e o que for diferente de zero significa que temos o ativo na carteira.
-    # Quantidade pode ser negativo. Exemplo: operação de short
+    # Quantidade pode ser negativo, por exemplo, operação de short
     sql = <<~SQL
       SELECT carteira_ativos.id, ROUND(SUM(quantidade)::numeric, 10)
       FROM carteira_ativos
@@ -33,7 +33,7 @@ class CarteiraPosicao
            operacoes ON operacoes.carteira_ativo_id = carteira_ativos.id
                INNER JOIN
            ativos on carteira_ativos.ativo_id = ativos.id
-      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_fim_str}'
+      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_str}'
       GROUP BY carteira_ativos.id, ativos.nome
       HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
       ORDER BY book, ativos.nome ASC;
@@ -42,31 +42,29 @@ class CarteiraPosicao
     resultado = ActiveRecord::Base.connection.execute(sql).values
 
     resultado.each do |carteira_ativo_id, quantidade|
-      ca = CarteiraAtivo.includes(:corretora, ativo: :cotacoes).find(carteira_ativo_id)
-      # FIXME: testar se rola fazer varias chamadas para quantidade
-      # #ca.set_quantidade quantidade
-      @carteira_ativos.push ca
+      cap = CarteiraAtivoPosicao.new(carteira_ativo_id, @data, quantidade)
+      @carteira_ativos_posicoes.push cap
     end
 
-    @carteira_ativos
+    @carteira_ativos_posicoes
   end
 
-  # FIXME usar activerecord query group by depois e desativar isso
-  def carteira_ativos_por_corretora
+  def carteira_ativos_posicoes_por_corretora
     pc = {}
-    carteira_ativos.each do |ca|
+    carteira_ativos_posicoes.each do |cap|
+      ca = cap.carteira_ativo
       corretora_nome = ca.corretora.nome
       tipo = ca.ativo.tipo
       pc[corretora_nome] = {} unless corretora_nome.in? pc
       pc[corretora_nome][tipo] = [] unless tipo.in? pc[corretora_nome]
-      pc[corretora_nome][tipo].push ca
+      pc[corretora_nome][tipo].push cap
     end
 
     # fazer o sort agora por tamanho de posição. Este é o padrão de display na XP por exemplo
     pc_sorted = pc.clone
     pc.each do |corretora_nome, tipos|
-      tipos.each do |tipo, carteira_ativos|
-        pc_sorted[corretora_nome][tipo] = carteira_ativos.sort_by { |ca| ca.valor_posicao }.reverse
+      tipos.each do |tipo, carteira_ativos_posicoes|
+        pc_sorted[corretora_nome][tipo] = carteira_ativos_posicoes.sort_by { |cap| cap.valor_posicao }.reverse
       end
     end
 
@@ -75,39 +73,14 @@ class CarteiraPosicao
 
   def total_ativos_por_corretora
     tc = {}
-    carteira_ativos.each do |ca|
-      tc[ca.corretora] = { ca.ativo.moeda => 0 } unless ca.corretora.in? tc
-      tc[ca.corretora][ca.ativo.moeda] += ca.valor_posicao(moeda: ca.ativo.moeda)
+    carteira_ativos_posicoes.each do |cap|
+      moeda = cap.carteira_ativo.ativo.moeda
+      ca = cap.carteira_ativo
+      tc[ca.corretora] = { moeda => 0 } unless ca.corretora.in? tc
+      tc[ca.corretora][moeda] += cap.valor_posicao(moeda: moeda)
     end
 
     tc
-  end
-
-  def total_ativos
-    return @total_ativos unless @total_ativos.nil?
-
-    @total_ativos = 0
-    carteira_ativos.each do |ca|
-      @total_ativos += ca.valor_posicao
-    end
-
-    @total_ativos
-  end
-
-  def total_geral
-    total_ativos + saldo_cc_total
-  end
-
-  def saldo_cc_total
-    Rails.cache.fetch("saldo_cc_total_#{@investidor.id}", expires_in: 5.seconds) do
-      total_brl = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
-                                                       'conta_correntes.moeda': 'BRL').sum(:valor)
-      total_usd = Extrato.joins(:conta_corrente).where('conta_correntes.investidor_id': @carteira.investidor.id,
-                                                       'conta_correntes.moeda': 'USD').sum(:valor)
-      total_usdbrl = total_usd * @valor_usdbrl
-
-      total_brl + total_usdbrl
-    end
   end
 
   def porcentagem_por_book
@@ -115,10 +88,10 @@ class CarteiraPosicao
 
     @porcentagem_por_book = {}
 
-    carteira_ativos.each do |ca|
-      book = ca.book
+    carteira_ativos_posicoes.each do |cap|
+      book = cap.carteira_ativo.book
       @porcentagem_por_book[book] = 0 unless book.in? @porcentagem_por_book
-      @porcentagem_por_book[book] += (ca.valor_posicao / total_geral) * 100
+      @porcentagem_por_book[book] += (cap.valor_posicao / total_geral) * 100
     end
 
     @porcentagem_por_book
@@ -128,10 +101,10 @@ class CarteiraPosicao
     return @valor_por_book unless @valor_por_book.nil?
 
     @valor_por_book = {}
-    carteira_ativos.each do |ca|
-      book = ca.book
+    carteira_ativos_posicoes.each do |cap|
+      book = cap.carteira_ativo.book
       @valor_por_book[book] = 0 unless book.in? @valor_por_book
-      @valor_por_book[book] += ca.valor_posicao
+      @valor_por_book[book] += cap.valor_posicao
     end
 
     @valor_por_book
@@ -139,6 +112,25 @@ class CarteiraPosicao
 
   def total_investido
     total_c_e_v + saldo_cc_total
+  end
+
+  def total_ativos
+    return @total_ativos unless @total_ativos.nil?
+
+    @total_ativos = 0
+    carteira_ativos_posicoes.each do |cap|
+      @total_ativos += cap.valor_posicao
+    end
+
+    @total_ativos
+  end
+
+  def saldo_cc_total
+    ContaCorrente.saldo_cc_total(@carteira.investidor, @data)
+  end
+
+  def total_geral
+    total_ativos + saldo_cc_total
   end
 
   def rentabilidade
@@ -149,8 +141,8 @@ class CarteiraPosicao
     Operacao.operacoes_carteira(@carteira.id).limit(5)
   end
 
-  def porcentagem_carteira_ativo(ca)
-    ca.valor_posicao / total_geral * 100
+  def porcentagem_carteira_ativo(cap)
+    cap.valor_posicao / total_geral * 100
   end
 
   def valor_teorico_carteira_ativo(ca)
@@ -160,9 +152,10 @@ class CarteiraPosicao
 
   def total_c_e_v
     CarteiraAtivo
-               .joins(:operacoes)
-               .where(carteira_id: @carteira.id)
-               .sum('quantidade * valor_unit * usdbrl')
+      .joins(:operacoes)
+      .where(carteira_id: @carteira.id)
+      .where("operacoes.data <= '#{@data}'")
+      .sum('quantidade * valor_unit * usdbrl')
   end
 
 end

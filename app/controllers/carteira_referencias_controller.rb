@@ -9,15 +9,20 @@ class CarteiraReferenciasController < ApplicationController
     @carteira = Carteira.find params[:carteira_id]
     @carteira_ativos = @carteira.carteira_ativos_validos_por_book
 
+    # NOTA: Esta view só funciona com o momento atual, não é possivel resgatar a história
+    # de referência da carteira pela maneira que armazenamos este histórico.
     if @view == 'atual_vs_ref'
       @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)
-      @carteira_ativos_posicao = @carteira_posicao.carteira_ativos
-      carteira_ativos_soma_tmp = @carteira_ativos_posicao.union(@carteira_ativos)
+      @carteira_posicao_caps = @carteira_posicao.carteira_ativos_posicoes
+      @carteira_ativos_posicoes = []
+      @carteira_ativos.each { |ca| @carteira_ativos_posicoes.push CarteiraAtivoPosicao.new(ca, @data_fim) }
+      carteira_ativos_posicoes_soma_tmp = @carteira_posicao_caps.union(@carteira_ativos_posicoes)
       # reordena por book
-      @carteira_ativos_soma = {}
-      carteira_ativos_soma_tmp.each do |ca|
-        @carteira_ativos_soma[ca.book] = [] unless ca.book.in? @carteira_ativos_soma
-        @carteira_ativos_soma[ca.book].push ca
+      @carteira_ativos_posicoes_soma = {}
+      carteira_ativos_posicoes_soma_tmp.each do |cap|
+        book = cap.carteira_ativo.book
+        @carteira_ativos_posicoes_soma[book] = [] unless book.in? @carteira_ativos_posicoes_soma
+        @carteira_ativos_posicoes_soma[book].push cap
       end
     end
   end

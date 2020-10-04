@@ -35,16 +35,16 @@ class Operacao < ApplicationRecord
       quant_pos = quantidade
     end
     v_operacao_venda = valor_unit * usdbrl * quant_pos
-    pm = carteira_ativo.preco_medio(data)
-    pm = carteira_ativo.preco_medio(Date.today) if pm.nil?
+    cap = CarteiraAtivoPosicao.new(carteira_ativo.id, Date.today)
+    pm = cap.preco_medio
     v_medio = pm * quant_pos
 
     sum_custos_oper = Operacao
                       .where(carteira_ativo_id: carteira_ativo_id)
-                      .where("data >= ? AND data <= ?", carteira_ativo.data_montagem, data)
+                      .where("data >= ? AND data <= ?", cap.data_montagem, data)
                       .sum('(co_taxa + co_emolumentos + co_corretagem + co_iss_iof + co_irrf + co_outros) * usdbrl')
 
-    puts "Data mont #{carteira_ativo.data_montagem}"
+    puts "Data mont #{cap.data_montagem}"
     puts "Preço Medio #{pm}"
     puts "Valor Medio #{v_medio}"
     puts "Valor Venda #{v_operacao_venda}"

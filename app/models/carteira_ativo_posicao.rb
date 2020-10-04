@@ -18,7 +18,7 @@ class CarteiraAtivoPosicao
       @carteira_ativo
         .operacoes
         .where(mon_ou_des: 1)
-        .where("operacoes.data <= '#{@data_str}'")
+        .where("operacoes.data <= '#{@data_str}'::date")
         .order(data: :desc)
         .limit(1)[0].data
     end
@@ -48,8 +48,8 @@ class CarteiraAtivoPosicao
       from operacoes
       where carteira_ativo_id = #{@carteira_ativo.id} and 
        operacao = 1 and 
-       data >= '#{data_montagem_str}' and
-       data <= '#{@data_str}'
+       data >= '#{data_montagem_str}'::date and
+       data <= '#{@data_str}'::date
     SQL
 
     ActiveRecord::Base.connection.execute(sql).values[0][0]
@@ -64,7 +64,7 @@ class CarteiraAtivoPosicao
 
     @carteira_ativo
       .operacoes
-      .where("operacoes.data <= '#{@data_str}'")
+      .where("operacoes.data <= '#{@data_str}'::date")
       .sum(:quantidade)
   end
 
@@ -72,14 +72,14 @@ class CarteiraAtivoPosicao
     if moeda == 'BRL'
       @carteira_ativo
         .operacoes
-        .where("operacoes.data <= '#{@data_str}'")
+        .where("operacoes.data <= '#{@data_str}'::date")
         .sum('valor_unit * quantidade * usdbrl')
     else # USD
       # FIXME:
       # não temos a cotacao brlusd armazenada a época para definir qual a cotação usar
       @carteira_ativo
         .operacoes
-        .where("operacoes.data <= '#{@data_str}'")
+        .where("operacoes.data <= '#{@data_str}'::date")
         .sum('valor_unit * quantidade')
     end
   end

@@ -8,7 +8,7 @@ class Cotacao < ApplicationRecord
     data_str = data.strftime '%F'
     Rails.cache.fetch("cotacao_ativo_#{ativo_id}", expires_in: 5.seconds) do
       where(ativo_id: ativo_id)
-          .where("data <= '#{data_str}'")
+          .where("data <= '#{data_str}'::date")
           .order(data: :desc)
           .limit(1).first
     end

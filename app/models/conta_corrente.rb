@@ -20,7 +20,7 @@ class ContaCorrente < ApplicationRecord
                     .where('conta_correntes.moeda': 'USD')
                     .where("liquidacao <= '#{data}'::date")
                     .sum(:valor)
-    total_usdbrl = total_usd * Cotacao.cotacao_usdbrl(data: data).valor_unit
+    total_usdbrl = total_usd * Cotacao.cotacao_usdbrl(data).valor_unit
 
     total_brl + total_usdbrl
   end

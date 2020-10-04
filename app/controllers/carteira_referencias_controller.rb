@@ -1,21 +1,19 @@
 class CarteiraReferenciasController < ApplicationController
 
-  before_action :set_vars, only: [:edit, :update, :create, :new]
+  before_action :set_vars, only: [:edit, :update, :create, :new, :index]
   before_action :set_carteira_ativo, only: [:edit, :update]
 
   def index
     @view = params[:view]
-    @data_fim = Date.today
-    @carteira = Carteira.find params[:carteira_id]
     @carteira_ativos = @carteira.carteira_ativos_validos_por_book
 
     # NOTA: Esta view só funciona com o momento atual, não é possivel resgatar a história
     # de referência da carteira pela maneira que armazenamos este histórico.
     if @view == 'atual_vs_ref'
-      @carteira_posicao = CarteiraPosicao.new(@carteira, @data_fim)
+      @carteira_posicao = CarteiraPosicao.new(@carteira, @data)
       @carteira_posicao_caps = @carteira_posicao.carteira_ativos_posicoes
       @carteira_ativos_posicoes = []
-      @carteira_ativos.each { |ca| @carteira_ativos_posicoes.push CarteiraAtivoPosicao.new(ca, @data_fim) }
+      @carteira_ativos.each { |ca| @carteira_ativos_posicoes.push CarteiraAtivoPosicao.new(ca, @data) }
       carteira_ativos_posicoes_soma_tmp = @carteira_posicao_caps.union(@carteira_ativos_posicoes)
       # reordena por book
       @carteira_ativos_posicoes_soma = {}

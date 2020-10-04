@@ -56,7 +56,7 @@ class CarteiraAtivoPosicao
   end
 
   def cotacao
-    Cotacao.cotacao_ativo(@carteira_ativo.ativo.id, data: @data)
+    Cotacao.cotacao_ativo(@carteira_ativo.ativo.id, @data)
   end
 
   def quantidade
@@ -85,11 +85,11 @@ class CarteiraAtivoPosicao
   end
 
   def valor_posicao(moeda: 'BRL')
-    cotacao ? cotacao.valor_unit_moeda(moeda: moeda) * quantidade.to_f : 0
+    cotacao ? cotacao.valor_unit_moeda(@data, moeda: moeda) * quantidade.to_f : 0
   end
 
   def rentabilidade
-    cotacao ? ((cotacao.valor_unit_moeda / preco_medio) - 1) * 100 : 0
+    cotacao ? ((cotacao.valor_unit_moeda(@data) / preco_medio) - 1) * 100 : 0
   end
 
 end

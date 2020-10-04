@@ -14,11 +14,6 @@ class CarteiraPosicoesController < ApplicationController
   private
 
   def set_vars
-    @data = if params[:data].present?
-              params[:data].to_date
-            else
-              Date.today
-            end
     @carteira = Carteira.find params[:carteira_id]
     @carteira_posicao = CarteiraPosicao.new(@carteira, @data)
     @carteira_posicao_caps = @carteira_posicao.carteira_ativos_posicoes

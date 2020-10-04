@@ -49,8 +49,8 @@
       </li>
     </ul>
     <span class="navbar-text">
-          Dólar: <%= display_moeda Cotacao.cotacao_usdbrl.valor_unit %>
-      <small>(<%= display_data Cotacao.cotacao_usdbrl.data %>)</small>
+          Dólar: <%= display_moeda Cotacao.cotacao_usdbrl(@data).valor_unit %>
+      <small>(<%= display_data Cotacao.cotacao_usdbrl(@data).data %>)</small>
       </span>
   </div>
 </nav>

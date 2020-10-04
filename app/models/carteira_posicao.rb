@@ -4,7 +4,7 @@ class CarteiraPosicao
     @carteira = carteira # ActiveRecord Carteira
     @investidor = carteira.investidor
     @data = data
-    @valor_usdbrl = Cotacao.cotacao_usdbrl(data: data).valor_unit
+    @valor_usdbrl = Cotacao.cotacao_usdbrl(data).valor_unit
     @saldo_cc_por_corretora = nil
     @carteira_ativos_posicoes = [] # lista de CarteiraAtivoPosicao
     @valor_por_book = nil

@@ -11,11 +11,4 @@ class CarteiraAtivo < ApplicationRecord
     "#{ativo.nome_amigavel} - #{corretora.nome}"
   end
 
-  # Última cotação do Ativo
-  #
-  # @return Cotacao object
-  def cotacao
-    Cotacao.cotacao_ativo(ativo.id)
-  end
-
 end

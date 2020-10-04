@@ -33,7 +33,7 @@ class CarteiraPosicao
            operacoes ON operacoes.carteira_ativo_id = carteira_ativos.id
                INNER JOIN
            ativos on carteira_ativos.ativo_id = ativos.id
-      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data <= '#{data_str}'::date
+      WHERE carteira_ativos.carteira_id = #{@carteira.id} AND operacoes.data::date <= '#{data_str}'
       GROUP BY carteira_ativos.id, ativos.nome
       HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
       ORDER BY book, ativos.nome ASC;
@@ -154,7 +154,7 @@ class CarteiraPosicao
     CarteiraAtivo
       .joins(:operacoes)
       .where(carteira_id: @carteira.id)
-      .where("operacoes.data <= '#{@data}'::date")
+      .where("operacoes.data::date <= '#{@data}'")
       .sum('quantidade * valor_unit * usdbrl')
   end
 

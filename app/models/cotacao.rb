@@ -8,20 +8,18 @@ class Cotacao < ApplicationRecord
     data_str = data.strftime '%F'
     Rails.cache.fetch("cotacao_ativo_#{ativo_id}", expires_in: 3.seconds) do
       where(ativo_id: ativo_id)
-          .where("data <= '#{data_str}'::date")
+          .where("data::date <= '#{data_str}'")
           .order(data: :desc)
           .limit(1).first
     end
   end
 
-  # @param data: considera a cotação mais próxima da data especificada
   def self.cotacao_usdbrl(data)
     Rails.cache.fetch('cotacao_usdbrl', expires_in: 3.seconds) do
       cotacao_ativo Ativo.find_by_nome('CURRENCY:USDBRL').id, data
     end
   end
 
-  # @param data: considera a cotação mais próxima da data especificada
   def self.cotacao_brlusd(data)
     Rails.cache.fetch('cotacao_brlusd', expires_in: 3.seconds) do
       cotacao_ativo Ativo.find_by_nome('CURRENCY:BRLUSD').id, data

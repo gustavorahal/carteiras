@@ -41,7 +41,7 @@ class Operacao < ApplicationRecord
 
     sum_custos_oper = Operacao
                       .where(carteira_ativo_id: carteira_ativo_id)
-                      .where("data >= ? AND data <= ?", cap.data_montagem, data)
+                      .where("data::date >= ? AND data::date <= ?", cap.data_montagem, data)
                       .sum('(co_taxa + co_emolumentos + co_corretagem + co_iss_iof + co_irrf + co_outros) * usdbrl')
 
     puts "Data mont #{cap.data_montagem}"

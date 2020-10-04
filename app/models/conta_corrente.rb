@@ -13,12 +13,12 @@ class ContaCorrente < ApplicationRecord
     total_brl = Extrato.joins(:conta_corrente)
                     .where('conta_correntes.investidor_id': investidor.id)
                     .where('conta_correntes.moeda': 'BRL')
-                    .where("liquidacao <= '#{data}'::date")
+                    .where("liquidacao::date <= '#{data}'")
                     .sum(:valor)
     total_usd = Extrato.joins(:conta_corrente)
                     .where('conta_correntes.investidor_id': investidor.id)
                     .where('conta_correntes.moeda': 'USD')
-                    .where("liquidacao <= '#{data}'::date")
+                    .where("liquidacao::date <= '#{data}'")
                     .sum(:valor)
     total_usdbrl = total_usd * Cotacao.cotacao_usdbrl(data).valor_unit
 

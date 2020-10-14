@@ -49,6 +49,12 @@ class CarteiraPosicao
     @carteira_ativos_posicoes
   end
 
+  def carteira_ativos
+    tmp_list = []
+    carteira_ativos_posicoes.each { |cap| tmp_list.push cap.carteira_ativo }
+    tmp_list
+  end
+
   def carteira_ativos_posicoes_por_corretora
     pc = {}
     carteira_ativos_posicoes.each do |cap|
@@ -141,8 +147,14 @@ class CarteiraPosicao
     Operacao.operacoes_carteira(@carteira.id).limit(5)
   end
 
-  def porcentagem_carteira_ativo(cap)
+  def porcentagem_carteira_ativo(ca)
+    cap = CarteiraAtivoPosicao.new(ca, @data)
     cap.valor_posicao / total_geral * 100
+  end
+
+  def valor_posicao_carteira_ativo(ca)
+    cap = CarteiraAtivoPosicao.new(ca, @data)
+    cap.valor_posicao
   end
 
   def valor_teorico_carteira_ativo(ca)

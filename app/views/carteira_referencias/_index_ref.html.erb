@@ -11,14 +11,14 @@
   <tbody>
     <tr class="table-primary text-center">
       <td colspan="4">
-        <h5>Total <%= display_porcentagem @carteira.ref_books_porcentagem_soma %></h5>
+        <h5>Total <%= display_porcentagem @carteira.carteira_ativos_books_porcentagem_soma %></h5>
       </td>
     </tr>
     <% book = '' %>
     <% @carteira_ativos.each do |ca| %>
       <% if book != ca.book %>
         <% book = ca.book %>
-        <% book_percent = @carteira.ref_books_porcentagem[book] %>
+        <% book_percent = @carteira.carteira_ativos_por_book_porcentagem[book] %>
         <tr class="table-primary text-center">
           <td colspan="4">
             <h6><%= book %> (<%= display_porcentagem book_percent %>)</h6>

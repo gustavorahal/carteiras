@@ -26,7 +26,7 @@
         <small>desde <%= display_data cap.data_montagem %> </small></td>
       <td><%= display_porcentagem cap.rentabilidade, cores: true %></td>
       <td><%= display_moeda cap.valor_posicao, cores: true %>
-        (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(cap) %>)
+        (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(cap.carteira_ativo) %>)
       </td>
       <td><%= display_numero cap.quantidade %></td>
       <td><%= display_moeda cap.preco_medio %></td>

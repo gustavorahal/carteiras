@@ -4,7 +4,7 @@
 <h6>Valor posição: <%= display_moeda @carteira_ativo_posicao.valor_posicao, moeda: ativo.moeda %>
   (<%= display_porcentagem @carteira_ativo_posicao.rentabilidade, cores: true %>)</h6>
 <h6>Quantidade: <%= @carteira_ativo_posicao.quantidade %></h6>
-<h6>Porcentagem na carteira: <%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo @carteira_ativo_posicao %></h6>
+<h6>Porcentagem na carteira: <%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo @carteira_ativo_posicao.carteira_ativo %></h6>
 <h6>Porcentagem teórica: <%= display_porcentagem @carteira_ativo.porcentagem %> (<%= link_to 'editar', edit_carteira_carteira_referencia_path(@carteira, @carteira_ativo) %>)</h6>
 
 <% operacoes = @carteira_ativo.operacoes.order(:data)  %>

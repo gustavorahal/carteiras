@@ -41,14 +41,14 @@ class BuscaCotacao
   def self.usd_brl
     api_host = 'currency-converter5.p.rapidapi.com'
     url_usdbrl = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=USD&to=BRL&amount=1"
-    json_response = fetch_rapidapi_json(url_usdbrl, api_host)
+    json_response = _fetch_rapidapi_json(url_usdbrl, api_host)
     json_response['rates']['BRL']['rate'].to_f
   end
 
   def self.brl_usd
     api_host = 'currency-converter5.p.rapidapi.com'
     url_brlusd = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1"
-    json_response = fetch_rapidapi_json(url_brlusd, api_host)
+    json_response = _fetch_rapidapi_json(url_brlusd, api_host)
     json_response['rates']['USD']['rate'].to_f
   end
 
@@ -56,42 +56,37 @@ class BuscaCotacao
     url = "https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL"
     api_host = 'coingecko.p.rapidapi.com'
 
-    json_response = fetch_rapidapi_json(url, api_host)
+    json_response = _fetch_rapidapi_json(url, api_host)
     json_response['bitcoin']['brl']
   end
 
   # Real time (ou quase isso)
-  def self.acao(ativo)
-    url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo}"
-    api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
-    json_response = fetch_rapidapi_json(url, api_host)
+  #
+  # @param ativo_nome: string com nome do ativo
+  # @param data: Date object ou nil caso seja a cotacao atual
+  # @return [Float] valor do ativo na data especificado
+  def self.acao(ativo_nome, data)
 
-    result = json_response['quoteResponse']['result']
-    result[0]['regularMarketPrice'] unless result.empty?
+    api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+
+    if data
+      from_data = data.to_time.to_i
+      to_data = (data + 1.day).to_time.to_i
+      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ativo_nome}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
+      json_response = _fetch_rapidapi_json(url, api_host)
+      return json_response['chart']['result'][0]['indicators']['quote'][0]['close'][0].round(2).to_f
+    else
+      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_nome}"
+      json_response = _fetch_rapidapi_json(url, api_host)
+      result = json_response['quoteResponse']['result']
+      return result[0]['regularMarketPrice'].to_f unless result.empty?
+    end
   end
 
-  # def self.busca_fundo(nome_fundo)
-  #   #url = 'https://data.anbima.com.br/fundos/318396'
-  #   #url = 'https://api.anbima.com.br/feed/fundos/v1/fundos/318396'
-  #   # ANBIMA
-  #   client_id = 'EXAMPLE_CLIENT_ID'
-  #   client_secret = 'EXAMPLE_CLIENT_SECRET'
-  #   client = OAuth2::Client.new(client_id, client_secret,
-  #                               site: 'http://api-sandbox.anbima.com.br',
-  #                               authorize_url: '/oauth/access-token',
-  #                               token_url: '/oauth/access-token')
-  #
-  #   token = client.client_credentials.get_token(redirect_uri: 'https://localhost:8080/oauth2/callback',
-  #                          headers: {'Authorization' => "Basic #{Base64.encode64("#{client_id}:#{client_secret}")}"})
-  #   response = token.get('/feed/fundos/v1/fundos?size=10',
-  #                        headers: { 'client_id' => client_id,
-  #                                   'access_token' => token.token},
-  #                                    'accept' => 'application/json' )
-  #   response.class.name
-  # end
 
+  private
 
-  def self.fetch_rapidapi_json(service_url, rapidapi_host)
+  def self._fetch_rapidapi_json(service_url, rapidapi_host)
     uri = URI(service_url)
 
     http = Net::HTTP.new(uri.host, uri.port)

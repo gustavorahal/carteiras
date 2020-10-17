@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_05_043529) do
+ActiveRecord::Schema.define(version: 2020_10_16_234007) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -107,6 +107,7 @@ ActiveRecord::Schema.define(version: 2020_10_05_043529) do
     t.float "usdbrl", default: 1.0
     t.bigint "carteira_ativo_id", null: false
     t.bigint "corretora_id", null: false
+    t.string "observacao"
     t.index ["carteira_ativo_id"], name: "index_operacoes_on_carteira_ativos_id"
   end
 

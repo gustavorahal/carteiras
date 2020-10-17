@@ -17,6 +17,8 @@
                      help: 'Caso a operação seja em dolar, usar valor de compra ou venda conforme operação',
                      step: :any %>
 
+  <%= f.text_field :observacao %>
+
   <h5>Custos Operacionais na moeda do ativo</h5>
   <%= f.number_field :co_taxa, step: :any %>
   <%= f.number_field :co_emolumentos, step: :any %>

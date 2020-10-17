@@ -44,7 +44,7 @@ class OperacoesController < ApplicationController
   def secure_params
     params.require(:operacao).permit(:carteira_ativo_id, :mon_ou_des,
                                      :data, :valor_unit, :quantidade,
-                                     :operacao, :usdbrl, :co_corretagem, :co_taxa,
+                                     :operacao, :usdbrl, :observacao, :co_corretagem, :co_taxa,
                                      :co_emolumentos, :co_iss_iof, :co_irrf, :co_outros)
   end
 

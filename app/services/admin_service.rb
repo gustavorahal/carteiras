@@ -8,8 +8,8 @@ class AdminService
       Operacao.where(carteira_ativo: ca).each do |op|
         op.valor_unit = op.valor_unit / n_vezes
         op.quantidade = op.quantidade * n_vezes
-        obs = "Ação desdobrada em #{n_vezes}x em #{Date.today}"
-        op.observacao = op.observacao.nil? ? obs : op.observacao + "<br>" + obs
+        obs = "Desdobramento em #{n_vezes}x em #{Date.today}"
+        op.observacao = op.observacao.nil? ? obs : op.observacao + '<br>' + obs
         op.save
       end
     end

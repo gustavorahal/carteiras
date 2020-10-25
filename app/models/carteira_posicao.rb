@@ -4,7 +4,7 @@ class CarteiraPosicao
     @carteira = carteira # ActiveRecord Carteira
     @investidor = carteira.investidor
     @data = data
-    @valor_usdbrl = Cotacao.cotacao_usdbrl(data).valor_unit
+    @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
     @saldo_cc_por_corretora = nil
     @carteira_ativos_posicoes = [] # lista de CarteiraAtivoPosicao
     @valor_por_book = nil
@@ -148,13 +148,13 @@ class CarteiraPosicao
   end
 
   def porcentagem_carteira_ativo(ca)
-    cap = CarteiraAtivoPosicao.new(ca, @data)
-    cap.valor_posicao / total_geral * 100
+    cap = _busca_cap(ca)
+    cap ? (cap.valor_posicao / total_geral * 100) : 0
   end
 
   def valor_posicao_carteira_ativo(ca)
-    cap = CarteiraAtivoPosicao.new(ca, @data)
-    cap.valor_posicao
+    cap = _busca_cap(ca)
+    cap ? cap.valor_posicao : 0
   end
 
   def valor_teorico_carteira_ativo(ca)
@@ -169,5 +169,22 @@ class CarteiraPosicao
       .where("operacoes.data::date <= '#{@data}'")
       .sum('quantidade * valor_unit * usdbrl')
   end
+
+
+  #
+  # Privados
+  #
+
+  private
+
+  def _busca_cap(ca)
+    cap_buscado = nil
+    @carteira_ativos_posicoes.each do |cap|
+      cap_buscado = cap if cap.carteira_ativo == ca
+    end
+
+    cap_buscado
+  end
+
 
 end

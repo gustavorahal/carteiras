@@ -1,6 +1,6 @@
 class CarteiraAtivoPosicao
 
-  attr_reader :carteira_ativo
+  attr_reader :carteira_ativo, :cotacao
 
   def initialize(carteira_ativo_ref, data, quantidade = nil)
     @carteira_ativo = if carteira_ativo_ref.is_a? CarteiraAtivo
@@ -8,9 +8,12 @@ class CarteiraAtivoPosicao
                       else # passei um ID
                         CarteiraAtivo.includes(:corretora, ativo: :cotacoes).find(carteira_ativo_ref)
                       end
+    @ativo = @carteira_ativo.ativo
     @data = data
     @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
+    @cotacao = CotacaoService.cotacao(@ativo, @data)
+    raise StandardError, "Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end
 
   def data_montagem
@@ -55,10 +58,6 @@ class CarteiraAtivoPosicao
     ActiveRecord::Base.connection.execute(sql).values[0][0]
   end
 
-  def cotacao
-    Cotacao.cotacao_ativo(@carteira_ativo.ativo.id, @data)
-  end
-
   def quantidade
     return @quantidade unless @quantidade.nil?
 
@@ -85,11 +84,17 @@ class CarteiraAtivoPosicao
   end
 
   def valor_posicao(moeda: 'BRL')
-    cotacao ? cotacao.valor_unit_moeda(@data, moeda: moeda) * quantidade.to_f : 0
+    valor_unit = valor_unit_na_moeda(moeda)
+    valor_unit * quantidade.to_f
   end
 
   def rentabilidade
-    cotacao ? ((cotacao.valor_unit_moeda(@data) / preco_medio) - 1) * 100 : 0
+    valor_unit = valor_unit_na_moeda
+    ((valor_unit / preco_medio) - 1) * 100
+  end
+
+  def valor_unit_na_moeda(moeda = 'BRL')
+    CotacaoService.valor_unit_na_moeda(@ativo, @cotacao, @data, moeda)
   end
 
 end

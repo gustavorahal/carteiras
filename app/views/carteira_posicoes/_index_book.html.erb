@@ -30,7 +30,7 @@
       </td>
       <td><%= display_numero cap.quantidade %></td>
       <td><%= display_moeda cap.preco_medio %></td>
-      <td><%= display_moeda cap.cotacao.valor_unit_moeda(@data) %> <small>(<%= display_data cap.cotacao.data %>)</small></td>
+      <td><%= display_moeda cap.valor_unit_na_moeda %> <small>(<%= display_data cap.cotacao.data %>)</small></td>
     </tr>
   <% end %>
   </tbody>

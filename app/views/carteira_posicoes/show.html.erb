@@ -12,6 +12,9 @@
   <dt class="col-sm-3">Preço Médio</dt>
   <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.preco_medio %></dd>
 
+  <dt class="col-sm-3">Última cotação</dt>
+  <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.valor_unit_na_moeda %> <small>(<%= display_data @carteira_ativo_posicao.cotacao.data %>)</small></dd>
+
   <dt class="col-sm-3">Quantidade</dt>
   <dd class="col-sm-9"><%= @carteira_ativo_posicao.quantidade %></dd>
 

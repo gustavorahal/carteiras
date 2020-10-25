@@ -15,7 +15,6 @@
     <th scope="col">Quant.</th>
     <th scope="col">Valor Unit.</th>
     <th scope="col">Valor Total</th>
-    <th scope="col">IRPF</th>
     <th scope="col">USDBRL</th>
     <th scope="col">Obs.</th>
     <th scope="col">C.O.</th>
@@ -37,7 +36,6 @@
       <td><%= oper.quantidade %></td>
       <td><%= display_moeda oper.valor_unit, moeda: oper.carteira_ativo.ativo.moeda %></td>
       <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.carteira_ativo.ativo.moeda, cores: true %></td>
-      <td><%= display_moeda oper.irpf %></td>
       <td><%= display_moeda oper.usdbrl %></td>
       <td><small><%= oper.observacao.nil? ? oper.observacao : oper.observacao.html_safe %></small></td>
       <td><%= display_moeda oper.custos_operacionais, moeda: oper.carteira_ativo.ativo.moeda %></td>

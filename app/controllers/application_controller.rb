@@ -9,5 +9,6 @@ class ApplicationController < ActionController::Base
             else
               Date.today
             end
+    @cotacao_usdbrl = CotacaoService.cotacao_usdbrl(@data)
   end
 end

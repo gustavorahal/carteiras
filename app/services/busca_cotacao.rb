@@ -69,18 +69,19 @@ class BuscaCotacao
 
     api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
 
-    if data
+    if data == Date.today || data.nil?
+      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_nome}"
+      json_response = _fetch_rapidapi_json(url, api_host)
+      result = json_response['quoteResponse']['result']
+      return result[0]['regularMarketPrice'].to_f unless result.empty?
+    else
       from_data = data.to_time.to_i
       to_data = (data + 1.day).to_time.to_i
       url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ativo_nome}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
       json_response = _fetch_rapidapi_json(url, api_host)
       return json_response['chart']['result'][0]['indicators']['quote'][0]['close'][0].round(2).to_f
-    else
-      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_nome}"
-      json_response = _fetch_rapidapi_json(url, api_host)
-      result = json_response['quoteResponse']['result']
-      return result[0]['regularMarketPrice'].to_f unless result.empty?
     end
+
   end
 
 

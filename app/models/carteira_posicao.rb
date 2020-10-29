@@ -70,7 +70,7 @@ class CarteiraPosicao
     pc_sorted = pc.clone
     pc.each do |corretora_nome, tipos|
       tipos.each do |tipo, carteira_ativos_posicoes|
-        pc_sorted[corretora_nome][tipo] = carteira_ativos_posicoes.sort_by { |cap| cap.valor_posicao }.reverse
+        pc_sorted[corretora_nome][tipo] = carteira_ativos_posicoes.sort_by { |cap| cap.valor_posicao_em_brl }.reverse
       end
     end
 
@@ -83,7 +83,7 @@ class CarteiraPosicao
       moeda = cap.carteira_ativo.ativo.moeda
       ca = cap.carteira_ativo
       tc[ca.corretora] = { moeda => 0 } unless ca.corretora.in? tc
-      tc[ca.corretora][moeda] += cap.valor_posicao
+      tc[ca.corretora][moeda] += cap.valor_posicao_em_brl
     end
 
     tc
@@ -97,7 +97,7 @@ class CarteiraPosicao
     carteira_ativos_posicoes.each do |cap|
       book = cap.carteira_ativo.book
       @porcentagem_por_book[book] = 0 unless book.in? @porcentagem_por_book
-      @porcentagem_por_book[book] += (cap.valor_posicao / total_geral) * 100
+      @porcentagem_por_book[book] += (cap.valor_posicao_em_brl / total_geral) * 100
     end
 
     @porcentagem_por_book
@@ -110,7 +110,7 @@ class CarteiraPosicao
     carteira_ativos_posicoes.each do |cap|
       book = cap.carteira_ativo.book
       @valor_por_book[book] = 0 unless book.in? @valor_por_book
-      @valor_por_book[book] += cap.valor_posicao
+      @valor_por_book[book] += cap.valor_posicao_em_brl
     end
 
     @valor_por_book

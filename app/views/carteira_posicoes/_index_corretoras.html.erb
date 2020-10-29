@@ -24,7 +24,7 @@
         <% ca = cap.carteira_ativo %>
         <tr>
           <td><%= link_to ca.nome_amigavel, carteira_carteira_posicao_path(@carteira, ca) %></td>
-          <td><%= display_moeda cap.valor_posicao %></td>
+          <td><%= display_moeda cap.valor_posicao, moeda: cap.ativo.moeda %></td>
           <td><%= display_numero cap.quantidade %></td>
         </tr>
       <% end %>

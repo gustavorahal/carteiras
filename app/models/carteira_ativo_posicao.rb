@@ -1,6 +1,6 @@
 class CarteiraAtivoPosicao
 
-  attr_reader :carteira_ativo, :cotacao
+  attr_reader :carteira_ativo, :cotacao, :ativo
 
   def initialize(carteira_ativo_ref, data, quantidade = nil)
     @carteira_ativo = if carteira_ativo_ref.is_a? CarteiraAtivo
@@ -27,25 +27,32 @@ class CarteiraAtivoPosicao
     end
   end
 
+  def preco_medio
+    sum_str = 'quantidade * valor_unit'
+    _preco_medio_sql(sum_str)
+  end
+
+  def preco_medio_em_brl
+    if @ativo.moeda == 'USD'
+      sum_str = 'quantidade * valor_unit * usdbrl'
+      _preco_medio_sql(sum_str)
+    else
+      preco_medio
+    end
+  end
+
   # Calcula preço médio de compra
-  # 
+  #
   # Q & A
   # -----
-  # 
+  #
   # 1. Porque pegar apenas operações de compra? não teria que incluir pequenas vendas desde a data
   # de montagem?
   #  R. se desejo auferir os ganhos, o fato de ter vendido por 12 quando paguei 10, por exemplo,
   #  não deveria aumentar o preço médio para 11. O preço médio de compra continuaria 10 enquanto
   #  referência para ganhos ou perdas de vendas futuras.
-  def preco_medio(moeda: 'BRL')
+  def _preco_medio_sql(sum_str)
     data_montagem_str = data_montagem.strftime '%F'
-
-    sum_str = if @carteira_ativo.ativo.moeda == 'USD' && moeda == 'BRL'
-                'quantidade * valor_unit * usdbrl'
-              else # não temos valor de BRL para USD
-                'quantidade * valor_unit'
-              end
-
     sql = <<~SQL
       select sum(#{sum_str})/sum(quantidade) as preco_medio
       from operacoes
@@ -67,34 +74,45 @@ class CarteiraAtivoPosicao
       .sum(:quantidade)
   end
 
-  def valor_investido(moeda: 'BRL')
-    if moeda == 'BRL'
-      @carteira_ativo
-        .operacoes
-        .where("operacoes.data::date <= '#{@data_str}'")
-        .sum('valor_unit * quantidade * usdbrl')
-    else # USD
-      # FIXME:
-      # não temos a cotacao brlusd armazenada a época para definir qual a cotação usar
-      @carteira_ativo
-        .operacoes
-        .where("operacoes.data::date <= '#{@data_str}'")
-        .sum('valor_unit * quantidade')
+  def valor_investido
+    @carteira_ativo
+      .operacoes
+      .where("operacoes.data::date <= '#{@data_str}'")
+      .sum('valor_unit * quantidade')
+  end
+
+  def valor_investido_em_brl
+    # sendo o ativo em BRL ou USD, a mesma conta se aplica visto que se
+    # ativo em BRL o 'usdbrl' terá 1 de valor.
+    @carteira_ativo
+      .operacoes
+      .where("operacoes.data::date <= '#{@data_str}'")
+      .sum('valor_unit * quantidade * usdbrl')
+  end
+
+  def valor_posicao
+    @cotacao.valor_unit * quantidade.to_f
+  end
+
+  def valor_posicao_em_brl
+    if @ativo.moeda == 'BRL'
+      valor_posicao
+    elsif @ativo.moeda == 'USD'
+      valor_unit_brl * quantidade.to_f
     end
   end
 
-  def valor_posicao(moeda: 'BRL')
-    valor_unit = valor_unit_na_moeda(moeda)
-    valor_unit * quantidade.to_f
-  end
-
   def rentabilidade
-    valor_unit = valor_unit_na_moeda
-    ((valor_unit / preco_medio) - 1) * 100
+    ((@cotacao.valor_unit / preco_medio) - 1) * 100
   end
 
-  def valor_unit_na_moeda(moeda = 'BRL')
-    CotacaoService.valor_unit_na_moeda(@ativo, @cotacao, @data, moeda)
+  def rentabilidade_em_brl
+    ((valor_unit_brl / preco_medio_em_brl) - 1) * 100
   end
+
+  def valor_unit_brl
+    @cotacao.valor_unit * CotacaoService.cotacao_usdbrl(@data).valor_unit
+  end
+
 
 end

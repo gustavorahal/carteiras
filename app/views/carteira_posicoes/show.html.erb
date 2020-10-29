@@ -6,14 +6,16 @@
   <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.valor_investido, moeda: ativo.moeda %></dd>
 
   <dt class="col-sm-3">Valor posição</dt>
-  <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.valor_posicao, moeda: ativo.moeda %>
-    (<%= display_porcentagem @carteira_ativo_posicao.rentabilidade, cores: true %>)</dd>
+  <dd class="col-sm-9">
+    <%= display_moeda @carteira_ativo_posicao.valor_posicao, moeda: ativo.moeda %>
+    (<%= display_rentabilidade @carteira_ativo_posicao %>)
+  </dd>
 
   <dt class="col-sm-3">Preço Médio</dt>
-  <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.preco_medio %></dd>
+  <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.preco_medio, moeda: ativo.moeda %></dd>
 
-  <dt class="col-sm-3">Última cotação</dt>
-  <dd class="col-sm-9"><%= display_moeda @carteira_ativo_posicao.valor_unit_na_moeda %> <small>(<%= display_data @carteira_ativo_posicao.cotacao.data %>)</small></dd>
+  <dt class="col-sm-3">Preço Atual</dt>
+  <dd class="col-sm-9"><%= display_preco_atual @carteira_ativo_posicao %></dd>
 
   <dt class="col-sm-3">Quantidade</dt>
   <dd class="col-sm-9"><%= @carteira_ativo_posicao.quantidade %></dd>

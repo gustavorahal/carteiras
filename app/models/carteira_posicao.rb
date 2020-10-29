@@ -83,7 +83,7 @@ class CarteiraPosicao
       moeda = cap.carteira_ativo.ativo.moeda
       ca = cap.carteira_ativo
       tc[ca.corretora] = { moeda => 0 } unless ca.corretora.in? tc
-      tc[ca.corretora][moeda] += cap.valor_posicao(moeda: moeda)
+      tc[ca.corretora][moeda] += cap.valor_posicao
     end
 
     tc
@@ -125,7 +125,7 @@ class CarteiraPosicao
 
     @total_ativos = 0
     carteira_ativos_posicoes.each do |cap|
-      @total_ativos += cap.valor_posicao
+      @total_ativos += cap.valor_posicao_em_brl
     end
 
     @total_ativos

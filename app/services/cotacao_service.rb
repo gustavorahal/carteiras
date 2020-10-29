@@ -44,16 +44,6 @@ class CotacaoService
     end
   end
 
-  def self.valor_unit_na_moeda(ativo, cotacao, data, moeda = 'BRL')
-    if moeda == ativo.moeda
-      cotacao.valor_unit
-    elsif moeda == 'BRL' # e ativo é USD
-      cotacao.valor_unit * cotacao_usdbrl(data).valor_unit
-    elsif moeda == 'USD' # e ativo é BRL
-      cotacao.valor_unit * cotacao_brlusd(data).valor_unit
-    end
-  end
-
   def self.busca_e_registra_tudo(data = Date.today)
     Ativo.all.each do |ativo|
       cotacao(ativo, data)

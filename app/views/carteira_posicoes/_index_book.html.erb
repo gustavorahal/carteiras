@@ -24,13 +24,13 @@
     <tr>
       <td><%= link_to cap.carteira_ativo.nome_amigavel, carteira_carteira_posicao_path(@carteira, cap.carteira_ativo) %>
         <small>desde <%= display_data cap.data_montagem %> </small></td>
-      <td><%= display_porcentagem cap.rentabilidade, cores: true %></td>
-      <td><%= display_moeda cap.valor_posicao, cores: true %>
+      <td><%= display_rentabilidade cap %></td>
+      <td><%= display_moeda cap.valor_posicao, moeda: cap.ativo.moeda, cores: true %>
         (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(cap.carteira_ativo) %>)
       </td>
       <td><%= display_numero cap.quantidade %></td>
-      <td><%= display_moeda cap.preco_medio %></td>
-      <td><%= display_moeda cap.valor_unit_na_moeda %> <small>(<%= display_data cap.cotacao.data %>)</small></td>
+      <td><%= display_moeda cap.preco_medio, moeda: cap.ativo.moeda %></td>
+      <td><%= display_preco_atual cap %></td>
     </tr>
   <% end %>
   </tbody>

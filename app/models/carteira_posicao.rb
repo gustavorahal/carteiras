@@ -149,12 +149,12 @@ class CarteiraPosicao
 
   def porcentagem_carteira_ativo(ca)
     cap = _busca_cap(ca)
-    cap ? (cap.valor_posicao / total_geral * 100) : 0
+    cap ? (cap.valor_posicao_em_brl / total_geral * 100) : 0
   end
 
   def valor_posicao_carteira_ativo(ca)
     cap = _busca_cap(ca)
-    cap ? cap.valor_posicao : 0
+    cap ? cap.valor_posicao_em_brl : 0
   end
 
   def valor_teorico_carteira_ativo(ca)

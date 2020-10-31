@@ -83,7 +83,7 @@ class CarteiraPosicao
       moeda = cap.carteira_ativo.ativo.moeda
       ca = cap.carteira_ativo
       tc[ca.corretora] = { moeda => 0 } unless ca.corretora.in? tc
-      tc[ca.corretora][moeda] += cap.valor_posicao_em_brl
+      tc[ca.corretora][moeda] += cap.valor_posicao
     end
 
     tc

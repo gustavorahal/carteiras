@@ -3,15 +3,11 @@ class ExtratosController < ApplicationController
   def import
     cc = ContaCorrente.find params[:conta_corrente_id]
     extrato_file = params[:file]
-    if cc.corretora.nome == 'XP'
-      begin
-        ImportaExtrato.extrato_xp(cc, extrato_file.path)
-        redirect_to conta_corrente_path(cc), notice: 'Extrato importado com sucesso'
-      rescue TypeError => e
-        redirect_to conta_corrente_path(cc), alert: e.message
-      end
-    else
-      redirect_to conta_corrente_path(cc), alert: 'Corretora não suportada'
+    begin
+      ImportaExtrato.importar(cc, extrato_file.path)
+      redirect_to conta_corrente_path(cc), notice: 'Extrato importado com sucesso'
+    rescue StandardError => e
+      redirect_to conta_corrente_path(cc), alert: e.message
     end
   end
 

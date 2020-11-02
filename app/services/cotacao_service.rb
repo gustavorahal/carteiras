@@ -5,29 +5,37 @@ class CotacaoService
   # param @ativo ActiceRecord Ativo
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}", expires_in: 3.seconds) do
-      cotacao = Cotacao.where(ativo_id: ativo.id, data: data).first
+      # Se estamos no horário do pregão, pegar cotação do dia anterior
+      # Só queremos armazenar a cotação de fechamento do dia
+      data_cotacao = if DateTime.now.hour < 19
+                       data - 1.day
+                     else
+                       data
+                     end
+
+      if data_cotacao.on_weekend?
+        data_cotacao = data.prev_weekday
+      end
+
+      cotacao = Cotacao.where(ativo_id: ativo.id, data: data_cotacao).first
       return cotacao if cotacao
 
       Rails.logger.debug "Buscando cotação para #{ativo.nome}"
-      begin
-        case ativo.tipo
-        when 'acao', 'fii'
-          return _busca_e_registra_acao(ativo, data)
-        when 'moeda'
-          return _busca_e_registra_moeda(ativo, data)
-        when 'criptomoeda'
-          return _busca_e_registra_moeda(ativo, data)
-        when 'tesouro'
-          return _busca_e_registra_tesouro(ativo)
-        when 'fundo'
-          # como não temos um jeito automatizado de buscar fundos
-          # retornar ultima cotação
-          return Cotacao.where(ativo_id: ativo.id).order(data: :desc).first
-        else
-          puts "invalido"
-        end
-      rescue => e
-        Rails.logger.error e.message
+      case ativo.tipo
+      when 'acao', 'fii'
+        return _busca_e_registra_acao(ativo, data_cotacao)
+      when 'moeda'
+        return _busca_e_registra_moeda(ativo, data_cotacao)
+      when 'criptomoeda'
+        return _busca_e_registra_moeda(ativo, data_cotacao)
+      when 'tesouro'
+        return _busca_e_registra_tesouro(ativo)
+      when 'fundo'
+        # como não temos um jeito automatizado de buscar fundos
+        # retornar ultima cotação
+        return Cotacao.where(ativo_id: ativo.id).order(data: :desc).first
+      else
+        raise StandardError, 'Tipo de ativo não suportado para busca de cotação'
       end
     end
   end
@@ -68,17 +76,13 @@ class CotacaoService
             end
     return if preco.nil?
 
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: Date.today)
+    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_tesouro(ativo)
     data, preco = BuscaCotacao.tesouro ativo.nome
-    # Para a aplicação, a cotação que importa é a ultima cotacao conhecida
-    # se no sábado a cotacao seria a da sexta, para efeitos práticos,
-    # a cotacao pode ser copiada para sábado. Assim, sempre considera a data
-    # de hoje mesmo que venha uma data de 1 ou 2 dias atrás
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: Date.today)
+    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
   # @return Cotacao ActiveRecord object
@@ -87,7 +91,7 @@ class CotacaoService
     ativo_str += '.SA' if ativo.moeda == 'BRL'
 
     preco = BuscaCotacao.acao(ativo_str, data).to_f
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: Date.today)
+    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
 end

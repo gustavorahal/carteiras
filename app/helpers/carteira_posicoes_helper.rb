@@ -13,9 +13,18 @@ module CarteiraPosicoesHelper
     cotacao = carteira_ativo_posicao.cotacao
     ativo = carteira_ativo_posicao.ativo
     html_str = display_moeda cotacao.valor_unit, moeda: ativo.moeda
-    html_str += "<small>(#{display_data cotacao.data})</small>".html_safe unless cotacao.data == Date.today
+    html_str += " <small>(#{display_data cotacao.data})</small>".html_safe unless cotacao.data == Date.today
 
     html_str
+  end
+
+  def display_preco_medio(carteira_ativo_posicao)
+    ativo = carteira_ativo_posicao.ativo
+    display_moeda carteira_ativo_posicao.preco_medio, moeda: ativo.moeda
+  end
+
+  def display_nome_ca(carteira_ativo_posicao)
+
   end
 
 end

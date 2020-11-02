@@ -16,8 +16,8 @@
             (<%= display_porcentagem @carteira_posicao.porcentagem_por_book[cap.carteira_ativo.book] %>) </h6>
         </td>
         <td><!-- Quantidade --></td>
+        <td>Preço</td>
         <td>Preço Médio</td>
-        <td>Preço Atual</td>
       </tr>
       <% book_atual = cap.carteira_ativo.book %>
     <% end %>
@@ -29,8 +29,8 @@
         (<%= display_porcentagem @carteira_posicao.porcentagem_carteira_ativo(cap.carteira_ativo) %>)
       </td>
       <td><%= display_numero cap.quantidade %></td>
-      <td><%= display_moeda cap.preco_medio, moeda: cap.ativo.moeda %></td>
       <td><%= display_preco_atual cap %></td>
+      <td><%= display_preco_medio cap %></td>
     </tr>
   <% end %>
   </tbody>

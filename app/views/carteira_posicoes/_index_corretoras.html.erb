@@ -4,28 +4,33 @@
     <th scope="col">Ativo</th>
     <th scope="col">Posição<br></th>
     <th scope="col">Quantidade<br></th>
+    <th scope="col">Preço<br></th>
+    <th scope="col">Preço Médio<br></th>
   </tr>
   </thead>
 
   <tbody>
   <% @carteira_posicao.carteira_ativos_posicoes_por_corretora.each do |corretora_nome, tipos|  %>
     <tr class="table-primary">
-      <td colspan="3">
+      <td colspan="5">
         <h6><%= corretora_nome %></h6>
       </td>
     </tr>
     <% tipos.each do |tipo, carteira_ativos_posicoes| %>
       <tr class="table-dark">
-        <td colspan="3">
+        <td colspan="5">
           <h6><%= tipo.upcase %></h6>
         </td>
       </tr>
       <% carteira_ativos_posicoes.each do |cap| %>
         <% ca = cap.carteira_ativo %>
+        <% ativo = cap.ativo %>
         <tr>
           <td><%= link_to ca.nome_amigavel, carteira_carteira_posicao_path(@carteira, ca) %></td>
-          <td><%= display_moeda cap.valor_posicao, moeda: cap.ativo.moeda %></td>
+          <td><%= display_moeda cap.valor_posicao, moeda: ativo.moeda %></td>
           <td><%= display_numero cap.quantidade %></td>
+          <td><%= display_preco_atual cap %></td>
+          <td><%= display_preco_medio cap %></td>
         </tr>
       <% end %>
     <% end %>

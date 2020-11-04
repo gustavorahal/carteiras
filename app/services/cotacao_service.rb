@@ -7,7 +7,9 @@ class CotacaoService
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}", expires_in: 3.seconds) do
       # Se estamos no horário do pregão, pegar cotação do dia anterior
       # Só queremos armazenar a cotação de fechamento do dia
-      data_cotacao = if DateTime.now.hour < 19
+      # Usar "zone" porque estou pensando em termos de hora do Brasil, que
+      # é o config do Rails também
+      data_cotacao = if Time.zone.now.hour < 19
                        data - 1.day
                      else
                        data

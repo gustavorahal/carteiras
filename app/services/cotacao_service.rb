@@ -113,7 +113,7 @@ class CotacaoService
         Rails.logger.debug("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
         return Cotacao.where(ativo_id: ativo.id).last
       end
-      data_efetiva -= 1.day
+      data_efetiva = _ajusta_data(data_efetiva - 1.day)
       preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
       Rails.logger.debug("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
       tentativas -= 1

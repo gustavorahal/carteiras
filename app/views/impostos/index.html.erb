@@ -1,0 +1,10 @@
+<%= render 'common/titulo_pagina', titulo: "Operações tributáveis em #{@data.year}" %>
+
+<br>
+<h4>Ações</h4>
+<%= render 'tabela_operacoes', tributacao: @tributacao_acoes %>
+<br>
+<h4>FII</h4>
+<%= render 'tabela_operacoes', tributacao: @tributacao_fii %>
+
+<small><em>Valor I.R.</em> se positivo é imposto a pagar. Se negativo é prejuizo, portanto, nada a pagar.</small>

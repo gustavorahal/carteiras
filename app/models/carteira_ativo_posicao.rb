@@ -57,7 +57,7 @@ class CarteiraAtivoPosicao
       select sum(#{sum_str})/sum(quantidade) as preco_medio
       from operacoes
       where carteira_ativo_id = #{@carteira_ativo.id} and 
-       operacao = 1 and 
+       operacao in (1,4) and 
        data::date >= '#{data_montagem_str}' and
        data::date <= '#{@data_str}'
     SQL

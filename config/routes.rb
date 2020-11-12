@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     resources :carteira_referencias
     resources :carteira_posicoes
     resources :operacoes
+    get 'impostos', action: :index, controller: 'impostos'
   end
 
 

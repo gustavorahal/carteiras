@@ -5,13 +5,19 @@ class Operacao < ApplicationRecord
   enum operacao: {
       C: 1,
       V: 2,
-      IR: 3
+      IR: 3,
+      S: 4
   }
 
   enum mon_ou_des: {
       M: 1,
       D: 2
   }
+
+  def valor_total_brl
+    quantidade_abs = quantidade.negative? ? quantidade * -1 : quantidade
+    valor_unit * quantidade_abs * usdbrl
+  end
 
   def self.operacoes_carteira(carteira_id)
     Operacao

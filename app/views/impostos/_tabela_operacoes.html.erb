@@ -1,0 +1,48 @@
+<% tributacao = local_assigns.fetch :tributacao, '' %>
+
+<table class="table table-striped table-sm">
+  <thead class="thead-dark">
+  <tr>
+    <th>Ativo</th>
+    <th>Preço médio</th>
+    <th>Preço venda</th>
+    <th>Quant. Vendida</th>
+    <th>C.O.</th>
+    <th>Valor Venda</th>
+    <th>Lucro Líquido</th>
+    <th>Imposto a pagar</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% tributacao.keys.each do |mes| %>
+    <tr>
+      <td colspan="8"><h5><%= I18n.l(Date.new(@data.year, mes), format: "%B") %></h5></td>
+    </tr>
+    <% tributacao[mes][:imposto_operacoes].each do |imp_oper| %>
+      <tr>
+        <td><%= imp_oper.ativo.nome %></td>
+        <td><%= display_moeda imp_oper.preco_medio_compra %>
+                  <small>(<%= display_data imp_oper.data_montagem %>)</small>
+        </td>
+        <td><%= display_moeda imp_oper.preco_venda %></td>
+        <td><%= imp_oper.quantidade_vendida %></td>
+        <td><%= display_moeda imp_oper.custos_operacionais %></td>
+        <td><%= display_moeda imp_oper.valor_venda %></td>
+        <td><%= display_moeda imp_oper.lucro_liquido %></td>
+        <td><%= display_moeda imp_oper.imposto_a_pagar %></td>
+      </tr>
+    <% end %>
+    <tr>
+      <td colspan="5"></td>
+      <td><strong><%= display_moeda tributacao[mes][:valor_venda] %></strong></td>
+      <td><strong><%= display_moeda tributacao[mes][:lucro_liquido], cores: true %></strong></td>
+      <td>
+        <strong><%= display_moeda tributacao[mes][:imposto_a_pagar], cores: true %></strong>
+              <small class="text-muted">no mês</small> <br>
+        <strong><%= display_moeda tributacao[mes][:imposto_a_pagar_acumulado], cores: true %></strong>
+              <small class="text-muted">acumulado</small>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

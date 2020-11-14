@@ -68,7 +68,7 @@ class CotacaoService
     # Só queremos armazenar a cotação de fechamento do dia
     # Usar "zone" porque estou pensando em termos de hora do Brasil, que
     # é o config do Rails também
-    data_ajustada = if Time.zone.now.hour < 19
+    data_ajustada = if data == Date.today && Time.zone.now.hour < 19
                       data_ajustada - 1.day
                     else
                       data_ajustada
@@ -120,7 +120,7 @@ class CotacaoService
     end
 
     # Como podemos ter escolhido uma data diferente da fornecida, ver se já não temos ela afinal
-    # antes de tentar criar
+    # antes de tentar criar uma nova entrada no banco
     Cotacao.find_or_create_by!(ativo_id: ativo.id, valor_unit: preco, data: data_efetiva)
   end
 

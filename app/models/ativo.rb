@@ -8,7 +8,8 @@ class Ativo < ApplicationRecord
       moeda: 3,
       fundo: 4,
       criptomoeda: 5,
-      tesouro: 6
+      tesouro: 6,
+      etf: 7
   }
 
   def nome_amigavel

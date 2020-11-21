@@ -38,11 +38,17 @@ class BuscaCotacao
     [data, preco]
   end
 
-  def self.usd_brl
-    api_host = 'currency-converter5.p.rapidapi.com'
-    url_usdbrl = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=USD&to=BRL&amount=1"
-    json_response = _fetch_rapidapi_json(url_usdbrl, api_host)
-    json_response['rates']['BRL']['rate'].to_f
+  # Fonte: https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios/resource/22ab054c-b3ff-4864-82f7-b2815c7a77ec?inner_span=True
+  def self.usd_brl(data = Date.today)
+    # formato de data esperado pela API: 11-19-2020 (MM-DD-AAAA)
+    data_str = data.strftime('%m-%d-%Y')
+    url = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='#{data_str}'&$top=100&$format=json"
+    uri = URI(url)
+    response = Net::HTTP.get(uri)
+    json_response = JSON.parse(response)
+    return nil if json_response['value'].empty?
+
+    json_response['value'][0]['cotacaoCompra'].to_f
   end
 
   def self.brl_usd

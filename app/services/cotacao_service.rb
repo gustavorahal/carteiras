@@ -1,7 +1,5 @@
 class CotacaoService
 
-
-
   # param @ativo ActiceRecord Ativo
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}", expires_in: 3.seconds) do
@@ -31,15 +29,11 @@ class CotacaoService
   end
 
   def self.cotacao_usdbrl(data)
-    Rails.cache.fetch("cotacao_usdbrl_#{data}", expires_in: 3.seconds) do
-      cotacao(Ativo.find_by_nome('CURRENCY:USDBRL'), data)
-    end
+    cotacao(Moedas.config.ativo_usdbrl, data)
   end
 
   def self.cotacao_brlusd(data)
-    Rails.cache.fetch("cotacao_brlusd_#{data}", expires_in: 3.seconds) do
-      cotacao(Ativo.find_by_nome('CURRENCY:BRLUSD'), data)
-    end
+    cotacao(Moedas.config.ativo_brlusd, data)
   end
 
   def self.busca_e_registra_tudo(data = Date.today)
@@ -79,11 +73,11 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = if ativo.nome == 'CURRENCY:BRLUSD'
+    preco = if ativo == Moedas.config.ativo_brlusd
               BuscaCotacao.brl_usd
-            elsif ativo.nome == 'CURRENCY:USDBRL'
-              BuscaCotacao.usd_brl
-            elsif ativo.nome == 'CURRENCY:BTCBRL'
+            elsif ativo == Moedas.config.ativo_usdbrl
+              BuscaCotacao.usd_brl(data)
+            elsif ativo == Moedas.config.ativo_btcbrl
               BuscaCotacao.btc_brl
             else
               nil

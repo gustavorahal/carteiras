@@ -20,4 +20,8 @@ class Ativo < ApplicationRecord
     end
   end
 
+  def usd?
+    moeda == 'USD'
+  end
+
 end

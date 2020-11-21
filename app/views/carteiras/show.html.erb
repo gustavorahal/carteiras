@@ -35,28 +35,6 @@
       </div>
     </div>
 
-
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">
-          Últimas operações <small>(<%= link_to 'ver todas', carteira_operacoes_path(carteira_id: @carteira.id) %>)
-          (<%= link_to 'nova', new_carteira_operacao_path(carteira_id: @carteira.id) %>)</small>
-        </h5>
-        <table class="table table-borderless table-sm">
-          <tbody>
-            <% @carteira_posicao.ultimas_operacoes.each do |operacao| %>
-              <tr>
-                <td><%= display_data operacao.data %></td>
-                <td><%= operacao.carteira_ativo.ativo.nome %> </td>
-                <td><%= operacao.operacao %></td>
-                <td><%= display_moeda operacao.quantidade * operacao.valor_unit * operacao.usdbrl, cores: true %></td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 </div>
 </div>

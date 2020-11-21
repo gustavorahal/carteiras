@@ -14,7 +14,7 @@
   <%= f.number_field :quantidade, step: :any %>
   <%= f.number_field :valor_unit, step: :any %>
   <%= f.number_field :usdbrl, default: 1,
-                     help: 'Caso a operação seja em dolar, usar valor de compra ou venda conforme operação',
+                     help: 'Não colocar nada aqui a não ser que saiba o que esta fazendo. O sistema irá atribuir o valor do dolar com base na data da operação',
                      step: :any %>
 
   <%= f.text_field :observacao %>

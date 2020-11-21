@@ -2,7 +2,7 @@ class CotacaoService
 
   # param @ativo ActiceRecord Ativo
   def self.cotacao(ativo, data)
-    Rails.cache.fetch("cotacao_ativo_#{ativo.id}", expires_in: 3.seconds) do
+    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
       data_cotacao = _ajusta_data(data)
 
       cotacao = Cotacao.where(ativo_id: ativo.id, data: data_cotacao).first

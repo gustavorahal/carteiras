@@ -143,10 +143,6 @@ class CarteiraPosicao
     (total_geral / total_investido - 1) * 100
   end
 
-  def ultimas_operacoes
-    Operacao.operacoes_carteira(@carteira.id).limit(5)
-  end
-
   def porcentagem_carteira_ativo(ca)
     cap = _busca_cap(ca)
     cap ? (cap.valor_posicao_em_brl / total_geral * 100) : 0

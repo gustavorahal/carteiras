@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_16_234007) do
+ActiveRecord::Schema.define(version: 2020_11_21_212526) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -108,7 +108,11 @@ ActiveRecord::Schema.define(version: 2020_10_16_234007) do
     t.bigint "carteira_ativo_id", null: false
     t.bigint "corretora_id", null: false
     t.string "observacao"
+    t.bigint "ativo_id"
+    t.bigint "carteira_id"
+    t.index ["ativo_id"], name: "index_operacoes_on_ativo_id"
     t.index ["carteira_ativo_id"], name: "index_operacoes_on_carteira_ativos_id"
+    t.index ["carteira_id"], name: "index_operacoes_on_carteira_id"
   end
 
   add_foreign_key "carteira_ativos", "ativos"
@@ -117,6 +121,8 @@ ActiveRecord::Schema.define(version: 2020_10_16_234007) do
   add_foreign_key "carteiras", "investidores"
   add_foreign_key "cotacoes", "ativos"
   add_foreign_key "extratos", "conta_correntes"
+  add_foreign_key "operacoes", "ativos"
   add_foreign_key "operacoes", "carteira_ativos"
+  add_foreign_key "operacoes", "carteiras"
   add_foreign_key "operacoes", "corretoras", name: "operacoes_corretoras_id_fk"
 end

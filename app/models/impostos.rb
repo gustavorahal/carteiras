@@ -71,8 +71,8 @@ class Impostos
 
     comeco_mes = Date.new(ano, mes).beginning_of_month
     fim_mes = Date.new(ano, mes).end_of_month
-    Operacao.operacoes_carteira(carteira.id)
-        .where(data: comeco_mes..fim_mes,
+    carteira.operacoes.includes(:ativo)
+            .where(data: comeco_mes..fim_mes,
                operacao: 'V',
                'ativos.tipo': (tipos.map { |tipo| Ativo.tipos[tipo] }),
                'ativos.moeda': moeda)
@@ -97,8 +97,10 @@ class ImpostoOperacao
 
   def initialize(operacao)
     @operacao = operacao
+    @carteira = operacao.carteira
     @carteira_ativo = operacao.carteira_ativo
-    @ativo = operacao.carteira_ativo.ativo
+    @ativo = operacao.ativo
+    @usdbrl_valor = CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
 
     raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(%w[acao fii])
 
@@ -109,10 +111,10 @@ class ImpostoOperacao
   end
 
   def custos_operacionais
-    Operacao
-      .where(carteira_ativo_id: @carteira_ativo.id)
-      .where(data: @data_inicio..@data_fim)
-      .sum('(co_taxa + co_emolumentos + co_corretagem + co_iss_iof + co_irrf + co_outros) * usdbrl')
+    @carteira.operacoes
+             .where(ativo_id: @ativo.id)
+             .where(data: @data_inicio..@data_fim)
+             .sum('(co_taxa + co_emolumentos + co_corretagem + co_iss_iof + co_irrf + co_outros) * usdbrl')
   end
 
   def quantidade_vendida
@@ -128,11 +130,19 @@ class ImpostoOperacao
   end
 
   def valor_venda
-    @operacao.valor_total_brl
+    if @ativo.usd?
+      @operacao.valor_unit * quantidade_vendida * @usdbrl_valor
+    else
+      @operacao.valor_unit * quantidade_vendida
+    end
   end
 
   def preco_venda
-    @operacao.valor_unit * @operacao.usdbrl
+    if @ativo.usd?
+      @operacao.valor_unit * @usdbrl_valor
+    else
+      @operacao.valor_unit
+    end
   end
 
   def lucro_bruto

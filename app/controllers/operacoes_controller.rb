@@ -2,7 +2,7 @@ class OperacoesController < ApplicationController
 
   def index
     @carteira = Carteira.find params[:carteira_id]
-    @operacoes = Operacao.operacoes_carteira(params[:carteira_id])
+    @operacoes = @carteira.operacoes
   end
 
   def new
@@ -14,6 +14,11 @@ class OperacoesController < ApplicationController
   def create
     @operacao = Operacao.new secure_params
     @operacao.corretora_id = @operacao.carteira_ativo.corretora_id
+    @operacao.usdbrl = if @operacao.ativo.usd?
+                         CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
+                       else
+                         1
+                       end
 
     if @operacao.save
       redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]

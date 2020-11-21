@@ -14,6 +14,8 @@ class OperacoesController < ApplicationController
   def create
     @operacao = Operacao.new secure_params
     @operacao.corretora_id = @operacao.carteira_ativo.corretora_id
+    @operacao.ativo_id = @operacao.carteira_ativo.ativo_id
+    @operacao.carteira_id = @operacao.carteira_ativo.carteira_id
     @operacao.usdbrl = if @operacao.ativo.usd?
                          CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
                        else

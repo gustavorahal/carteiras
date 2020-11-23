@@ -2,7 +2,7 @@
 # Posição da Carteira em relação a Referência que segue
 class CarteiraAtivosReferencia
   def initialize(carteira_posicao)
-    raise TypeError unless carteira_posicao.is_a? CarteiraPosicao
+    raise TypeError unless carteira_posicao.is_a? CarteiraAtivos
 
     @carteira_ativos = carteira_posicao # Objeto CarteiraPosicao
     @carteira = carteira_posicao.carteira

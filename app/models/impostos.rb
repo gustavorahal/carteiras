@@ -71,7 +71,7 @@ class Impostos
 
     comeco_mes = Date.new(ano, mes).beginning_of_month
     fim_mes = Date.new(ano, mes).end_of_month
-    carteira.operacoes.includes(:ativo)
+    carteira.operacoes
             .where(data: comeco_mes..fim_mes,
                operacao: 'V',
                'ativos.tipo': (tipos.map { |tipo| Ativo.tipos[tipo] }),
@@ -98,13 +98,12 @@ class ImpostoOperacao
   def initialize(operacao)
     @operacao = operacao
     @carteira = operacao.carteira
-    @carteira_ativo = operacao.carteira_ativo
     @ativo = operacao.ativo
     @usdbrl_valor = CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
 
     raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(%w[acao fii])
 
-    @cap = AtivoPosicao.new(@carteira_ativo, operacao.data)
+    @cap = AtivoPosicao.new(@carteira, @ativo, operacao.data)
     @data_inicio = @cap.data_montagem
     @data_fim = operacao.data
 

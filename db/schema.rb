@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_22_144507) do
+ActiveRecord::Schema.define(version: 2020_11_23_215203) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,19 +23,6 @@ ActiveRecord::Schema.define(version: 2020_11_22_144507) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "descricao"
     t.index ["nome"], name: "ativos_nome_uindex", unique: true
-  end
-
-  create_table "carteira_ativos", force: :cascade do |t|
-    t.bigint "carteira_id", null: false
-    t.bigint "ativo_id", null: false
-    t.string "book"
-    t.float "porcentagem"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.bigint "corretora_id", null: false
-    t.index ["ativo_id", "carteira_id", "corretora_id"], name: "index_ca_on_ativo_id_and_carteira_id_and_corretora_id", unique: true
-    t.index ["ativo_id"], name: "index_carteira_ativos_on_ativo_id"
-    t.index ["carteira_id"], name: "index_carteira_ativos_on_carteira_id"
   end
 
   create_table "carteiras", force: :cascade do |t|
@@ -107,13 +94,11 @@ ActiveRecord::Schema.define(version: 2020_11_22_144507) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.float "usdbrl", default: 1.0
-    t.bigint "carteira_ativo_id", null: false
     t.bigint "corretora_id", null: false
     t.string "observacao"
     t.bigint "ativo_id"
     t.bigint "carteira_id"
     t.index ["ativo_id"], name: "index_operacoes_on_ativo_id"
-    t.index ["carteira_ativo_id"], name: "index_operacoes_on_carteira_ativos_id"
     t.index ["carteira_id"], name: "index_operacoes_on_carteira_id"
   end
 
@@ -138,15 +123,11 @@ ActiveRecord::Schema.define(version: 2020_11_22_144507) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  add_foreign_key "carteira_ativos", "ativos"
-  add_foreign_key "carteira_ativos", "carteiras"
-  add_foreign_key "carteira_ativos", "corretoras", name: "carteira_ativos_corretoras_id_fk"
   add_foreign_key "carteiras", "investidores"
   add_foreign_key "carteiras", "referencias"
   add_foreign_key "cotacoes", "ativos"
   add_foreign_key "extratos", "conta_correntes"
   add_foreign_key "operacoes", "ativos"
-  add_foreign_key "operacoes", "carteira_ativos"
   add_foreign_key "operacoes", "carteiras"
   add_foreign_key "operacoes", "corretoras", name: "operacoes_corretoras_id_fk"
   add_foreign_key "referencia_ativos", "ativos"

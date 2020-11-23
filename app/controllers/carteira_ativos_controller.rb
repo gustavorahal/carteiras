@@ -19,7 +19,7 @@ class CarteiraAtivosController < ApplicationController
 
   def set_vars
     @carteira = Carteira.find params[:carteira_id]
-    @carteira_ativos = CarteiraPosicao.new(@carteira, @data)
+    @carteira_ativos = CarteiraAtivos.new(@carteira, @data)
     @carteira_ativos_referencia = CarteiraAtivosReferencia.new(@carteira_ativos)
     @porcentagens_por_book_carteira = @carteira_ativos_referencia.porcentagens_por_book
     @valor_por_book_carteira = @carteira_ativos_referencia.valor_por_book

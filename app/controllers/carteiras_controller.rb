@@ -7,7 +7,7 @@ class CarteirasController < ApplicationController
   def show
     @carteira = Carteira.find params[:id]
     @contas_correntes = ContaCorrente.includes(:corretora).where(investidor_id: @carteira.investidor.id)
-    @carteira_ativos = CarteiraPosicao.new(@carteira, @data)
+    @carteira_ativos = CarteiraAtivos.new(@carteira, @data)
   end
 
 end

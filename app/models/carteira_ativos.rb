@@ -1,6 +1,6 @@
 
 # Posição da Carteira em determinada data. Quais ativos e qual a posicao deles
-class CarteiraPosicao
+class CarteiraAtivos
 
   attr_reader :carteira
 

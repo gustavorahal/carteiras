@@ -26,19 +26,18 @@
     <tr>
       <td><%= display_data oper.data %></td>
       <% if mostra_nome  %>
-        <td><%= link_to oper.carteira_ativo.ativo.nome_amigavel,
-                        carteira_carteira_posicao_path(oper.carteira_ativo.carteira.id,
-                                                     oper.carteira_ativo.id) %></td>
+        <td><%= link_to oper.ativo.nome_amigavel,
+                        carteira_ativo_path(oper.carteira, oper.ativo) %></td>
       <% end %>
       <td><%= oper.corretora.nome %></td>
       <td><%= oper.operacao.capitalize %></td>
       <td><%= oper.mon_ou_des %></td>
       <td><%= oper.quantidade %></td>
-      <td><%= display_moeda oper.valor_unit, moeda: oper.carteira_ativo.ativo.moeda %></td>
-      <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.carteira_ativo.ativo.moeda, cores: true %></td>
+      <td><%= display_moeda oper.valor_unit, moeda: oper.ativo.moeda %></td>
+      <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.ativo.moeda, cores: true %></td>
       <td><%= display_moeda oper.usdbrl %></td>
       <td><small><%= oper.observacao.nil? ? oper.observacao : oper.observacao.html_safe %></small></td>
-      <td><%= display_moeda oper.custos_operacionais, moeda: oper.carteira_ativo.ativo.moeda %></td>
+      <td><%= display_moeda oper.custos_operacionais, moeda: oper.ativo.moeda %></td>
       <td><%= link_to 'Editar', edit_carteira_operacao_path(params[:carteira_id], oper) %></td>
     </tr>
   <% end %>

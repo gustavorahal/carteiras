@@ -1,0 +1,77 @@
+
+<div class="card">
+  <div class="card-body">
+    <table class="table table-borderless table-sm">
+      <h5 class="card-title">Composição</h5>
+      <tr><td></td><td><strong>Posição</strong></td><td><strong>Referência</strong></td></tr>
+      <% @porcentagens_por_book_ref.each do |book, porcentagem_ref| %>
+        <tr>
+          <td><%= book %></td>
+          <td><%= display_porcentagem @porcentagens_por_book_carteira[book] %></td>
+          <td><%= display_porcentagem porcentagem_ref %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <table class="table table-striped table-sm">
+    <thead class="thead-dark">
+    <tr>
+      <th scope="col">Ativo</th>
+      <th scope="col">Posição</th>
+      <th scope="col">Referência</th>
+      <th scope="col">Diff valor</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <% @referencia_ativos_por_book.each do |book, ativos| %>
+      <tr class="table-primary">
+        <td>
+          <h6><%= book %></h6>
+        </td>
+        <td>
+          <h6><%= display_porcentagem @porcentagens_por_book_carteira[book] %></h6>
+        </td>
+        <td>
+          <h6><%= display_porcentagem @porcentagens_por_book_ref[book] %></h6>
+        </td>
+        <td></td>
+      </tr>
+      <% ativos.each do |ativo| %>
+        <% if @carteira_lista_de_ativos.include?(ativo) %>
+          <% span_class = 'font-weight-bold' %>
+          <% @carteira_ativos_restante.delete ativo %>
+        <% else %>
+          <% span_class = 'font-weight-light' %>
+        <% end %>
+        <tr>
+          <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
+          <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
+          <td><span class="<%= span_class %>"><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></span></td>
+          <td><span class="<%= span_class %>"><%= display_moeda(@carteira_ativos.valor_ativo(ativo) - @carteira_ativos_referencia.valor_teorico(ativo), cores: true) %></span></td>
+        </tr>
+      <% end %>
+    <% end %>
+
+    <!-- Ativos que não estão na referencia -->
+    <tr class="table-primary">
+      <td><h6>SEM REFERÊNCIA</h6></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <% span_class = 'font-weight-light' %>
+    <% @carteira_ativos_restante.each do |ativo| %>
+      <tr>
+        <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
+        <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
+        <td></td>
+        <td></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

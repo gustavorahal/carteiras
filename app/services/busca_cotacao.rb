@@ -43,6 +43,7 @@ class BuscaCotacao
     # formato de data esperado pela API: 11-19-2020 (MM-DD-AAAA)
     data_str = data.strftime('%m-%d-%Y')
     url = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='#{data_str}'&$top=100&$format=json"
+    Rails.logger.debug "Buscando cotacao USDBRL em #{url}"
     uri = URI(url)
     response = Net::HTTP.get(uri)
     json_response = JSON.parse(response)

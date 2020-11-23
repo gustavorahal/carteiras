@@ -1,5 +1,4 @@
 class Ativo < ApplicationRecord
-  has_many :carteira_ativos
   has_many :cotacoes
 
   enum tipo: {

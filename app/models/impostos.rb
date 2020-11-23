@@ -104,7 +104,7 @@ class ImpostoOperacao
 
     raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(%w[acao fii])
 
-    @cap = CarteiraAtivoPosicao.new(@carteira_ativo, operacao.data)
+    @cap = AtivoPosicao.new(@carteira_ativo, operacao.data)
     @data_inicio = @cap.data_montagem
     @data_fim = operacao.data
 

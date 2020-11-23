@@ -1,21 +1,17 @@
 class OperacoesController < ApplicationController
 
+  before_action :set_vars, only: [:index, :new, :create, :edit]
+
   def index
-    @carteira = Carteira.find params[:carteira_id]
     @operacoes = @carteira.operacoes
   end
 
   def new
-    @carteira = Carteira.find params[:carteira_id]
     @operacao = Operacao.new
-    @carteira_ativos = @carteira.carteira_ativos_todos
   end
 
   def create
     @operacao = Operacao.new secure_params
-    @operacao.corretora_id = @operacao.carteira_ativo.corretora_id
-    @operacao.ativo_id = @operacao.carteira_ativo.ativo_id
-    @operacao.carteira_id = @operacao.carteira_ativo.carteira_id
     @operacao.usdbrl = if @operacao.ativo.usd?
                          CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
                        else
@@ -30,10 +26,7 @@ class OperacoesController < ApplicationController
   end
 
   def edit
-    @carteira = Carteira.find params[:carteira_id]
     @operacao = Operacao.find params[:id]
-    # pego todos os ativos porque posso estar editando operações de ativos não mais válidos
-    @carteira_ativos = @carteira.carteira_ativos_todos
   end
 
   def update
@@ -48,8 +41,14 @@ class OperacoesController < ApplicationController
 
   private
 
+  def set_vars
+    @carteira = Carteira.find params[:carteira_id]
+    @ativos = Ativo.all.order(:nome)
+    @corretoras = Corretora.all.order(:nome)
+  end
+
   def secure_params
-    params.require(:operacao).permit(:carteira_ativo_id, :mon_ou_des,
+    params.require(:operacao).permit(:ativo_id, :corretora_id, :carteira_id, :mon_ou_des,
                                      :data, :valor_unit, :quantidade,
                                      :operacao, :usdbrl, :observacao, :co_corretagem, :co_taxa,
                                      :co_emolumentos, :co_iss_iof, :co_irrf, :co_outros)

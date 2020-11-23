@@ -1,0 +1,34 @@
+<h4><%= @ativo.nome_amigavel %> em <%= display_data @data %> (ver <%= link_to 'histórico cotações', ativo_cotacoes_path(@ativo) %>)</h4>
+
+<dl class="row">
+  <dt class="col-sm-3">Investido</dt>
+  <dd class="col-sm-9"><%= display_moeda @ativo_posicao.valor_investido, moeda: @ativo.moeda %></dd>
+
+  <dt class="col-sm-3">Valor posição</dt>
+  <dd class="col-sm-9">
+    <%= display_moeda @ativo_posicao.valor, moeda: @ativo.moeda %>
+    (<%= display_rentabilidade @ativo_posicao %>)
+  </dd>
+
+  <dt class="col-sm-3">Preço Médio</dt>
+  <dd class="col-sm-9"><%= display_moeda @ativo_posicao.preco_medio, moeda: @ativo.moeda %></dd>
+
+  <dt class="col-sm-3">Preço Atual</dt>
+  <dd class="col-sm-9"><%= display_preco_atual @ativo_posicao %></dd>
+
+  <dt class="col-sm-3">Quantidade</dt>
+  <dd class="col-sm-9"><%= @ativo_posicao.quantidade %></dd>
+
+  <dt class="col-sm-3">Porcentagem na carteira</dt>
+  <dd class="col-sm-9"><%= display_porcentagem @carteira_ativos.porcentagem_ativo @ativo %></dd>
+
+  <dt class="col-sm-3">Porcentagem teórica</dt>
+  <dd class="col-sm-9"><%= display_porcentagem @carteira.referencia.porcentagem(@ativo) %></dd>
+</dl>
+
+<br>
+<% operacoes = @ativo_posicao.operacoes  %>
+<h5>Operações (<%= link_to 'registrar operação', new_carteira_operacao_path(@carteira) %>)</h5>
+<%= render 'common/operacoes_table',
+           operacoes: operacoes,
+           mostra_nome: false %>

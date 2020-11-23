@@ -1,14 +1,19 @@
-class CarteiraAtivoPosicao
+class AtivoPosicao
 
-  attr_reader :carteira_ativo, :cotacao, :ativo
+  attr_reader :cotacao, :ativo
 
-  def initialize(carteira_ativo_ref, data, quantidade = nil)
-    @carteira_ativo = if carteira_ativo_ref.is_a? CarteiraAtivo
-                        carteira_ativo_ref
-                      else # passei um ID
-                        CarteiraAtivo.includes(:corretora, ativo: :cotacoes).find(carteira_ativo_ref)
-                      end
-    @ativo = @carteira_ativo.ativo
+  def initialize(carteira_ref, ativo_ref, data, quantidade = nil)
+    @carteira = if carteira_ref.is_a? Carteira
+                  carteira_ref
+                else # passei um ID
+                  Carteira.find(carteira_ref)
+                end
+    @ativo = if ativo_ref.is_a? Ativo
+               ativo_ref
+             else # passei um ID
+               Ativo.find(ativo_ref)
+             end
+    @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id)
     @data = data
     @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
@@ -16,13 +21,23 @@ class CarteiraAtivoPosicao
     raise StandardError, "Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end
 
+  # Em termos de layout de banco, cada operação acontece em determinada corretora
+  # Entretanto, na pratica, todas operações acabam acontecendo em uma corretora somente
+  # portanto é possível dizer que um ativo de determinada carteira esta em determinada
+  # corretora
+  def corretora
+    @operacoes_ativo.take.corretora
+  end
+
+  def operacoes
+    @operacoes_ativo
+  end
+
   def data_montagem
-    Rails.cache.fetch("data_montagem_ca_id-#{@carteira_ativo.id}", expires_in: 5.seconds) do
-      @carteira_ativo
-        .operacoes
+    Rails.cache.fetch("data_montagem_carteira_id-#{@carteira.id}_ativo_id-#{@ativo.id}", expires_in: 5.seconds) do
+      @operacoes_ativo
         .where(mon_ou_des: 1)
         .where("operacoes.data::date <= '#{@data_str}'")
-        .order(data: :desc)
         .limit(1)[0].data
     end
   end
@@ -54,11 +69,13 @@ class CarteiraAtivoPosicao
   def _preco_medio_sql(sum_str)
     data_montagem_str = data_montagem.strftime '%F'
     sql = <<~SQL
-      select sum(#{sum_str})/sum(quantidade) as preco_medio
-      from operacoes
-      where carteira_ativo_id = #{@carteira_ativo.id} and 
-       operacao in (1,4) and 
-       data::date >= '#{data_montagem_str}' and
+      SELECT sum(#{sum_str})/sum(quantidade) AS preco_medio
+      FROM operacoes
+      WHERE 
+       carteira_id = #{@carteira.id} AND 
+       ativo_id = #{@ativo.id} AND  
+       operacao IN (1,4) AND 
+       data::date >= '#{data_montagem_str}' AND
        data::date <= '#{@data_str}'
     SQL
 
@@ -68,15 +85,13 @@ class CarteiraAtivoPosicao
   def quantidade
     return @quantidade unless @quantidade.nil?
 
-    @carteira_ativo
-      .operacoes
+    @operacoes_ativo
       .where("operacoes.data::date <= '#{@data_str}'")
       .sum(:quantidade)
   end
 
   def valor_investido
-    @carteira_ativo
-      .operacoes
+    @operacoes_ativo
       .where("operacoes.data::date <= '#{@data_str}'")
       .sum('valor_unit * quantidade')
   end
@@ -84,19 +99,18 @@ class CarteiraAtivoPosicao
   def valor_investido_em_brl
     # sendo o ativo em BRL ou USD, a mesma conta se aplica visto que se
     # ativo em BRL o 'usdbrl' terá 1 de valor.
-    @carteira_ativo
-      .operacoes
+    @operacoes_ativo
       .where("operacoes.data::date <= '#{@data_str}'")
       .sum('valor_unit * quantidade * usdbrl')
   end
 
-  def valor_posicao
+  def valor
     @cotacao.valor_unit * quantidade.to_f
   end
 
-  def valor_posicao_em_brl
+  def valor_em_brl
     if @ativo.moeda == 'BRL'
-      valor_posicao
+      valor
     elsif @ativo.moeda == 'USD'
       valor_unit_brl * quantidade.to_f
     end

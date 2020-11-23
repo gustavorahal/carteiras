@@ -12,12 +12,15 @@ Rails.application.routes.draw do
     end
   end
   resources :investidores
+
   resources :carteiras do
-    resources :carteira_referencias
-    resources :carteira_posicoes
     resources :operacoes
-    get 'impostos', action: :index, controller: 'impostos'
+    get 'impostos', to: 'impostos#index'
   end
 
+  get '/carteira_ativos/:carteira_id/ativos', to: 'carteira_ativos#index', as: 'carteira_ativos'
+  get '/carteira_ativos/:carteira_id/ativos/:ativo_id', to: 'carteira_ativos#show', as: 'carteira_ativo'
+
+  resources :referencias
 
 end

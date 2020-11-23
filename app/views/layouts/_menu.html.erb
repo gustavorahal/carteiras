@@ -18,8 +18,8 @@
             Posição
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="<%= carteira_carteira_posicoes_path(@carteira, view: 'book') %>">Por book</a>
-            <a class="dropdown-item" href="<%= carteira_carteira_posicoes_path(@carteira, view: 'corretoras') %>">Por corretoras</a>
+            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'book') %>">Por book</a>
+            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'corretoras') %>">Por corretoras</a>
           </div>
         </li>
 
@@ -28,8 +28,8 @@
             Referência
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="<%= carteira_carteira_referencias_path(@carteira, view: 'ref') %>">Referência</a>
-            <a class="dropdown-item" href="<%= carteira_carteira_referencias_path(@carteira, view: 'atual_vs_ref') %>">Atual vs. Referência</a>
+            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'ref') %>">Referência</a>
+            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'atual_vs_ref') %>">Atual vs. Referência</a>
           </div>
         </li>
 

@@ -1,5 +1,4 @@
 class Operacao < ApplicationRecord
-  belongs_to :carteira_ativo
   belongs_to :corretora
   belongs_to :ativo
   belongs_to :carteira

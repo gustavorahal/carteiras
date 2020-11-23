@@ -5,7 +5,7 @@ class CotacaoService
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
       data_cotacao = _ajusta_data(data)
 
-      cotacao = Cotacao.where(ativo_id: ativo.id, data: data_cotacao).first
+      cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       return cotacao if cotacao
 
       Rails.logger.debug "Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
@@ -50,25 +50,23 @@ class CotacaoService
   # @return Objeto data, considerando fatores como final de semana,
   # feriado e fechamento de pregão
   def self._ajusta_data(data)
-
-    data_ajustada = data
-    # Considerar finais de semana
-    data_ajustada = data_ajustada.prev_weekday if data_ajustada.on_weekend?
-
-    # E feriados
-    data_ajustada = data_ajustada.prev_weekday if Holidays.on(data_ajustada, :br).present?
-
     # Se estamos no horário do pregão, pegar cotação do dia anterior
     # Só queremos armazenar a cotação de fechamento do dia
     # Usar "zone" porque estou pensando em termos de hora do Brasil, que
     # é o config do Rails também
-    data_ajustada = if data == Date.today && Time.zone.now.hour < 19
-                      data_ajustada - 1.day
+    data_ajustada = if data == Date.today && _dia_util?(data) && Time.zone.now.hour < 19
+                      data - 1.day
                     else
-                      data_ajustada
+                      data
                     end
 
+    data_ajustada -= 1.day until _dia_util?(data_ajustada)
+
     data_ajustada
+  end
+
+  def self._dia_util?(data)
+    !data.on_weekend? && !Holidays.on(data, :br).present?
   end
 
   # @return Cotacao ActiveRecord object

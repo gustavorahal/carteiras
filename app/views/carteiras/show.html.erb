@@ -4,13 +4,13 @@
   <div class="card-group">
     <div class="card">
       <div class="card-body">
-        <h3><%= display_moeda @carteira_posicao.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
-        <small class="text-muted"><%= display_porcentagem @carteira_posicao.rentabilidade, cores: true %> dos
-          <%= display_moeda @carteira_posicao.total_investido %> investidos</small>
+        <h3><%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
+        <small class="text-muted"><%= display_porcentagem @carteira_ativos.rentabilidade, cores: true %> dos
+          <%= display_moeda @carteira_ativos.total_investido %> investidos</small>
         <br>
         <br>
-        <h5><%= display_moeda @carteira_posicao.total_ativos %><small class="text-muted"> em ativos</small></h5>
-        <% @carteira_posicao.total_ativos_por_corretora.each do |corretora, moeda_total| %>
+        <h5><%= display_moeda @carteira_ativos.total_ativos %><small class="text-muted"> em ativos</small></h5>
+        <% @carteira_ativos.total_ativos_por_corretora.each do |corretora, moeda_total| %>
             <% moeda_total.each do |moeda, total| %>
               <span class="font-weight-lighter">
                 <%= display_moeda total, moeda: moeda %> <small class="text-muted"><%= corretora.nome %></small>
@@ -19,7 +19,7 @@
           <br>
         <% end %>
         <br>
-        <h5><%= display_moeda @carteira_posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
+        <h5><%= display_moeda @carteira_ativos.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
         <% @contas_correntes.each do |cc| %>
             <% saldo = cc.saldo(@data)  %>
             <% next if saldo == 0  %>

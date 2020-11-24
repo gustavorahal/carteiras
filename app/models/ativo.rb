@@ -1,5 +1,6 @@
 class Ativo < ApplicationRecord
   has_many :cotacoes
+  has_many :referencia_ativos
 
   enum tipo: {
       acao: 1,

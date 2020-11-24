@@ -21,6 +21,8 @@ Rails.application.routes.draw do
   get '/carteira_ativos/:carteira_id/ativos', to: 'carteira_ativos#index', as: 'carteira_ativos'
   get '/carteira_ativos/:carteira_id/ativos/:ativo_id', to: 'carteira_ativos#show', as: 'carteira_ativo'
 
-  resources :referencias
+  resources :referencias do
+    resources :referencia_ativos
+  end
 
 end

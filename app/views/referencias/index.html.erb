@@ -1,4 +1,3 @@
-<%= render 'common/btn_new',
-           url: new_carteira_carteira_referencia_path(@carteira, @carteira_ativo),
-           label: 'Novo ativo' %>
-
+<% @referencias.each do |referencia| %>
+  <h4><%= link_to referencia.nome, referencia_path(referencia) %></h4>
+<% end %>

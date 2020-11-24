@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_23_215203) do
+ActiveRecord::Schema.define(version: 2020_11_24_001111) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -112,7 +112,6 @@ ActiveRecord::Schema.define(version: 2020_11_23_215203) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["ativo_id"], name: "index_referencia_ativos_on_ativo_id"
-    t.index ["referencia_id", "ativo_id"], name: "index_referencia_ativos_on_referencia_id_and_ativo_id", unique: true
     t.index ["referencia_id"], name: "index_referencia_ativos_on_referencia_id"
   end
 

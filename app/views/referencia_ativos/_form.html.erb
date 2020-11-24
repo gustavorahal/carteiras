@@ -1,0 +1,27 @@
+<%= bootstrap_form_for [@referencia, @referencia_ativo], layout: :horizontal do |f| %>
+
+  <% if @referencia_ativo.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @referencia_ativo.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= f.hidden_field :referencia_id, value: @referencia.id %>
+
+  <% if @ativos.nil? %> <!-- Estamos editando -->
+    <%= hidden_field_tag :ativo_id, @referencia_ativo.ativo.id %>
+    <%= f.static_control nil, label: 'Ativo', value: @referencia_ativo.ativo.nome_amigavel %>
+  <% else %>
+    <%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel %>
+  <% end %>
+  <%= f.text_field :book %>
+  <%= f.number_field :porcentagem, step: :any %>
+  <%= f.date_select :data_entrada %>
+  <%= f.date_select :data_saida, include_blank: true %>
+
+  <%= f.form_group do %>
+    <%= f.submit 'Salvar' %>
+    <%= link_to 'Cancelar', :back, class: 'btn btn-link' %>
+  <% end %>
+
+<% end %>

@@ -52,9 +52,7 @@ class CotacaoService
   def self._ajusta_data(data)
     # Se estamos no horário do pregão, pegar cotação do dia anterior
     # Só queremos armazenar a cotação de fechamento do dia
-    # Usar "zone" porque estou pensando em termos de hora do Brasil, que
-    # é o config do Rails também
-    data_ajustada = if data == Date.today && _dia_util?(data) && Time.zone.now.hour < 19
+    data_ajustada = if data == Date.today && _dia_util?(data) && Time.now.hour < 22
                       data - 1.day
                     else
                       data

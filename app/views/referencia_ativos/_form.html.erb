@@ -9,8 +9,7 @@
   <%= f.hidden_field :referencia_id, value: @referencia.id %>
 
   <% if @ativos.nil? %> <!-- Estamos editando -->
-    <%= hidden_field_tag :ativo_id, @referencia_ativo.ativo.id %>
-    <%= f.static_control nil, label: 'Ativo', value: @referencia_ativo.ativo.nome_amigavel %>
+    <%= f.static_control :ativo, label: 'Ativo', value: @referencia_ativo.ativo.nome_amigavel %>
   <% else %>
     <%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel %>
   <% end %>

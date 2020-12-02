@@ -1,4 +1,6 @@
 
+<%= render 'common/titulo_pagina', titulo: "Seguindo carteira #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
+
 <div class="card">
   <div class="card-body">
     <table class="table table-borderless table-sm">

@@ -117,13 +117,8 @@ class CarteiraAtivos
   end
 
   def porcentagem_ativo(ativo)
-    cap = _busca_ativo_posicao(ativo)
+    cap = busca_ativo_posicao(ativo)
     cap ? (cap.valor_em_brl / total_geral * 100) : 0
-  end
-
-  def valor_ativo(ativo)
-    cap = _busca_ativo_posicao(ativo)
-    cap ? cap.valor_em_brl : 0
   end
 
   def total_c_e_v
@@ -132,14 +127,7 @@ class CarteiraAtivos
       .sum('quantidade * valor_unit * usdbrl')
   end
 
-
-  #
-  # Privados
-  #
-
-  private
-
-  def _busca_ativo_posicao(ativo)
+  def busca_ativo_posicao(ativo)
     ap_buscado = nil
     @ativos_posicao.each do |ap|
       ap_buscado = ap if ap.ativo == ativo

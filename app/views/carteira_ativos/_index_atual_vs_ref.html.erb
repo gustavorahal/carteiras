@@ -53,14 +53,21 @@
           <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
           <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
           <td><span class="<%= span_class %>"><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></span></td>
-          <td><span class="<%= span_class %>"><%= display_moeda(@carteira_ativos.valor_ativo(ativo) - @carteira_ativos_referencia.valor_teorico(ativo), cores: true) %></span></td>
+          <td>
+            <span class="<%= span_class %>">
+              <%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_brl(ativo), cores: true) %>
+              <% if ativo.usd? %>
+                (<%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_usd(ativo), cores: true, moeda: ativo.moeda) %>)
+              <% end %>
+            </span>
+          </td>
         </tr>
       <% end %>
     <% end %>
 
     <!-- Ativos que não estão na referencia -->
     <tr class="table-primary">
-      <td><h6>SEM REFERÊNCIA</h6></td>
+      <td><h6><i>NÃO ESTÃO EM REFERÊNCIA</i></h6></td>
       <td></td>
       <td></td>
       <td></td>

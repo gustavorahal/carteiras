@@ -1,13 +1,14 @@
 
 # Posição da Carteira em relação a Referência que segue
 class CarteiraAtivosReferencia
-  def initialize(carteira_posicao)
-    raise TypeError unless carteira_posicao.is_a? CarteiraAtivos
+  def initialize(carteira_ativos)
+    raise TypeError unless carteira_ativos.is_a? CarteiraAtivos
 
-    @carteira_ativos = carteira_posicao # Objeto CarteiraPosicao
-    @carteira = carteira_posicao.carteira
+    @carteira_ativos = carteira_ativos
+    @carteira = carteira_ativos.carteira
     @referencia = @carteira.referencia
-    @ativos_posicoes = carteira_posicao.ativos_posicao
+    @ativos_posicoes = carteira_ativos.ativos_posicao
+    @cotacao_usdbrl = CotacaoService.cotacao_usdbrl(Date.today)
   end
 
   def ativos_posicao_por_book
@@ -60,9 +61,20 @@ class CarteiraAtivosReferencia
 
   def valor_teorico(ativo)
     percent = porcentagem_ref_ativo(ativo)
-    return 0 if percent.nil? or percent.zero?
+    return 0 if percent.nil? || percent.zero?
 
     @carteira_ativos.total_geral * (percent / 100)
+  end
+
+  def diff_valor_referencia_brl(ativo)
+    ativo_posicao = @carteira_ativos.busca_ativo_posicao(ativo)
+    return 0 if ativo_posicao.nil?
+
+    ativo_posicao.valor_em_brl - valor_teorico(ativo)
+  end
+
+  def diff_valor_referencia_usd(ativo)
+    diff_valor_referencia_brl(ativo) / @cotacao_usdbrl.valor_unit
   end
 
 end

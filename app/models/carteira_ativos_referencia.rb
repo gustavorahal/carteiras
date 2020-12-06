@@ -68,7 +68,7 @@ class CarteiraAtivosReferencia
 
   def diff_valor_referencia_brl(ativo)
     ativo_posicao = @carteira_ativos.busca_ativo_posicao(ativo)
-    return 0 if ativo_posicao.nil?
+    return valor_teorico(ativo) if ativo_posicao.nil?
 
     ativo_posicao.valor_em_brl - valor_teorico(ativo)
   end

@@ -18,7 +18,7 @@
 </div>
 
 <div class="container">
-  <table class="table table-striped table-sm">
+  <table class="table table-sm">
     <thead class="thead-dark">
     <tr>
       <th scope="col">Ativo</th>
@@ -44,10 +44,10 @@
       </tr>
       <% ativos.each do |ativo| %>
         <% if @carteira_lista_de_ativos.include?(ativo) %>
-          <% span_class = 'font-weight-bold' %>
+          <% span_class = '' %>
           <% @carteira_ativos_restante.delete ativo %>
         <% else %>
-          <% span_class = 'font-weight-light' %>
+          <% span_class = 'bg-warning' %>
         <% end %>
         <tr>
           <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>

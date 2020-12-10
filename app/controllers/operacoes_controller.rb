@@ -4,6 +4,9 @@ class OperacoesController < ApplicationController
 
   def index
     @operacoes = @carteira.operacoes
+    # refazemos a query sem reusar a de cima porque o uso de "order by" acima
+    # complica o uso do distinct depois
+    @operacoes_hoje = Operacao.where(carteira: @carteira, data: Date.today)
   end
 
   def new

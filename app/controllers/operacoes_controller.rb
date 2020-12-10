@@ -12,11 +12,6 @@ class OperacoesController < ApplicationController
 
   def create
     @operacao = Operacao.new secure_params
-    @operacao.usdbrl = if @operacao.ativo.usd?
-                         CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
-                       else
-                         1
-                       end
 
     if @operacao.save
       redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
@@ -48,7 +43,7 @@ class OperacoesController < ApplicationController
   end
 
   def secure_params
-    params.require(:operacao).permit(:ativo_id, :corretora_id, :carteira_id, :mon_ou_des,
+    params.require(:operacao).permit(:ativo_id, :corretora_id, :carteira_id,
                                      :data, :valor_unit, :quantidade,
                                      :operacao, :usdbrl, :observacao, :co_corretagem, :co_taxa,
                                      :co_emolumentos, :co_iss_iof, :co_irrf, :co_outros)

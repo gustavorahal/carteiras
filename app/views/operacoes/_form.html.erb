@@ -10,7 +10,6 @@
   <%= f.collection_select :corretora_id, @corretoras, :id, :nome %>
   <%= f.hidden_field :carteira_id, value: @carteira.id %>
   <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
-  <%= f.select :mon_ou_des, Operacao.mon_ou_des.keys.to_a, include_blank: true %>
 
   <%= f.date_select :data %>
   <%= f.number_field :quantidade, step: :any %>

@@ -2,11 +2,12 @@
 <h4>Cotações <%= @ativo.nome_amigavel %></h4>
 <%= render 'common/btn_new', label:'Nova cotação', url: new_ativo_cotacao_path %>
 
-<table class="table table-striped table-sm">
+<table class="table table-sm">
   <thead>
     <th>Data</th>
     <th>Preço</th>
     <th>Timestamp</th>
+    <th></th>
   </thead>
   <tbody>
     <% @cotacoes.each do |cotacao| %>
@@ -14,6 +15,7 @@
         <td><%= display_data cotacao.data  %></td>
         <td><%= display_moeda cotacao.valor_unit, moeda: cotacao.ativo.moeda %></td>
         <td><%= cotacao.created_at %></td>
+        <td><%= link_to 'Editar', edit_ativo_cotacao_path(@ativo, cotacao) %></td>
       </tr>
     <% end %>
   </tbody>

@@ -109,9 +109,10 @@ class CotacaoService
       tentativas -= 1
     end
 
-    # Como podemos ter escolhido uma data diferente da fornecida, ver se já não temos ela afinal
-    # antes de tentar criar uma nova entrada no banco
-    Cotacao.find_or_create_by!(ativo_id: ativo.id, valor_unit: preco, data: data_efetiva)
+    # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
+    # dela e "sobreescrever"
+    Cotacao.find_by(ativo: ativo, data: data_efetiva).destroy
+    Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
   end
 
 end

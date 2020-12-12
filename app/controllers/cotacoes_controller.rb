@@ -22,6 +22,21 @@ class CotacoesController < ApplicationController
     end
   end
 
+  def edit
+    @ativo = Ativo.find params[:ativo_id]
+    @cotacao = Cotacao.find params[:id]
+  end
+
+  def update
+    @cotacao = Cotacao.find params[:id]
+    if @cotacao.update(secure_params)
+      redirect_to ativo_cotacoes_path ativo_id: params[:ativo_id], notice: "Cotação atualizada com sucesso!"
+    else
+      render 'edit'
+    end
+  end
+
+
   private
 
   def secure_params

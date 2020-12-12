@@ -68,6 +68,20 @@ class BuscaCotacao
   end
 
   def self.acao(ticker, data, bolsa = nil)
+    begin
+      preco = acao_marketstack(ticker, data, bolsa)
+    rescue StandardError
+      preco = acao_yahoo_finance(ticker, data, bolsa)
+    end
+
+    if preco.nil?
+      preco = acao_yahoo_finance(ticker, data, bolsa)
+    end
+
+    preco
+  end
+
+  def self.acao_marketstack(ticker, data, bolsa = nil)
 
     # Tickers como BRK.B precisam ser convertidos para BRK-B
     ticker = ticker.gsub('.', '-')
@@ -92,32 +106,33 @@ class BuscaCotacao
 
   # Real time (ou quase isso) -- OLD API YAHOO FINANCE
   #
-  # @param ativo_nome: string com nome do ativo
+  # @param ticker: string com nome do ativo
   # @param data: Date object ou nil caso seja a cotacao atual
   # @return [Float] valor do ativo na data especificada
-  # def self.acao(ativo_nome, data, bolsa = nil)
-  #   ativo_str = ativo_nome
-  #   ativo_str += '.SA' if bolsa == 'BVMF'
-  #
-  #   api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
-  #
-  #   if data == Date.today || data.nil?
-  #     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_str}"
-  #     json_response = _fetch_rapidapi_json(url, api_host)
-  #     result = json_response['quoteResponse']['result']
-  #     return result[0]['regularMarketPrice'].to_f unless result.empty?
-  #   else
-  #     from_data = data.to_time.to_i
-  #     to_data = (data + 1.day).to_time.to_i
-  #     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ativo_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
-  #     json_response = _fetch_rapidapi_json(url, api_host)
-  #     dado = json_response['chart']['result'][0]['indicators']['quote'][0]
-  #     return nil if dado.empty?
-  #
-  #     dado['close'][0].round(2).to_f
-  #   end
-  #
-  # end
+  def self.acao_yahoo_finance(ticker, data, bolsa = nil)
+    ticker_str = ticker
+    ticker_str += '.SA' if bolsa == 'BVMF'
+
+    api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+
+    if data == Date.today || data.nil?
+      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ticker_str}"
+      json_response = _fetch_rapidapi_json(url, api_host)
+      result = json_response['quoteResponse']['result']
+      return result[0]['regularMarketPrice'].to_f unless result.empty?
+    else
+      from_data = data.to_time.to_i
+      to_data = (data + 1.day).to_time.to_i
+      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
+      Rails.logger.debug("Chamando #{url}")
+      json_response = _fetch_rapidapi_json(url, api_host)
+      dado = json_response['chart']['result'][0]['indicators']['quote'][0]
+      return nil if dado.empty?
+
+      dado['close'][0].round(2).to_f
+    end
+
+  end
 
 
   private

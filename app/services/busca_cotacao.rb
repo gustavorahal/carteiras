@@ -54,47 +54,70 @@ class BuscaCotacao
 
   def self.brl_usd
     api_host = 'currency-converter5.p.rapidapi.com'
-    url_brlusd = "https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1"
+    url_brlusd = 'https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1'
     json_response = _fetch_rapidapi_json(url_brlusd, api_host)
     json_response['rates']['USD']['rate'].to_f
   end
 
   def self.btc_brl
-    url = "https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL"
+    url = 'https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL'
     api_host = 'coingecko.p.rapidapi.com'
 
     json_response = _fetch_rapidapi_json(url, api_host)
     json_response['bitcoin']['brl']
   end
 
-  # Real time (ou quase isso)
+  def self.acao(ticker, data, bolsa = nil)
+
+    # Tickers como BRK.B precisam ser convertidos para BRK-B
+    ticker = ticker.gsub('.', '-')
+    ticker += '.BVMF' if bolsa == 'BVMF'
+
+    access_key = ENV['MARKETSTACK_ACCESS_KEY']
+    data_str = data.strftime('%Y-%m-%d')
+
+    url = "http://api.marketstack.com/v1/tickers/#{ticker}/eod/#{data_str}?access_key=#{access_key}"
+    Rails.logger.debug "Chamando #{url}"
+    uri = URI(url)
+    json = Net::HTTP.get(uri)
+    api_response = JSON.parse(json)
+
+    return nil if api_response.blank?
+
+    raise StandardError, api_response['error']['message'] if api_response['error'].present?
+
+    api_response['close']
+
+  end
+
+  # Real time (ou quase isso) -- OLD API YAHOO FINANCE
   #
   # @param ativo_nome: string com nome do ativo
   # @param data: Date object ou nil caso seja a cotacao atual
   # @return [Float] valor do ativo na data especificada
-  def self.acao(ativo_nome, data, bolsa = nil)
-    ativo_str = ativo_nome
-    ativo_str += '.SA' if bolsa == 'BVMF'
-
-    api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
-
-    if data == Date.today || data.nil?
-      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_str}"
-      json_response = _fetch_rapidapi_json(url, api_host)
-      result = json_response['quoteResponse']['result']
-      return result[0]['regularMarketPrice'].to_f unless result.empty?
-    else
-      from_data = data.to_time.to_i
-      to_data = (data + 1.day).to_time.to_i
-      url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ativo_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
-      json_response = _fetch_rapidapi_json(url, api_host)
-      dado = json_response['chart']['result'][0]['indicators']['quote'][0]
-      return nil if dado.empty?
-
-      dado['close'][0].round(2).to_f
-    end
-
-  end
+  # def self.acao(ativo_nome, data, bolsa = nil)
+  #   ativo_str = ativo_nome
+  #   ativo_str += '.SA' if bolsa == 'BVMF'
+  #
+  #   api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+  #
+  #   if data == Date.today || data.nil?
+  #     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ativo_str}"
+  #     json_response = _fetch_rapidapi_json(url, api_host)
+  #     result = json_response['quoteResponse']['result']
+  #     return result[0]['regularMarketPrice'].to_f unless result.empty?
+  #   else
+  #     from_data = data.to_time.to_i
+  #     to_data = (data + 1.day).to_time.to_i
+  #     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ativo_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
+  #     json_response = _fetch_rapidapi_json(url, api_host)
+  #     dado = json_response['chart']['result'][0]['indicators']['quote'][0]
+  #     return nil if dado.empty?
+  #
+  #     dado['close'][0].round(2).to_f
+  #   end
+  #
+  # end
 
 
   private
@@ -107,8 +130,8 @@ class BuscaCotacao
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
     request = Net::HTTP::Get.new(uri)
-    request["x-rapidapi-host"] = rapidapi_host
-    request["x-rapidapi-key"] = 'ENV.fetch("RAPIDAPI_KEY")'
+    request['x-rapidapi-host'] = rapidapi_host
+    request['x-rapidapi-key'] = 'ENV.fetch("RAPIDAPI_KEY")'
 
     response = http.request(request)
     JSON.parse(response.read_body)

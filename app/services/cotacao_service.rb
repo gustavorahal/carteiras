@@ -111,7 +111,7 @@ class CotacaoService
 
     # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
     # dela e "sobreescrever"
-    Cotacao.find_by(ativo: ativo, data: data_efetiva).destroy
+    Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
     Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
   end
 

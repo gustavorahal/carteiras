@@ -16,7 +16,7 @@ class BuscaCotacao
 
     return unless titulo.in? titulos
 
-    document = Nokogiri::HTML.parse(open(titulos[titulo]))
+    document = Nokogiri::HTML.parse(URI.parse(titulos[titulo]).open)
     tags = document.xpath("//span[@class='ml-1 sm:text-xl']")
     # conversão manual do formato pt_BR para en_US
     preco = tags[3].text.gsub('R$ ', '').gsub('.','').gsub(',', '.')
@@ -29,7 +29,7 @@ class BuscaCotacao
   def self.fundo_xp_dolar
     # url da anbima https://data.anbima.com.br/fundos/072176
     url = 'https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=2476'
-    document = Nokogiri::HTML.parse(open(url))
+    document = Nokogiri::HTML.parse(URI.parse(url).open)
     table = document.css('table').first
     preco = table.css('tr')[1].css('td')[1].text.strip.gsub(',', '.').to_f
     data_str = table.css('tr')[1].css('td')[0].text.strip
@@ -43,7 +43,7 @@ class BuscaCotacao
     # formato de data esperado pela API: 11-19-2020 (MM-DD-AAAA)
     data_str = data.strftime('%m-%d-%Y')
     url = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='#{data_str}'&$top=100&$format=json"
-    Rails.logger.debug "Buscando cotacao USDBRL em #{url}"
+    Rails.logger.debug "Chamando #{url}"
     uri = URI(url)
     response = Net::HTTP.get(uri)
     json_response = JSON.parse(response)
@@ -54,13 +54,15 @@ class BuscaCotacao
 
   def self.brl_usd
     api_host = 'currency-converter5.p.rapidapi.com'
-    url_brlusd = 'https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1'
-    json_response = _fetch_rapidapi_json(url_brlusd, api_host)
+    url = 'https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1'
+    Rails.logger.debug "Chamando #{url}"
+    json_response = _fetch_rapidapi_json(url, api_host)
     json_response['rates']['USD']['rate'].to_f
   end
 
   def self.btc_brl
     url = 'https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL'
+    Rails.logger.debug "Chamando #{url}"
     api_host = 'coingecko.p.rapidapi.com'
 
     json_response = _fetch_rapidapi_json(url, api_host)

@@ -1,0 +1,11 @@
+<div class="row">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <% Utils.meses_passados_ano(@carteira.operacoes.limit(1).take.data).each do |ultimo_dia| %>
+        <li class="breadcrumb-item">
+          <%= link_to l(ultimo_dia, format: '%b'), request.params.merge(data: ultimo_dia.strftime('%Y-%m-%d')) %>
+        </li>
+      <% end %>
+    </ol>
+  </nav>
+</div>

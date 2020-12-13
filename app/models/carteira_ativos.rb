@@ -82,7 +82,7 @@ class CarteiraAtivos
     ativos_posicao.each do |ativo_posicao|
       moeda = ativo_posicao.ativo.moeda
       corretora = ativo_posicao.corretora
-      tc[corretora] = { moeda => 0 } unless corretora.in? tc
+      tc[corretora] = { 'USD' => 0, 'BRL' => 0 } unless corretora.in? tc
       tc[corretora][moeda] += ativo_posicao.valor
     end
 

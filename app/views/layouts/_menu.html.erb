@@ -18,9 +18,9 @@
             Posição
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'book') %>">Por book</a>
-            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'corretoras') %>">Por corretoras</a>
-            <a class="dropdown-item" href="<%= carteira_ativos_path(@carteira, view: 'atual_vs_ref') %>">Atual vs. Referência</a>
+            <%= link_to 'Por book', carteira_ativos_path(@carteira, view: 'book', data: @data), class: "dropdown-item"  %>
+            <%= link_to 'Por corretoras', carteira_ativos_path(@carteira, view: 'corretoras', data: @data), class: "dropdown-item"  %>
+            <%= link_to 'Atual vs. Referência', carteira_ativos_path(@carteira, view: 'atual_vs_ref'), class: "dropdown-item"  %>
           </div>
         </li>
 

@@ -3,7 +3,7 @@ class CotacaoService
   # param @ativo ActiceRecord Ativo
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
-      data_cotacao = _ajusta_data(data)
+      data_cotacao = Utils.ajusta_data(data)
 
       cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       return cotacao if cotacao
@@ -47,36 +47,17 @@ class CotacaoService
   # Métodos privados
   #
 
-  # @return Objeto data, considerando fatores como final de semana,
-  # feriado e fechamento de pregão
-  def self._ajusta_data(data)
-    # Se estamos no horário do pregão, pegar cotação do dia anterior
-    # Só queremos armazenar a cotação de fechamento do dia
-    data_ajustada = if data == Date.today && _dia_util?(data) && Time.now.hour < 22
-                      data - 1.day
-                    else
-                      data
-                    end
-
-    data_ajustada -= 1.day until _dia_util?(data_ajustada)
-
-    data_ajustada
-  end
-
-  def self._dia_util?(data)
-    !data.on_weekend? && !Holidays.on(data, :br).present?
-  end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = if ativo == Moedas.config.ativo_brlusd
+    preco = if ativo.id == Moedas.config.ativo_brlusd.id
               BuscaCotacao.brl_usd
-            elsif ativo == Moedas.config.ativo_usdbrl
+            elsif ativo.id == Moedas.config.ativo_usdbrl.id
               BuscaCotacao.usd_brl(data)
-            elsif ativo == Moedas.config.ativo_btcbrl
+            elsif ativo.id == Moedas.config.ativo_btcbrl.id
               BuscaCotacao.btc_brl
             else
-              nil
+              raise StandardError, "Tipo de moeda #{ativo.tipo} ativo ID #{ativo.id} não suportado para busca de cotação"
             end
     return if preco.nil?
 
@@ -103,7 +84,7 @@ class CotacaoService
         Rails.logger.debug("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
         return Cotacao.where(ativo_id: ativo.id).last
       end
-      data_efetiva = _ajusta_data(data_efetiva - 1.day)
+      data_efetiva = Utils.ajusta_data(data_efetiva - 1.day)
       preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
       Rails.logger.debug("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
       tentativas -= 1

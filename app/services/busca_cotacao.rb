@@ -113,6 +113,8 @@ class BuscaCotacao
   # @return [Float] valor do ativo na data especificada
   def self.acao_yahoo_finance(ticker, data, bolsa = nil)
     ticker_str = ticker
+    # Tickers como BRK.B precisam ser convertidos para BRK-B
+    ticker_str = ticker_str.gsub('.', '-')
     ticker_str += '.SA' if bolsa == 'BVMF'
 
     api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
@@ -128,6 +130,9 @@ class BuscaCotacao
       url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
       Rails.logger.debug("Chamando #{url}")
       json_response = _fetch_rapidapi_json(url, api_host)
+      if json_response['chart']['result'].nil?
+        raise StandardError, "Yahoo API: Não foi possivel obter cotação de #{ticker_str}: #{json_response['chart']['error']['description']}"
+      end
       dado = json_response['chart']['result'][0]['indicators']['quote'][0]
       return nil if dado.empty?
 

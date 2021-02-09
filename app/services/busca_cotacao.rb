@@ -12,7 +12,8 @@ class BuscaCotacao
                 'Tesouro Prefixado 2025' => 'https://taxas-tesouro.com/resgatar/tesouro-prefixado-2025/',
                 'Tesouro Prefixado com Juros Semestrais 2029' => 'https://taxas-tesouro.com/resgatar/tesouro-prefixado-com-juros-semestrais-2029/',
                 'Tesouro Selic 2023' => 'https://taxas-tesouro.com/resgatar/tesouro-selic-2023/',
-                'Tesouro Selic 2025' => 'https://taxas-tesouro.com/resgatar/tesouro-selic-2025/' }
+                'Tesouro Selic 2025' => 'https://taxas-tesouro.com/resgatar/tesouro-selic-2025/',
+                'Tesouro Selic 2027' => 'https://taxas-tesouro.com/resgatar/tesouro-selic-2027/'}
 
     return unless titulo.in? titulos
 

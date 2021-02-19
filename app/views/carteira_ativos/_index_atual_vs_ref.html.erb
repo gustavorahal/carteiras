@@ -1,6 +1,10 @@
 
 <%= render 'common/titulo_pagina', titulo: "Seguindo carteira #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
 
+<br>
+<h3>Total Geral de <%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
+<br>
+
 <div class="card">
   <div class="card-body">
     <table class="table table-borderless table-sm">
@@ -25,6 +29,8 @@
       <th scope="col">Posição</th>
       <th scope="col">Referência</th>
       <th scope="col">Diff valor</th>
+      <th scope="col">Diff Quant</th>
+      <th scope="col"></th>
     </tr>
     </thead>
     <tbody>
@@ -40,7 +46,7 @@
         <td>
           <h6><%= display_porcentagem @porcentagens_por_book_ref[book] %></h6>
         </td>
-        <td></td>
+        <td></td><td></td><td></td>
       </tr>
       <% ativos.each do |ativo| %>
         <% if @carteira_lista_de_ativos.include?(ativo) %>
@@ -55,11 +61,29 @@
           <td><span class="<%= span_class %>"><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></span></td>
           <td>
             <span class="<%= span_class %>">
-              <%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_brl(ativo), cores: true) %>
+              <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
+              <%= display_moeda(diff_valor_brl, cores: true) %>
               <% if ativo.usd? %>
-                (<%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_usd(ativo), cores: true, moeda: ativo.moeda) %>)
+                <% diff_valor_usd = @carteira_ativos_referencia.diff_valor_referencia_usd(ativo) %>
+                (<%= display_moeda(diff_valor_usd, cores: true, moeda: ativo.moeda) %>)
               <% end %>
             </span>
+          </td>
+          <td>
+            <% if ativo.usd? %>
+              <% quant = diff_valor_usd / ativo.ultima_cotacao.valor_unit %>
+            <% else %>
+              <% quant = diff_valor_brl / ativo.ultima_cotacao.valor_unit %>
+            <% end %>
+            <%= quant.round(4) %>
+          </td>
+          <td>
+            <% quant.negative? ? operacao = 'C' : operacao = 'V' %>
+            <% ap = @carteira_ativos.busca_ativo_posicao(ativo) %>
+            <% unless ap.nil? %>
+              <%= render 'common/btn_oper_corretora', corretora: ap.corretora,
+                                                      ativo: ativo, operacao: operacao %>
+            <% end %>
           </td>
         </tr>
       <% end %>

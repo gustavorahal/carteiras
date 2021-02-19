@@ -1,0 +1,13 @@
+<% corretora = local_assigns.fetch :corretora, false %>
+<% ativo = local_assigns.fetch :ativo, false %>
+<% operacao = local_assigns.fetch :operacao, false %>
+
+<% label = 'Vender' if operacao == 'V' %>
+<% label = 'Comprar' if operacao == 'C' %>
+
+<% url = oper_corretora_url(corretora, ativo, operacao) %>
+
+<% unless url.nil? %>
+  <%= link_to label, url , target: '_blank',
+              class: "btn btn-sm btn-primary" %>
+<% end %>

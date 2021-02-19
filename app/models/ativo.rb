@@ -24,4 +24,12 @@ class Ativo < ApplicationRecord
     moeda == 'USD'
   end
 
+  def brl?
+    moeda == 'BRL'
+  end
+
+  def ultima_cotacao
+    cotacoes.last
+  end
+
 end

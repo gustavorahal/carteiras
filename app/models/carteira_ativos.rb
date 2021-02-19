@@ -117,8 +117,8 @@ class CarteiraAtivos
   end
 
   def porcentagem_ativo(ativo)
-    cap = busca_ativo_posicao(ativo)
-    cap ? (cap.valor_em_brl / total_geral * 100) : 0
+    ap = busca_ativo_posicao(ativo)
+    ap ? (ap.valor_em_brl / total_geral * 100) : 0
   end
 
   def total_c_e_v

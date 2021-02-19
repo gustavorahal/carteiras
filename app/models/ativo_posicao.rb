@@ -1,6 +1,6 @@
 class AtivoPosicao
 
-  attr_reader :cotacao, :ativo
+  attr_reader :cotacao, :ativo, :corretora
 
   def initialize(carteira_ref, ativo_ref, data, quantidade = nil)
     @carteira = if carteira_ref.is_a? Carteira
@@ -18,15 +18,13 @@ class AtivoPosicao
     @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
     @cotacao = CotacaoService.cotacao(@ativo, @data)
-    raise StandardError, "Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
-  end
+    # Em termos de layout de banco, cada operação acontece em determinada corretora
+    # Entretanto, na pratica, todas operações acabam acontecendo em uma corretora somente
+    # portanto é possível dizer que um ativo de determinada carteira esta em determinada
+    # corretora
+    @corretora = @operacoes_ativo.take.corretora
 
-  # Em termos de layout de banco, cada operação acontece em determinada corretora
-  # Entretanto, na pratica, todas operações acabam acontecendo em uma corretora somente
-  # portanto é possível dizer que um ativo de determinada carteira esta em determinada
-  # corretora
-  def corretora
-    @operacoes_ativo.take.corretora
+    raise StandardError, "Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end
 
   def operacoes

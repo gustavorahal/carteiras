@@ -42,9 +42,12 @@ class Operacao < ApplicationRecord
   def ajusta_dolar
     self.usdbrl = if ativo.usd? && usdbrl == 1
                     CotacaoService.cotacao_usdbrl(data).valor_unit
-                  else
+                  elsif ativo.brl?
                     1
+                  else
+                    usdbrl
                   end
+    Rails.logger.debug "Operacao Model ajustou dolar para #{self.usdbrl}"
   end
 
   def ajusta_mon_ou_des

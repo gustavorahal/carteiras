@@ -6,17 +6,14 @@
     <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
   <% end %>
 
-  <%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel %>
+  <%= f.date_select :data %> <!-- Deixar data em primeiro já que na maioria das vezes não mudamos -->
+  <%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel, focus: true %>
   <%= f.collection_select :corretora_id, @corretoras, :id, :nome %>
   <%= f.hidden_field :carteira_id, value: @carteira.id %>
   <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
 
-  <%= f.date_select :data %>
   <%= f.number_field :quantidade, step: :any %>
   <%= f.number_field :valor_unit, step: :any %>
-  <%= f.number_field :usdbrl, default: 1,
-                     help: 'Não colocar nada aqui a não ser que saiba o que esta fazendo. O sistema irá atribuir o valor do dolar com base na data da operação',
-                     step: :any %>
 
   <%= f.text_field :observacao %>
 

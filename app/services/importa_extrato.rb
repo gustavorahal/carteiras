@@ -6,13 +6,45 @@ class ImportaExtrato
       _xp(conta_corrente, file_path)
     when 'Avenue'
       _avenue(conta_corrente, file_path)
+    when 'Vitreo'
+      _vitreo(conta_corrente, file_path)
     else
       raise StandardError, 'Corretora não suportada'
     end
   end
 
+  #
+  # Privado
+  #
 
-  private_class_method def self._avenue(conta_corrente, file_path)
+  def self._vitreo(conta_corrente, file_path)
+    # Load a csv and auto-strip the BOM (byte order mark)
+    # csv files saved from MS Excel typically have the BOM marker at the beginning of the file
+    sheet = Roo::CSV.new(file_path, csv_options: { col_sep: ';', encoding: 'bom|utf-8' } )
+
+    # verifica se formato adequado
+    header = sheet.row(1)
+    raise StandardError, 'Extrato em formato inválido' unless
+      header[0] == 'DataMovimentacao' &&
+        header[1] == 'Tipo' &&
+        header[2] == 'DescricaoLancamento' &&
+        header[3] == 'ValorLancamento' &&
+        header[4] == 'Saldo'
+
+    i = 1
+    loop do
+      i += 1
+      row = sheet.row(i)
+      break if row[0].blank?
+      next if row[2] == 'SALDO DO DIA'
+
+      _insere_linha_extrato(conta_corrente, row[0], row[0], row[2], row[3])
+    end
+
+  end
+
+
+  def self._avenue(conta_corrente, file_path)
     sheet = Roo::Excelx.new(file_path).sheet(0)
 
     # verifica se formato adequado
@@ -38,7 +70,7 @@ class ImportaExtrato
 
   end
 
-  private_class_method def self._xp(conta_corrente, file_path)
+  def self._xp(conta_corrente, file_path)
     sheet = Roo::Excelx.new(file_path).sheet(0)
 
     # verifica se formato adequado
@@ -61,7 +93,7 @@ class ImportaExtrato
     end
   end
 
-  private_class_method def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor)
+  def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor)
     extrato_atual = conta_corrente.extratos
     Rails.logger.debug("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
     return unless extrato_atual.find_by(liquidacao: liquidacao,

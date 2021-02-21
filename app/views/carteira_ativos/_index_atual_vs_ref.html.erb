@@ -29,7 +29,7 @@
       <th scope="col">Posição</th>
       <th scope="col">Referência</th>
       <th scope="col">Diff valor</th>
-      <th scope="col">Diff Quant</th>
+      <th scope="col">Diff quant</th>
       <th scope="col"></th>
     </tr>
     </thead>
@@ -101,6 +101,8 @@
       <tr>
         <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
         <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
+        <td></td>
+        <td></td>
         <td></td>
         <td></td>
       </tr>

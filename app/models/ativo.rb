@@ -28,6 +28,10 @@ class Ativo < ApplicationRecord
     moeda == 'BRL'
   end
 
+  def na_bolsa?
+    tipo.in? %w[acao fii etf]
+  end
+
   def ultima_cotacao
     cotacoes.last
   end

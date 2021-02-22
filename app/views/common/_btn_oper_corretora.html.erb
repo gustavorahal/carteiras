@@ -1,13 +1,20 @@
-<% corretora = local_assigns.fetch :corretora, false %>
+<% corretora = local_assigns.fetch :corretora, nil %>
 <% ativo = local_assigns.fetch :ativo, false %>
+<% disabled = local_assigns.fetch :disabled, '' %>
 <% operacao = local_assigns.fetch :operacao, false %>
 
 <% label = 'Vender' if operacao == 'V' %>
 <% label = 'Comprar' if operacao == 'C' %>
 
-<% url = oper_corretora_url(corretora, ativo, operacao) %>
-
-<% unless url.nil? %>
-  <%= link_to label, url , target: '_blank',
-              class: "btn btn-sm btn-primary" %>
+<% if corretora.nil? %>
+  <% disabled = 'disabled' %>
+<% else %>
+  <% url = oper_corretora_url(corretora, ativo, operacao) %>
 <% end %>
+
+<% if disabled or url.nil? %>
+  <% disabled = 'disabled' %>
+<% end %>
+
+<%= link_to label, url , target: '_blank',
+              class: "btn btn-link #{disabled}" %>

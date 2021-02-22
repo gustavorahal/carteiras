@@ -2,7 +2,7 @@
 <%= render 'common/titulo_pagina', titulo: "Seguindo carteira #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
 
 <br>
-<h3>Total Geral de <%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
+<h3>Total Geral de <%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">(inclui saldo em CC) em <%= display_data @data %> </small></h3>
 <br>
 
 <div class="card">
@@ -28,8 +28,6 @@
       <th scope="col">Ativo</th>
       <th scope="col">Posição</th>
       <th scope="col">Referência</th>
-      <th scope="col">Diff valor</th>
-      <th scope="col">Diff quant</th>
       <th scope="col"></th>
     </tr>
     </thead>
@@ -46,44 +44,36 @@
         <td>
           <h6><%= display_porcentagem @porcentagens_por_book_ref[book] %></h6>
         </td>
-        <td></td><td></td><td></td>
+        <td></td>
       </tr>
       <% ativos.each do |ativo| %>
         <% if @carteira_lista_de_ativos.include?(ativo) %>
-          <% span_class = '' %>
           <% @carteira_ativos_restante.delete ativo %>
-        <% else %>
-          <% span_class = 'bg-warning' %>
         <% end %>
         <tr>
-          <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
-          <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
-          <td><span class="<%= span_class %>"><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></span></td>
+          <td><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></td>
+          <td><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></td>
+          <td><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></td>
           <td>
-            <span class="<%= span_class %>">
-              <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
-              <%= display_moeda(diff_valor_brl, cores: true) %>
-              <% if ativo.usd? %>
-                <% diff_valor_usd = @carteira_ativos_referencia.diff_valor_referencia_usd(ativo) %>
-                (<%= display_moeda(diff_valor_usd, cores: true, moeda: ativo.moeda) %>)
-              <% end %>
-            </span>
-          </td>
-          <td>
+            <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
+            <% operacao = diff_valor_brl.negative? ? 'C' : 'V' %>
+
             <% if ativo.usd? %>
+              <% diff_valor_usd = @carteira_ativos_referencia.diff_valor_referencia_usd(ativo) %>
               <% quant = diff_valor_usd / ativo.ultima_cotacao.valor_unit %>
             <% else %>
               <% quant = diff_valor_brl / ativo.ultima_cotacao.valor_unit %>
             <% end %>
-            <%= quant.round(4) %>
-          </td>
-          <td>
-            <% quant.negative? ? operacao = 'C' : operacao = 'V' %>
+
             <% ap = @carteira_ativos.busca_ativo_posicao(ativo) %>
-            <% unless ap.nil? %>
-              <%= render 'common/btn_oper_corretora', corretora: ap.corretora,
-                                                      ativo: ativo, operacao: operacao %>
-            <% end %>
+
+            <!-- Agora mostra conteúdo -->
+            <%= render 'common/btn_oper_corretora', corretora: ap ? ap.corretora : nil,
+                                                      ativo: ativo, operacao: operacao, disabled: ap.nil?  %>
+            <%= quant.round(4).abs %>
+            (<%= display_moeda(diff_valor_usd.abs, moeda: ativo.moeda) if ativo.usd? %>
+            <%= display_moeda(diff_valor_brl.abs) %>)
+
           </td>
         </tr>
       <% end %>
@@ -96,13 +86,10 @@
       <td></td>
       <td></td>
     </tr>
-    <% span_class = 'font-weight-light' %>
     <% @carteira_ativos_restante.each do |ativo| %>
       <tr>
-        <td><span class="<%= span_class %>"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
-        <td><span class="<%= span_class %>"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
-        <td></td>
-        <td></td>
+        <td><span class="font-weight-light"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
+        <td><span class="font-weight-light"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
         <td></td>
         <td></td>
       </tr>

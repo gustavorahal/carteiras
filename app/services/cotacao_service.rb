@@ -1,16 +1,18 @@
 class CotacaoService
 
-  # param @ativo ActiceRecord Ativo
+  # param @ativo: ActiceRecord Ativo
+  # param @data: irá tentar buscar cotacao para data dada. Se não for possivel, retornar
+  #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
       data_cotacao = Utils.ajusta_data(data)
-
+      
       cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       return cotacao if cotacao
 
       Rails.logger.debug "Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
       case ativo.tipo
-      when 'acao', 'fii'
+      when 'acao', 'fii', 'etf'
         return _busca_e_registra_acao(ativo, data_cotacao)
       when 'moeda'
         return _busca_e_registra_moeda(ativo, data_cotacao)

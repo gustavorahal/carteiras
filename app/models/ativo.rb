@@ -32,8 +32,4 @@ class Ativo < ApplicationRecord
     tipo.in? %w[acao fii etf]
   end
 
-  def ultima_cotacao
-    cotacoes.last
-  end
-
 end

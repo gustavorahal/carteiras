@@ -77,4 +77,12 @@ class CarteiraAtivosReferencia
     diff_valor_referencia_brl(ativo) / @cotacao_usdbrl.valor_unit
   end
 
+  def diff_quant_referencia(ativo)
+    if ativo.usd?
+      diff_valor_referencia_usd(ativo) / ativo.ultima_cotacao.valor_unit
+    else
+      diff_valor_referencia_brl(ativo) / ativo.ultima_cotacao.valor_unit
+    end
+  end
+
 end

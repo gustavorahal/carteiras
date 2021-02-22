@@ -50,30 +50,25 @@
         <% if @carteira_lista_de_ativos.include?(ativo) %>
           <% @carteira_ativos_restante.delete ativo %>
         <% end %>
-        <tr>
+        <% percent_ativo = @carteira_ativos.porcentagem_ativo(ativo) %>
+        <tr <%= 'class=table-warning' if percent_ativo.zero? %>>
           <td><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></td>
-          <td><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></td>
+          <td>
+            <%= display_porcentagem percent_ativo %>
+          </td>
           <td><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></td>
           <td>
             <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
-            <% operacao = diff_valor_brl.negative? ? 'C' : 'V' %>
-
-            <% if ativo.usd? %>
-              <% diff_valor_usd = @carteira_ativos_referencia.diff_valor_referencia_usd(ativo) %>
-              <% quant = diff_valor_usd / ativo.ultima_cotacao.valor_unit %>
-            <% else %>
-              <% quant = diff_valor_brl / ativo.ultima_cotacao.valor_unit %>
-            <% end %>
-
+            <% quant = @carteira_ativos_referencia.diff_quant_referencia(ativo) %>
             <% ap = @carteira_ativos.busca_ativo_posicao(ativo) %>
+            <% operacao = (diff_valor_brl.negative? || percent_ativo.zero?) ? 'C' : 'V' %>
 
             <!-- Agora mostra conteúdo -->
             <%= render 'common/btn_oper_corretora', corretora: ap ? ap.corretora : nil,
                                                       ativo: ativo, operacao: operacao, disabled: ap.nil?  %>
             <%= quant.round(4).abs %>
-            (<%= display_moeda(diff_valor_usd.abs, moeda: ativo.moeda) if ativo.usd? %>
+            (<%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_usd(ativo).abs, moeda: ativo.moeda) if ativo.usd? %>
             <%= display_moeda(diff_valor_brl.abs) %>)
-
           </td>
         </tr>
       <% end %>

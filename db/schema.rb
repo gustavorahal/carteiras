@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_24_001111) do
+ActiveRecord::Schema.define(version: 2021_02_24_143547) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,8 @@ ActiveRecord::Schema.define(version: 2020_11_24_001111) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "descricao"
+    t.string "cnpj"
+    t.index ["cnpj"], name: "index_ativos_on_cnpj"
     t.index ["nome"], name: "ativos_nome_uindex", unique: true
   end
 
@@ -67,8 +69,8 @@ ActiveRecord::Schema.define(version: 2020_11_24_001111) do
     t.date "movimentacao", null: false
     t.string "descricao", null: false
     t.float "valor", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
     t.bigint "conta_corrente_id", null: false
     t.index ["conta_corrente_id"], name: "index_extratos_on_conta_corrente_id"
   end

@@ -27,18 +27,6 @@ class BuscaCotacao
     [data, preco]
   end
 
-  def self.fundo_xp_dolar
-    # url da anbima https://data.anbima.com.br/fundos/072176
-    url = 'https://institucional.xpi.com.br/investimentos/fundos-de-investimento/detalhes-de-fundos-de-investimento.aspx?F=2476'
-    document = Nokogiri::HTML.parse(URI.parse(url).open)
-    table = document.css('table').first
-    preco = table.css('tr')[1].css('td')[1].text.strip.gsub(',', '.').to_f
-    data_str = table.css('tr')[1].css('td')[0].text.strip
-    data = Time.zone.parse(data_str).to_datetime
-
-    [data, preco]
-  end
-
   # Fonte: https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios/resource/22ab054c-b3ff-4864-82f7-b2815c7a77ec?inner_span=True
   def self.usd_brl(data = Date.today)
     # formato de data esperado pela API: 11-19-2020 (MM-DD-AAAA)

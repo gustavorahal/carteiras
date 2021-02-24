@@ -9,6 +9,7 @@
     <th scope="col">Tipo</th>
     <th scope="col">Moeda</th>
     <th scope="col">Data adição</th>
+    <th></th>
   </tr>
   </thead>
 <tbody>
@@ -19,6 +20,7 @@
       <td><%= ativo.tipo %></td>
       <td><%= ativo.moeda %></td>
       <td><%= display_data ativo.created_at %></td>
+      <td><%= link_to 'Editar', edit_ativo_path(ativo) %></td>
     </tr>
   <% end %>
 </tbody>

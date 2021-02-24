@@ -1,0 +1,19 @@
+<%= bootstrap_form_for @ativo do |f| %>
+
+  <% if @ativo.errors[:base].present? %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @ativo.errors[:base][0] %>
+  <% else %>
+    <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
+  <% end %>
+
+  <%= f.text_field :nome %>
+  <%= f.text_field :descricao %>
+  <%= f.select :moeda, ['BRL', 'USD'] %>
+  <%= f.select :tipo, Ativo.tipos.keys.to_a %>
+  <%= f.text_field :cnpj, help: 'Relevante para fundos' %>
+
+  <%= f.form_group do %>
+    <%= f.submit 'Salvar' %>
+    <%= link_to 'Cancelar', :back, class: 'btn btn-link' %>
+  <% end %>
+<% end %>

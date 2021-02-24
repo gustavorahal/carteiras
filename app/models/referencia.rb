@@ -5,7 +5,7 @@ class Referencia < ApplicationRecord
 
   # Quais ativos ainda NÃO tenho na referencia?
   def ativos_disponiveis
-    Ativo.all - ativos.where.not('referencia_ativos.porcentagem': 0)
+    Ativo.all.order(:nome) - ativos.where.not('referencia_ativos.porcentagem': 0)
   end
 
   def ativos_por_book

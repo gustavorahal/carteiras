@@ -5,7 +5,8 @@ class CotacaoService
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
-      data_cotacao = Utils.ajusta_data(data)
+      data_cotacao = Utils.ajusta_data(data, ativo)
+      Rails.logger.debug "Data ajustada para #{data_cotacao}" if data_cotacao != data
       
       cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       return cotacao if cotacao
@@ -21,9 +22,11 @@ class CotacaoService
       when 'tesouro'
         return _busca_e_registra_tesouro(ativo, data_cotacao)
       when 'fundo'
-        # como não temos um jeito automatizado de buscar fundos
+        return _busca_e_registra_fundo(ativo, data_cotacao)
+      when 'cra', 'debenture'
+        # como não temos um jeito automatizado de buscar cra ou debenture
         # retornar ultima cotação
-        return Cotacao.where(ativo_id: ativo.id).order(data: :desc).first
+        return Cotacao.where(ativo: ativo).order(data: :desc).first
       else
         raise StandardError, 'Tipo de ativo não suportado para busca de cotação'
       end
@@ -49,6 +52,27 @@ class CotacaoService
   # Métodos privados
   #
 
+
+  #
+  # Pela maneira que nossa Backend funciona, esta função faz algo
+  # atipico. Aproveitando que a busca é custosa (download de arquivo de 30MB+)
+  # e retorna informações de todos os fundos, vamos aproveitar e atualizar
+  # informações de todos os fundos mas retornar só o que foi pedido
+  def self._busca_e_registra_fundo(ativo, data)
+    cnpjs = Ativo.where(tipo: 'fundo').pluck(:cnpj)
+    dados = BuscaFundos.cotas(cnpjs, data.year, data.month)
+    dados.each do |cnpj, vl_cotas|
+      vl_cotas.each do |vl_cota|
+        ativo = Ativo.find_by(cnpj: cnpj)
+        data = vl_cota[0].to_date
+        unless Cotacao.find_by(ativo: ativo, data: data)
+          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1])
+        end
+      end
+    end
+
+    Cotacao.find_by(ativo: ativo, data: data)
+  end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
@@ -86,7 +110,7 @@ class CotacaoService
         Rails.logger.debug("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
         return Cotacao.where(ativo_id: ativo.id).last
       end
-      data_efetiva = Utils.ajusta_data(data_efetiva - 1.day)
+      data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
       preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
       Rails.logger.debug("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
       tentativas -= 1

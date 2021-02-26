@@ -4,35 +4,36 @@ class CotacaoService
   # param @data: irá tentar buscar cotacao para data dada. Se não for possivel, retornar
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
-    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 10.seconds) do
+    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
       data_cotacao = Utils.ajusta_data(data, ativo)
       Rails.logger.info "CotacaoService.cotacao: Cotação ativo #{ativo.nome}: Data ajustada de #{data} para #{data_cotacao}" if data_cotacao != data
 
       cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       if cotacao
         Rails.logger.info "CotacaoService.cotacao: Cotação para #{ativo.nome} em #{data_cotacao} disponível no BD"
-        return cotacao
+      else
+        Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
+        case ativo.tipo
+        when 'acao', 'fii', 'etf'
+          cotacao = _busca_e_registra_acao(ativo, data_cotacao)
+        when 'moeda'
+          cotacao = _busca_e_registra_moeda(ativo, data_cotacao)
+        when 'criptomoeda'
+          cotacao = _busca_e_registra_moeda(ativo, data_cotacao)
+        when 'tesouro'
+          cotacao = _busca_e_registra_tesouro(ativo, data_cotacao)
+        when 'fundo'
+          cotacao = _busca_e_registra_fundo(ativo, data_cotacao)
+        when 'cra', 'debenture'
+          # como não temos um jeito automatizado de buscar cra ou debenture
+          # retornar ultima cotação
+          cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
+        else
+          raise StandardError, 'Tipo de ativo não suportado para busca de cotação'
+        end
       end
 
-      Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
-      case ativo.tipo
-      when 'acao', 'fii', 'etf'
-        return _busca_e_registra_acao(ativo, data_cotacao)
-      when 'moeda'
-        return _busca_e_registra_moeda(ativo, data_cotacao)
-      when 'criptomoeda'
-        return _busca_e_registra_moeda(ativo, data_cotacao)
-      when 'tesouro'
-        return _busca_e_registra_tesouro(ativo, data_cotacao)
-      when 'fundo'
-        return _busca_e_registra_fundo(ativo, data_cotacao)
-      when 'cra', 'debenture'
-        # como não temos um jeito automatizado de buscar cra ou debenture
-        # retornar ultima cotação
-        return Cotacao.where(ativo: ativo).order(data: :desc).first
-      else
-        raise StandardError, 'Tipo de ativo não suportado para busca de cotação'
-      end
+      cotacao
     end
   end
 

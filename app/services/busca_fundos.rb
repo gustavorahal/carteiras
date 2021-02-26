@@ -8,7 +8,7 @@ class BuscaFundos
 
   @url_cvm = 'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS'
 
-  def self.cotas(cnpjs, num_ano, num_mes)
+  def self.busca(cnpjs, num_ano, num_mes)
     raise TypeError unless cnpjs.is_a? Array
 
     arquivo_csv = _busca_arquivo_cvm(num_ano, num_mes)

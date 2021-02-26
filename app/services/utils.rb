@@ -53,4 +53,20 @@ class Utils
     lista
   end
 
+
+  def self.fetch_rapidapi_json(service_url, rapidapi_host)
+    uri = URI(service_url)
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    request = Net::HTTP::Get.new(uri)
+    request['x-rapidapi-host'] = rapidapi_host
+    request['x-rapidapi-key'] = 'ENV.fetch("RAPIDAPI_KEY")'
+
+    response = http.request(request)
+    JSON.parse(response.read_body)
+  end
+
 end

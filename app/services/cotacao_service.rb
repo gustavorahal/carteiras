@@ -12,25 +12,8 @@ class CotacaoService
       if cotacao
         Rails.logger.info "CotacaoService.cotacao: Cotação para #{ativo.nome} em #{data_cotacao} disponível no BD"
       else
-        Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
-        case ativo.tipo
-        when 'acao', 'fii', 'etf'
-          cotacao = _busca_e_registra_acao(ativo, data_cotacao)
-        when 'moeda'
-          cotacao = _busca_e_registra_moeda(ativo, data_cotacao)
-        when 'criptomoeda'
-          cotacao = _busca_e_registra_moeda(ativo, data_cotacao)
-        when 'tesouro'
-          cotacao = _busca_e_registra_tesouro(ativo, data_cotacao)
-        when 'fundo'
-          cotacao = _busca_e_registra_fundo(ativo, data_cotacao)
-        when 'cra', 'debenture'
-          # como não temos um jeito automatizado de buscar cra ou debenture
-          # retornar ultima cotação
-          cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
-        else
-          raise StandardError, 'Tipo de ativo não suportado para busca de cotação'
-        end
+        Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} em #{data_cotacao}"
+        cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_cotacao)
       end
 
       cotacao
@@ -64,7 +47,7 @@ class CotacaoService
   # informações de todos os fundos mas retornar só o que foi pedido
   def self._busca_e_registra_fundo(ativo, data)
     cnpjs = Ativo.where(tipo: 'fundo').pluck(:cnpj)
-    dados = BuscaFundos.cotas(cnpjs, data.year, data.month)
+    dados = BuscaFundos.busca(cnpjs, data.year, data.month)
     dados.each do |cnpj, vl_cotas|
       vl_cotas.each do |vl_cota|
         ativo = Ativo.find_by(cnpj: cnpj)
@@ -78,52 +61,58 @@ class CotacaoService
     Cotacao.find_by(ativo: ativo, data: data)
   end
 
+
+  # @return Cotacao ActiveRecord object
+  def self._busca_e_registra_criptomoeda(ativo, data)
+    _busca_e_registra_moeda(ativo, data)
+  end
+
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = if ativo.id == Moedas.config.ativo_brlusd.id
-              BuscaCotacao.brl_usd
-            elsif ativo.id == Moedas.config.ativo_usdbrl.id
-              BuscaCotacao.usd_brl(data)
-            elsif ativo.id == Moedas.config.ativo_btcbrl.id
-              BuscaCotacao.btc_brl
-            else
-              raise StandardError, "Tipo de moeda #{ativo.tipo} ativo ID #{ativo.id} não suportado para busca de cotação"
-            end
-    return if preco.nil?
-
+    preco = BuscaMoeda.busca(ativo, data)
     Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_tesouro(ativo, data)
-    data_api, preco = BuscaCotacao.tesouro ativo.nome
+    data_api, preco = BuscaTesouro.busca ativo.nome
     # Ignoramos a data_api e consideramos a data fornecida porque
     # a api sempre vai no fornecer a ultima data disponivel
     Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
   # @return Cotacao ActiveRecord object
-  def self._busca_e_registra_acao(ativo, data)
-    bolsa = ('BVMF' if ativo.moeda == 'BRL')
-    data_efetiva = data
-    preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
-    # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
-    tentativas = 3
-    while preco.blank?
-      if tentativas.zero?
-        Rails.logger.info("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
-        return Cotacao.where(ativo_id: ativo.id).last
-      end
-      data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
-      preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
-      Rails.logger.info("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
-      tentativas -= 1
-    end
+  def self._busca_e_registra_bolsa(ativo, data)
+    data_efetiva, preco = BuscaBolsa.busca(ativo, data)
 
     # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
     # dela e "sobreescrever"
     Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
     Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
+  end
+
+  def self._busca_e_registra_fii(ativo, data)
+    _busca_e_registra_bolsa(ativo, data)
+  end
+
+  def self._busca_e_registra_etf(ativo, data)
+    _busca_e_registra_bolsa(ativo, data)
+  end
+
+  def self._busca_e_registra_acao(ativo, data)
+    _busca_e_registra_bolsa(ativo, data)
+  end
+
+  def self._busca_e_registra_cra(ativo, data)
+    # como não temos um jeito automatizado de buscar cra ou debenture
+    # retornar ultima cotação
+    Cotacao.where(ativo: ativo).order(data: :desc).first
+  end
+
+  def self._busca_e_registra_debenture(ativo, data)
+    # como não temos um jeito automatizado de buscar cra ou debenture
+    # retornar ultima cotação
+    _busca_e_registra_cra(ativo, data)
   end
 
 end

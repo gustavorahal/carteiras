@@ -4,7 +4,7 @@ class CotacaoService
   # param @data: irá tentar buscar cotacao para data dada. Se não for possivel, retornar
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
-    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
+    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 10.seconds) do
       data_cotacao = Utils.ajusta_data(data, ativo)
       Rails.logger.info "CotacaoService.cotacao: Cotação ativo #{ativo.nome}: Data ajustada de #{data} para #{data_cotacao}" if data_cotacao != data
 

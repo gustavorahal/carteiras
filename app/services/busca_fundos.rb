@@ -35,7 +35,12 @@ class BuscaFundos
   # @return nome do arquivo baixado
   def self._busca_arquivo_cvm(num_ano, num_mes)
     nome_arquivo_cvm = "inf_diario_fi_#{num_ano}#{'%02d' % num_mes}.csv"
-    return nome_arquivo_cvm if File.exists? nome_arquivo_cvm
+    # Só podemos aproveitar o arquivo já baixado se já viramos o mês e portanto
+    # não haverá mais atualização nele.
+    if (File.exist? nome_arquivo_cvm) &&
+              (Date.today.month != num_mes && Date.today.year != num_ano)
+      return nome_arquivo_cvm
+    end
 
     url_arquivo = "#{@url_cvm}/#{nome_arquivo_cvm}"
     Rails.logger.info "Baixando arquivo CSV em #{url_arquivo}"

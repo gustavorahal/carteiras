@@ -6,12 +6,15 @@ class CotacaoService
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
       data_cotacao = Utils.ajusta_data(data, ativo)
-      Rails.logger.info "Data ajustada para #{data_cotacao}" if data_cotacao != data
-      
-      cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
-      return cotacao if cotacao
+      Rails.logger.info "CotacaoService.cotacao: Cotação ativo #{ativo.nome}: Data ajustada de #{data} para #{data_cotacao}" if data_cotacao != data
 
-      Rails.logger.info "Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
+      cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
+      if cotacao
+        Rails.logger.info "CotacaoService.cotacao: Cotação para #{ativo.nome} em #{data_cotacao} disponível no BD"
+        return cotacao
+      end
+
+      Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
       case ativo.tipo
       when 'acao', 'fii', 'etf'
         return _busca_e_registra_acao(ativo, data_cotacao)

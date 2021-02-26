@@ -95,7 +95,7 @@ class ImportaExtrato
 
   def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor)
     extrato_atual = conta_corrente.extratos
-    Rails.logger.debug("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
+    Rails.logger.info("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
     return unless extrato_atual.find_by(liquidacao: liquidacao,
                                         movimentacao: movimentacao,
                                         descricao: descricao,

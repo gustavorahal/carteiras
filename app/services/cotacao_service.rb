@@ -6,12 +6,12 @@ class CotacaoService
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 3.seconds) do
       data_cotacao = Utils.ajusta_data(data, ativo)
-      Rails.logger.debug "Data ajustada para #{data_cotacao}" if data_cotacao != data
+      Rails.logger.info "Data ajustada para #{data_cotacao}" if data_cotacao != data
       
       cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
       return cotacao if cotacao
 
-      Rails.logger.debug "Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
+      Rails.logger.info "Buscando cotação para #{ativo.nome} na data #{data_cotacao}"
       case ativo.tipo
       when 'acao', 'fii', 'etf'
         return _busca_e_registra_acao(ativo, data_cotacao)
@@ -107,12 +107,12 @@ class CotacaoService
     tentativas = 3
     while preco.blank?
       if tentativas.zero?
-        Rails.logger.debug("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
+        Rails.logger.info("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
         return Cotacao.where(ativo_id: ativo.id).last
       end
       data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
       preco = BuscaCotacao.acao(ativo.nome, data_efetiva, bolsa)
-      Rails.logger.debug("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
+      Rails.logger.info("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
       tentativas -= 1
     end
 

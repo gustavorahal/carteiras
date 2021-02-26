@@ -6,7 +6,7 @@ module CorretorasHelper
     begin
       url = send("#{corretora.nome.downcase}_url", ativo, operacao)
     rescue NoMethodError
-      Rails.logger.debug("Url de btn operacao para corretora #{corretora.nome} não definido")
+      Rails.logger.info("Url de btn operacao para corretora #{corretora.nome} não definido")
       return nil
     end
 

@@ -38,7 +38,7 @@ class BuscaFundos
     return nome_arquivo_cvm if File.exists? nome_arquivo_cvm
 
     url_arquivo = "#{@url_cvm}/#{nome_arquivo_cvm}"
-    Rails.logger.debug "Baixando arquivo CSV em #{url_arquivo}"
+    Rails.logger.info "Baixando arquivo CSV em #{url_arquivo}"
 
     download = URI.parse(url_arquivo).open
     IO.copy_stream(download, nome_arquivo_cvm)

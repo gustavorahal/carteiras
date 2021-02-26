@@ -47,7 +47,7 @@ class Operacao < ApplicationRecord
                   else
                     usdbrl
                   end
-    Rails.logger.debug "Operacao Model ajustou dolar para #{self.usdbrl}"
+    Rails.logger.info "Operacao Model ajustou dolar para #{self.usdbrl}"
   end
 
   def ajusta_mon_ou_des

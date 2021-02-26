@@ -32,7 +32,7 @@ class BuscaCotacao
     # formato de data esperado pela API: 11-19-2020 (MM-DD-AAAA)
     data_str = data.strftime('%m-%d-%Y')
     url = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='#{data_str}'&$top=100&$format=json"
-    Rails.logger.debug "Chamando #{url}"
+    Rails.logger.info "Chamando #{url}"
     uri = URI(url)
     response = Net::HTTP.get(uri)
     json_response = JSON.parse(response)
@@ -44,14 +44,14 @@ class BuscaCotacao
   def self.brl_usd
     api_host = 'currency-converter5.p.rapidapi.com'
     url = 'https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1'
-    Rails.logger.debug "Chamando #{url}"
+    Rails.logger.info "Chamando #{url}"
     json_response = _fetch_rapidapi_json(url, api_host)
     json_response['rates']['USD']['rate'].to_f
   end
 
   def self.btc_brl
     url = 'https://coingecko.p.rapidapi.com/simple/price?ids=BITCOIN&vs_currencies=BRL'
-    Rails.logger.debug "Chamando #{url}"
+    Rails.logger.info "Chamando #{url}"
     api_host = 'coingecko.p.rapidapi.com'
 
     json_response = _fetch_rapidapi_json(url, api_host)
@@ -82,7 +82,7 @@ class BuscaCotacao
     data_str = data.strftime('%Y-%m-%d')
 
     url = "http://api.marketstack.com/v1/tickers/#{ticker}/eod/#{data_str}?access_key=#{access_key}"
-    Rails.logger.debug "Chamando #{url}"
+    Rails.logger.info "Chamando #{url}"
     uri = URI(url)
     json = Net::HTTP.get(uri)
     api_response = JSON.parse(json)
@@ -117,7 +117,7 @@ class BuscaCotacao
       from_data = data.to_time.to_i
       to_data = (data + 1.day).to_time.to_i
       url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
-      Rails.logger.debug("Chamando #{url}")
+      Rails.logger.info("Chamando #{url}")
       json_response = _fetch_rapidapi_json(url, api_host)
       if json_response['chart']['result'].nil?
         raise StandardError, "Yahoo API: Não foi possivel obter cotação de #{ticker_str}: #{json_response['chart']['error']['description']}"

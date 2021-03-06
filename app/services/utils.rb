@@ -27,7 +27,7 @@ class Utils
     data_ajustada -= 1.day if data == Date.today && dia_util?(data) && Time.now.hour < 22
     data_ajustada -= 1.day until dia_util?(data_ajustada)
     # fundos tem um atraso de 3 dias uteis para atualizar cotas
-    data_ajustada -= 3.days if ativo.tipo == 'fundo'
+    data_ajustada -= 3.days if ativo.tipo == 'fundo' && data == Date.today
     
     data_ajustada
   end

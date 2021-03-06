@@ -5,21 +5,40 @@ class CotacaoService
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
-      data_cotacao = Utils.ajusta_data(data, ativo)
-      Rails.logger.info "CotacaoService.cotacao: Cotação ativo #{ativo.nome}: Data ajustada de #{data} para #{data_cotacao}" if data_cotacao != data
-
-      cotacao = Cotacao.where(ativo: ativo, data: data_cotacao).order(data: :desc).first
-      if cotacao
-        Rails.logger.info "CotacaoService.cotacao: Cotação para #{ativo.nome} em #{data_cotacao} disponível no BD"
-      else
-        Rails.logger.info "CotacaoService.cotacao: Buscando cotação para #{ativo.nome} em #{data_cotacao}"
-        cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_cotacao)
+      cotacao = Cotacao.where(ativo: ativo, data: data).order(data: :desc).first
+      if cotacao.nil?
+        Rails.logger.info "CotacaoService: Cotação para #{ativo.nome} em #{data} não encontrada no BD, buscando"
+        cotacao = _resolve_cotacao(ativo, data)
       end
 
       cotacao
     end
   end
 
+  # Encontra uma cotacão mais adequada de acordo com a data informada
+  def self._resolve_cotacao(ativo, data)
+    data_ajustada = Utils.ajusta_data(data, ativo)
+    ultima_cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
+
+    # Se eu pedi cotaçao para data de hoje (e não tem no BD), supõem-se então
+    # que eu queira a data mais próxima
+    return ultima_cotacao if ultima_cotacao.data > data_ajustada && data == Date.today
+
+    if data_ajustada != data
+      Rails.logger.info "CotacaoService: Cotação para #{ativo.nome}: Data ajustada de #{data} para #{data_ajustada}"
+    end
+
+    cotacao = Cotacao.where(ativo: ativo, data: data_ajustada).order(data: :desc).first
+    if cotacao
+      Rails.logger.info "CotacaoService: Cotação para #{ativo.nome} em #{data_ajustada} disponível no BD"
+    else
+      Rails.logger.info "CotacaoService: Buscando cotação para #{ativo.nome} em #{data_ajustada}"
+      cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+    end
+
+    cotacao
+  end
+  
   def self.cotacao_usdbrl(data)
     cotacao(Moedas.config.ativo_usdbrl, data)
   end

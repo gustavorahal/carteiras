@@ -91,11 +91,13 @@ class CarteiraAtivos
   end
 
   def porcentagem_por_moeda
-    # Calcula valores em ativos
     moeda_valores = {}
+    moeda_valores['USD'] = 0
+    moeda_valores['BRL'] = 0
+
+    # Calcula valores em ativos
     ativos_posicao.each do |ativo_posicao|
       moeda = ativo_posicao.ativo.moeda
-      moeda_valores[moeda] = 0 unless moeda.in? moeda_valores.keys
       moeda_valores[moeda] += ativo_posicao.valor_em_brl
     end
 

@@ -113,7 +113,7 @@ class CarteiraAtivos
   end
 
   def total_investido
-    total_c_e_v + saldo_cc_total
+    total_c_e_v
   end
 
   def total_ativos
@@ -138,7 +138,7 @@ class CarteiraAtivos
   end
 
   def rentabilidade
-    (total_geral / total_investido - 1) * 100
+    (total_ativos / total_investido - 1) * 100
   end
 
   def porcentagem_ativo(ativo)

@@ -85,10 +85,15 @@ class CotacaoService
   def self._busca_e_registra_bolsa(ativo, data)
     data_efetiva, preco = BuscaBolsa.busca(ativo, data)
 
-    # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
-    # dela e "sobreescrever"
-    Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
-    Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
+    if preco.nil?
+      Rails.logger.info("Não encontrei preço para #{ativo.nome} em #{data_efetiva}. Pegando última cotação")
+      Cotacao.where(ativo_id: ativo.id).last
+    else
+      # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
+      # dela e "sobreescrever"
+      Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
+      Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
+    end
   end
 
   def self._busca_e_registra_fii(ativo, data)

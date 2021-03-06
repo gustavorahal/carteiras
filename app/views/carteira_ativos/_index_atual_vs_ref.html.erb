@@ -1,25 +1,6 @@
 
 <%= render 'common/titulo_pagina', titulo: "Seguindo carteira #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
 
-<br>
-<h3>Total Geral de <%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">(inclui saldo em CC) em <%= display_data @data %> </small></h3>
-<br>
-
-<div class="card">
-  <div class="card-body">
-    <table class="table table-borderless table-sm">
-      <h5 class="card-title">Composição</h5>
-      <tr><td></td><td><strong>Posição</strong></td><td><strong>Referência</strong></td></tr>
-      <% @porcentagens_por_book_ref.each do |book, porcentagem_ref| %>
-        <tr>
-          <td><%= book %></td>
-          <td><%= display_porcentagem @porcentagens_por_book_carteira[book] %></td>
-          <td><%= display_porcentagem porcentagem_ref %></td>
-        </tr>
-      <% end %>
-    </table>
-  </div>
-</div>
 
 <div class="container">
   <table class="table table-sm">

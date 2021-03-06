@@ -1,9 +1,11 @@
-<% if @view == 'book' %>
-  <%= render 'index_book' %>
-<% elsif @view == 'corretoras' %>
+
+<%= render 'historico_header' %>
+<%= render 'painel_sintese' %>
+
+<% if @view == 'corretoras' %>
   <%= render 'index_corretoras' %>
 <% elsif @view == 'atual_vs_ref' %>
   <%= render 'index_atual_vs_ref' %>
 <% else %>
-  <h4>View não disponível</h4>
+  <%= render 'index_book' %>
 <% end %>

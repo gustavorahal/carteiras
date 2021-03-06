@@ -18,7 +18,7 @@ Rails.application.routes.draw do
     get 'impostos', to: 'impostos#index'
   end
 
-  get '/carteira_ativos/:carteira_id/ativos', to: 'carteira_ativos#index', as: 'carteira_ativos'
+  get '/carteira_ativos/:carteira_id', to: 'carteira_ativos#index', as: 'carteira_ativos'
   get '/carteira_ativos/:carteira_id/ativos/:ativo_id', to: 'carteira_ativos#show', as: 'carteira_ativo'
 
   resources :referencias do

@@ -18,22 +18,16 @@ class Referencia < ApplicationRecord
     lista
   end
 
-  def referencia_ativos_por_book
-    lista = {}
-    referencia_ativos.where.not(porcentagem: 0).order(:book).each do |referencia_ativo|
-      lista[referencia_ativo.book] = [] unless referencia_ativo.book.in? lista
-      lista[referencia_ativo.book].push referencia_ativo
-    end
-
-    lista
-  end
-
   def porcentagens_por_book
     referencia_ativos
         .where.not(porcentagem: 0)
         .group(:book)
         .order(:book)
         .sum(:porcentagem)
+  end
+
+  def porcentagem_por_moeda
+    referencia_ativos.includes(:ativo).where.not(porcentagem: 0).group('ativos.moeda').sum(:porcentagem)
   end
 
   def sum_porcentagem_ativos

@@ -10,6 +10,7 @@ class CarteiraAtivos
     @data = data
     @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
     @saldo_cc_por_corretora = nil
+    @saldo_cc_total = nil
     @ativos_posicao = [] # lista de CarteiraAtivoPosicao
     @total_ativos = nil
     @referencia = @carteira.referencia
@@ -38,7 +39,7 @@ class CarteiraAtivos
       SELECT ativos.id, ROUND(SUM(quantidade)::numeric, 10)
       FROM ativos
       JOIN operacoes ON operacoes.ativo_id = ativos.id
-      WHERE 
+      WHERE
           operacoes.carteira_id = #{@carteira.id} AND
           operacoes.data::date <= '#{data_str}'
       GROUP BY ativos.id, ativos.nome
@@ -89,6 +90,26 @@ class CarteiraAtivos
     tc
   end
 
+  def porcentagem_por_moeda
+    # Calcula valores em ativos
+    moeda_valores = {}
+    ativos_posicao.each do |ativo_posicao|
+      moeda = ativo_posicao.ativo.moeda
+      moeda_valores[moeda] = 0 unless moeda.in? moeda_valores.keys
+      moeda_valores[moeda] += ativo_posicao.valor_em_brl
+    end
+
+    # Soma valores em CCs
+    moeda_valores['USD'] += ContaCorrente.saldo_cc_usd(@carteira.investidor, @data) * @valor_usdbrl
+    moeda_valores['BRL'] += ContaCorrente.saldo_cc_brl(@carteira.investidor, @data)
+
+    # Calcula porcentagem tudo
+    percent_moeda = {}
+    moeda_valores.each { |moeda, valor| percent_moeda[moeda] = ((valor / total_geral) * 100).round(2) }
+
+    percent_moeda
+  end
+
   def total_investido
     total_c_e_v + saldo_cc_total
   end
@@ -105,7 +126,9 @@ class CarteiraAtivos
   end
 
   def saldo_cc_total
-    ContaCorrente.saldo_cc_total(@carteira.investidor, @data)
+    return @saldo_cc_total unless @saldo_cc_total.nil?
+
+    @saldo_cc_total = ContaCorrente.saldo_cc_total(@carteira.investidor, @data)
   end
 
   def total_geral

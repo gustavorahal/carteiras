@@ -4,10 +4,4 @@ class CarteirasController < ApplicationController
     @carteiras = Carteira.all
   end
 
-  def show
-    @carteira = Carteira.find params[:id]
-    @contas_correntes = ContaCorrente.includes(:corretora).where(investidor_id: @carteira.investidor.id)
-    @carteira_ativos = CarteiraAtivos.new(@carteira, @data)
-  end
-
 end

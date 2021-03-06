@@ -1,4 +1,4 @@
 
 <% @carteiras.each do |carteira| %>
-  <h5><%= link_to carteira.nome, carteira_path(carteira) %> </h5>
+  <h5><%= link_to carteira.nome, carteira_ativos_path(carteira) %> </h5>
 <% end %>

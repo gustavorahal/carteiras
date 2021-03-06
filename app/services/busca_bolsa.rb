@@ -11,13 +11,14 @@ class BuscaBolsa
     tentativas = 3
     while preco.blank?
       if tentativas.zero?
-        Rails.logger.info("Desistindo de tentar, pegando última cotacao para #{ativo.nome}")
-        return Cotacao.where(ativo_id: ativo.id).last
+        preco = nil
+        break
+      else
+        data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
+        preco = _api_busca(ativo.nome, data_efetiva, bolsa)
+        Rails.logger.info("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
+        tentativas -= 1
       end
-      data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
-      preco = _api_busca(ativo.nome, data_efetiva, bolsa)
-      Rails.logger.info("Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
-      tentativas -= 1
     end
 
     [data_efetiva, preco]
@@ -30,14 +31,12 @@ class BuscaBolsa
 
   def self._api_busca(ticker, data, bolsa)
     begin
-      preco = _api_marketstack(ticker, data, bolsa)
-    rescue StandardError
       preco = _api_yahoo_finance(ticker, data, bolsa)
+    rescue StandardError
+      preco = _api_marketstack(ticker, data, bolsa)
     end
 
-    if preco.nil?
-      preco = _api_yahoo_finance(ticker, data, bolsa)
-    end
+    preco = _api_marketstack(ticker, data, bolsa) if preco.nil?
 
     preco
   end

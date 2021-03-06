@@ -31,7 +31,7 @@
         <h5>Total <%= display_porcentagem @referencia.sum_porcentagem_ativos %></h5>
       </td>
     </tr>
-    <% @referencia.referencia_ativos_por_book.each do |book, referencia_ativos| %>
+    <% @referencia.ativos_por_book.each do |book, referencia_ativos| %>
       <% book_percent = @porcentagens_por_book_ref[book] %>
       <tr class="table-primary text-center">
         <td colspan="6">

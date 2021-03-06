@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <% if @carteira %>
-    <a class="navbar-brand" href="<%= carteira_path(@carteira) %>">Carteira <%= @carteira.nome %></a>
+    <a class="navbar-brand" href="<%= carteira_ativos_path(@carteira) %>">Carteira <%= @carteira.nome %></a>
   <% else %>
     <a class="navbar-brand" href="<%= root_path %>">Carteiras</a>
   <% end %>

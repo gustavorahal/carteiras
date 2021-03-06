@@ -141,6 +141,10 @@ class CarteiraAtivos
     (total_ativos / total_investido - 1) * 100
   end
 
+  def rendimento
+    total_ativos - total_investido
+  end
+
   def porcentagem_ativo(ativo)
     ap = busca_ativo_posicao(ativo)
     ap ? (ap.valor_em_brl / total_geral * 100) : 0

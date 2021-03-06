@@ -4,12 +4,14 @@
       <div class="card">
         <div class="card-body">
           <h3><%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
-          <small class="text-muted"><%= display_porcentagem @carteira_ativos.rentabilidade, cores: true %> dos
-            <%= display_moeda @carteira_ativos.total_investido %> investidos
+          <br>
+          <h5><%= display_moeda @carteira_ativos.total_ativos %>
+            <small class="text-muted">
+              em ativos | rendimento de <%= display_moeda @carteira_ativos.rendimento %>
+              (<%= display_porcentagem @carteira_ativos.rentabilidade, cores: true %>) dos
+              <%= display_moeda @carteira_ativos.total_investido %> investidos
           </small>
-          <br>
-          <br>
-          <h5><%= display_moeda @carteira_ativos.total_ativos %><small class="text-muted"> em ativos</small></h5>
+          </h5>
           <% @carteira_ativos.total_ativos_por_corretora.each do |corretora, moeda_total| %>
             <% moeda_total.each do |moeda, total| %>
               <span class="font-weight-lighter">

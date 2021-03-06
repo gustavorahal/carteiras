@@ -23,16 +23,12 @@ class Utils
   # @return Objeto data, considerando fatores como final de semana,
   # feriado, fechamento de pregão e tipo de ativo
   def self.ajusta_data(data, ativo)
-    data_ajustada = if data == Date.today && dia_util?(data) && Time.now.hour < 22
-                      # fundos tem um atraso de 3-4 dias uteis para atualizar cotas
-                      volta_dias = ativo.tipo == 'fundo' ? 4.days : 1.day
-                      data - volta_dias
-                    else
-                      data
-                    end
-
+    data_ajustada = data
+    data_ajustada -= 1.day if data == Date.today && dia_util?(data) && Time.now.hour < 22
     data_ajustada -= 1.day until dia_util?(data_ajustada)
-
+    # fundos tem um atraso de 3 dias uteis para atualizar cotas
+    data_ajustada -= 3.days if ativo.tipo == 'fundo'
+    
     data_ajustada
   end
 

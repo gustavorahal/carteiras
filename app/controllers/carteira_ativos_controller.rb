@@ -28,7 +28,7 @@ class CarteiraAtivosController < ApplicationController
   end
 
   def set_vars_view_atual_vs_ref
-    @referencia_ativos_por_book = @carteira.referencia.ativos_por_book
+    @referencia_ativos_por_book = @carteira.referencia.referencia_ativos_por_book
     @carteira_lista_de_ativos = @carteira_ativos.ativos
     @carteira_ativos_restante = @carteira_lista_de_ativos.clone
   end

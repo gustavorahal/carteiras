@@ -1,6 +1,5 @@
 
-<%= render 'common/titulo_pagina', titulo: "Seguindo carteira #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
-
+<%= render 'common/titulo_pagina', titulo: "Posição atual vs. referencia #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
 
 <div class="container">
   <table class="table table-sm">
@@ -14,7 +13,7 @@
     </thead>
     <tbody>
 
-    <% @referencia_ativos_por_book.each do |book, ativos| %>
+    <% @referencia_ativos_por_book.each do |book, referencia_ativos| %>
       <tr class="table-primary">
         <td>
           <h6><%= book %></h6>
@@ -27,7 +26,8 @@
         </td>
         <td></td>
       </tr>
-      <% ativos.each do |ativo| %>
+      <% referencia_ativos.each do |referencia_ativo| %>
+        <% ativo = referencia_ativo.ativo %>
         <% if @carteira_lista_de_ativos.include?(ativo) %>
           <% @carteira_ativos_restante.delete ativo %>
         <% end %>
@@ -37,7 +37,7 @@
           <td>
             <%= display_porcentagem percent_ativo %>
           </td>
-          <td><%= display_porcentagem @carteira.referencia.porcentagem(ativo) %></td>
+          <td><%= display_porcentagem referencia_ativo.porcentagem %></td>
           <td>
             <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
             <% quant = @carteira_ativos_referencia.diff_quant_referencia(ativo) %>

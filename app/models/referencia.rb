@@ -8,11 +8,12 @@ class Referencia < ApplicationRecord
     Ativo.all.order(:nome) - ativos.where.not('referencia_ativos.porcentagem': 0)
   end
 
-  def ativos_por_book
+  # Dicionario de Book e objetos ReferenciaAtivo
+  def referencia_ativos_por_book
     lista = {}
     referencia_ativos.where.not(porcentagem: 0).order(:book).each do |referencia_ativo|
       lista[referencia_ativo.book] = [] unless referencia_ativo.book.in? lista
-      lista[referencia_ativo.book].push referencia_ativo.ativo
+      lista[referencia_ativo.book].push referencia_ativo
     end
 
     lista

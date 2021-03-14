@@ -14,15 +14,13 @@ class AtivoPosicao
                Ativo.find(ativo_ref)
              end
     @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id)
+    # Faz sentido inferir que o ativo esta na corretora em que a ultima operação foi feita
+    # O "first" é porque a ordem das operacoes e decrescente
+    @corretora = @operacoes_ativo.first.corretora
     @data = data
     @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
     @cotacao = CotacaoService.cotacao(@ativo, @data)
-    # Em termos de layout de banco, cada operação acontece em determinada corretora
-    # Entretanto, na pratica, todas operações acabam acontecendo em uma corretora somente
-    # portanto é possível dizer que um ativo de determinada carteira esta em determinada
-    # corretora
-    @corretora = @operacoes_ativo.take.corretora
 
     raise StandardError, "Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end

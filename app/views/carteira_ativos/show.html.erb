@@ -24,6 +24,9 @@
 
   <dt class="col-sm-3">Porcentagem teórica</dt>
   <dd class="col-sm-9"><%= display_porcentagem @carteira.referencia.porcentagem(@ativo) %></dd>
+
+  <dt class="col-sm-3">Corretora</dt>
+  <dd class="col-sm-9"><%= @ativo_posicao.corretora.nome %></dd>
 </dl>
 
 <br>

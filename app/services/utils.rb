@@ -1,5 +1,13 @@
 class Utils
 
+  def self.transferencia_de_custodia(carteira, ativo, nova_corretora)
+    Operacao.create!(carteira: carteira, ativo: ativo, data: Date.today, quantidade: 0,
+                     valor_unit: 0, operacao: 'C',
+                     corretora: nova_corretora, operacao_sys: true,
+                     observacao: "Transferência de custódia para #{nova_corretora.nome}")
+  end
+
+
   # Ajusta data considerando ultimo dia de pregão
   #
   # Se estamos no horário do pregão, pegar cotação do dia anterior.

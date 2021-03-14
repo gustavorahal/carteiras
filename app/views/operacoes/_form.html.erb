@@ -16,7 +16,7 @@
   <%= f.number_field :valor_unit, step: :any %>
 
   <%= f.text_field :observacao %>
-  <%= f.form_group :terms, help: "Operação de sistema, geralmente usada para ajustes em casos de desdobramentos e grupamentos" do %>
+  <%= f.form_group :terms, help: "Operação de sistema, geralmente usada para ajustes em casos de desdobramentos ou grupamentos, migração de corretora etc." do %>
     <%= f.check_box :operacao_sys %>
   <% end %>
 

@@ -74,6 +74,7 @@ class Impostos
     carteira.operacoes
             .where(data: comeco_mes..fim_mes,
                operacao: 'V',
+               operacao_sys: false,
                'ativos.tipo': (tipos.map { |tipo| Ativo.tipos[tipo] }),
                'ativos.moeda': moeda)
   end

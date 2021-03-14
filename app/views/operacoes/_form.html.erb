@@ -16,6 +16,9 @@
   <%= f.number_field :valor_unit, step: :any %>
 
   <%= f.text_field :observacao %>
+  <%= f.form_group :terms, help: "Operação de sistema, geralmente usada para ajustes em casos de desdobramentos e grupamentos" do %>
+    <%= f.check_box :operacao_sys %>
+  <% end %>
 
   <h5>Custos Operacionais na moeda do ativo</h5>
   <%= f.number_field :co_taxa, step: :any %>

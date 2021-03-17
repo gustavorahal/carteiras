@@ -2,12 +2,13 @@ class ExtratosController < ApplicationController
 
   def import
     cc = ContaCorrente.find params[:conta_corrente_id]
+    carteira = cc.carteira
     extrato_file = params[:file]
     begin
       ImportaExtrato.importar(cc, extrato_file.path)
-      redirect_to conta_corrente_path(cc), notice: 'Extrato importado com sucesso'
+      redirect_to carteira_conta_corrente_path(carteira, cc), notice: 'Extrato importado com sucesso'
     rescue StandardError => e
-      redirect_to conta_corrente_path(cc), alert: e.message
+      redirect_to carteira_conta_corrente_path(carteira, cc), alert: e.message
     end
   end
 
@@ -20,10 +21,10 @@ class ExtratosController < ApplicationController
   def create
     @extrato = Extrato.new secure_params
     @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
-    @investidor = @conta_corrente.investidor
+    @carteira = @conta_corrente.carteira
 
     if @extrato.save
-      redirect_to conta_corrente_path(@conta_corrente)
+      redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente)
     else
       render 'new'
     end

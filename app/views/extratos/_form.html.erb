@@ -1,4 +1,4 @@
-<%= render 'common/titulo_pagina', titulo: "Conta Corrente corretora #{@conta_corrente.corretora.nome} de #{@investidor.nome} em #{@conta_corrente.moeda}" %>
+<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} carteira #{@carteira.nome} em #{@conta_corrente.moeda}" %>
 
 <%= bootstrap_form_for [@conta_corrente, @extrato] do |f| %>
   <% if @extrato.errors[:base].present? %>

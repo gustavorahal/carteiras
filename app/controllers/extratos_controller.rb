@@ -15,7 +15,7 @@ class ExtratosController < ApplicationController
   def new
     @extrato = Extrato.new
     @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
-    @investidor = @conta_corrente.investidor
+    @carteira = @conta_corrente.carteira
   end
 
   def create

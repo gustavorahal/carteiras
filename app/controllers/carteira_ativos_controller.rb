@@ -22,7 +22,7 @@ class CarteiraAtivosController < ApplicationController
     @carteira_ativos_referencia = CarteiraAtivosReferencia.new(@carteira_ativos)
     @porcentagens_por_book_carteira = @carteira_ativos_referencia.porcentagens_por_book
     @valor_por_book_carteira = @carteira_ativos_referencia.valor_por_book
-    @contas_correntes = ContaCorrente.includes(:corretora).where(investidor_id: @carteira.investidor.id)
+    @contas_correntes = ContaCorrente.includes(:corretora).where(carteira_id: @carteira.id)
     @porcentagens_por_book_ref = @carteira.referencia.porcentagens_por_book
     @ativos_posicao_por_book = @carteira_ativos_referencia.ativos_posicao_por_book
   end

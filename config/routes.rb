@@ -6,16 +6,18 @@ Rails.application.routes.draw do
     resources :cotacoes
   end
   resources :corretoras
-  resources :conta_correntes do
-    resources :extratos do
-      collection { post 'import' }
-    end
-  end
   resources :investidores
 
   resources :carteiras do
     resources :operacoes
     get 'impostos', to: 'impostos#index'
+    get 'movimentacoes', to: 'movimentacoes#index'
+    get 'proventos', to: 'proventos#index'
+    resources :conta_correntes do
+      resources :extratos do
+        collection { post 'import' }
+      end
+    end
   end
 
   get '/carteira_ativos/:carteira_id', to: 'carteira_ativos#index', as: 'carteira_ativos'

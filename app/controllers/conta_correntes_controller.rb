@@ -1,15 +1,14 @@
 class ContaCorrentesController < ApplicationController
 
   def index
-    @investidor = Investidor.find params[:investidor_id]
-    @conta_correntes = ContaCorrente.includes(:corretora).where(investidor: @investidor)
+    @carteira = Carteira.find params[:carteira_id]
+    @conta_correntes = ContaCorrente.includes(:corretora).where(carteira: @carteira)
   end
 
   def show
     @conta_corrente = ContaCorrente.find params[:id]
     @extratos = @conta_corrente.extratos.where("liquidacao::date <= '#{@data}'").order(liquidacao: :desc)
-    @investidor = @conta_corrente.investidor
+    @carteira = @conta_corrente.carteira
   end
-
 
 end

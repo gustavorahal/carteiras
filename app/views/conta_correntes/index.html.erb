@@ -1,5 +1,5 @@
-<%= render 'common/titulo_pagina', titulo: "Contas Correntes de #{@investidor.nome}" %>
+<%= render 'common/titulo_pagina', titulo: "Contas Correntes carteira #{@carteira.nome}" %>
 
 <% @conta_correntes.each do |cc| %>
-  <p><%= link_to cc.corretora.nome, conta_corrente_path(cc) %></p>
+  <p><%= link_to cc.corretora.nome, carteira_conta_corrente_path(@carteira, cc) %> em <%= cc.moeda %></p>
 <% end %>

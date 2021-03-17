@@ -48,6 +48,8 @@ class BuscaBolsa
     ticker += '.BVMF' if bolsa == 'BVMF'
 
     access_key = ENV['MARKETSTACK_ACCESS_KEY']
+    raise StandardError "MARKETSTACK_ACCESS_KEY env var not set" if access_key.blank?
+
     data_str = data.strftime('%Y-%m-%d')
 
     url = "http://api.marketstack.com/v1/tickers/#{ticker}/eod/#{data_str}?access_key=#{access_key}"

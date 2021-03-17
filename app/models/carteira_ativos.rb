@@ -102,8 +102,8 @@ class CarteiraAtivos
     end
 
     # Soma valores em CCs
-    moeda_valores['USD'] += ContaCorrente.saldo_cc_usd(@carteira.investidor, @data) * @valor_usdbrl
-    moeda_valores['BRL'] += ContaCorrente.saldo_cc_brl(@carteira.investidor, @data)
+    moeda_valores['USD'] += ContaCorrente.saldo_cc_usd(@carteira, @data) * @valor_usdbrl
+    moeda_valores['BRL'] += ContaCorrente.saldo_cc_brl(@carteira, @data)
 
     # Calcula porcentagem tudo
     percent_moeda = {}
@@ -113,24 +113,34 @@ class CarteiraAtivos
   end
 
   def total_investido
-    total_c_e_v
+    @carteira.movimentacoes.total
   end
 
   def total_ativos
     return @total_ativos unless @total_ativos.nil?
 
     @total_ativos = 0
-    ativos_posicao.each do |cap|
-      @total_ativos += cap.valor_em_brl
+    ativos_posicao.each do |ap|
+      @total_ativos += ap.valor_em_brl
     end
 
     @total_ativos
   end
 
+  def total_fii
+    total = 0
+    ativos_posicao.each do |ap|
+      total += ap.valor_em_brl if ap.ativo.fii?
+      Rails.logger.info "#{ap.ativo.nome} #{ap.valor_em_brl}" if ap.ativo.fii?
+    end
+
+    total
+  end
+
   def saldo_cc_total
     return @saldo_cc_total unless @saldo_cc_total.nil?
 
-    @saldo_cc_total = ContaCorrente.saldo_cc_total(@carteira.investidor, @data)
+    @saldo_cc_total = ContaCorrente.saldo_cc_total(@carteira, @data)
   end
 
   def total_geral

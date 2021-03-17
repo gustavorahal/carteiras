@@ -1,10 +1,10 @@
-<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} (#{@conta_corrente.moeda}) de #{@investidor.nome} em #{display_data @data}" %>
+<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} (#{@conta_corrente.moeda}) de carteira #{@carteira.nome} em #{display_data @data}" %>
 
 <h6>Saldo <%= display_moeda @conta_corrente.saldo(@data), moeda: @conta_corrente.moeda %></h6>
 
-<%= render 'common/btn_new', url: new_conta_corrente_extrato_path(@conta_corrente), label: 'Nova entrada' %>
+<%= render 'common/btn_new', url: new_carteira_conta_corrente_extrato_path(@carteira, @conta_corrente), label: 'Nova entrada' %>
 
-<%= bootstrap_form_tag url: import_conta_corrente_extratos_path(@conta_corrente) do |f| %>
+<%= bootstrap_form_tag url: import_carteira_conta_corrente_extratos_path(@carteira, @conta_corrente) do |f| %>
   <%= hidden_field_tag :conta_corrente_id, @conta_corrente.id %>
   <%= f.file_field :file, label: 'Importar extrato', placeholder: 'Arquivo de extrato' %>
 
@@ -18,6 +18,7 @@
     <th scope="col">Movimentação</th>
     <th scope="col">Descrição</th>
     <th scope="col">Valor</th>
+    <th scope="col">Processado?</th>
   </tr>
   </thead>
 
@@ -28,6 +29,7 @@
       <td><%= display_data extrato.movimentacao %></td>
       <td><%= extrato.descricao %></td>
       <td><%= display_moeda extrato.valor, moeda: @conta_corrente.moeda, cores: true %></td>
+      <td><%= extrato.processado %></td>
     </tr>
   <% end %>
   </tbody>

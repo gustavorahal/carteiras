@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_13_234747) do
+ActiveRecord::Schema.define(version: 2021_03_15_211428) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -43,6 +43,8 @@ ActiveRecord::Schema.define(version: 2021_03_13_234747) do
     t.string "moeda", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "carteira_id"
+    t.index ["carteira_id"], name: "index_conta_correntes_on_carteira_id"
     t.index ["corretora_id"], name: "index_conta_correntes_on_corretora_id"
     t.index ["investidor_id", "corretora_id", "moeda"], name: "index_cc_on_investidor_id_and_corretora_id_and_moeda", unique: true
     t.index ["investidor_id"], name: "index_conta_correntes_on_investidor_id"
@@ -72,6 +74,7 @@ ActiveRecord::Schema.define(version: 2021_03_13_234747) do
     t.datetime "created_at", precision: 6, default: -> { "now()" }, null: false
     t.datetime "updated_at", precision: 6, default: -> { "now()" }, null: false
     t.bigint "conta_corrente_id", null: false
+    t.boolean "processado", default: false
     t.index ["conta_corrente_id"], name: "index_extratos_on_conta_corrente_id"
   end
 
@@ -79,6 +82,20 @@ ActiveRecord::Schema.define(version: 2021_03_13_234747) do
     t.string "nome", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "movimentacoes", force: :cascade do |t|
+    t.bigint "carteira_id", null: false
+    t.bigint "corretora_id", null: false
+    t.bigint "extrato_id"
+    t.float "valor", null: false
+    t.string "moeda", default: "BRL", null: false
+    t.date "data", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["carteira_id"], name: "index_movimentacoes_on_carteira_id"
+    t.index ["corretora_id"], name: "index_movimentacoes_on_corretora_id"
+    t.index ["extrato_id"], name: "index_movimentacoes_on_extrato_id"
   end
 
   create_table "operacoes", id: :bigint, default: -> { "nextval('trades_id_seq'::regclass)" }, force: :cascade do |t|
@@ -105,6 +122,24 @@ ActiveRecord::Schema.define(version: 2021_03_13_234747) do
     t.index ["carteira_id"], name: "index_operacoes_on_carteira_id"
   end
 
+  create_table "proventos", force: :cascade do |t|
+    t.bigint "carteira_id", null: false
+    t.bigint "ativo_id", null: false
+    t.bigint "corretora_id", null: false
+    t.bigint "extrato_id"
+    t.integer "evento", null: false
+    t.float "quantidade", null: false
+    t.float "valor_liquido", null: false
+    t.string "moeda", default: "BRL", null: false
+    t.date "data", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ativo_id"], name: "index_proventos_on_ativo_id"
+    t.index ["carteira_id"], name: "index_proventos_on_carteira_id"
+    t.index ["corretora_id"], name: "index_proventos_on_corretora_id"
+    t.index ["extrato_id"], name: "index_proventos_on_extrato_id"
+  end
+
   create_table "referencia_ativos", force: :cascade do |t|
     t.bigint "referencia_id", null: false
     t.bigint "ativo_id", null: false
@@ -127,11 +162,19 @@ ActiveRecord::Schema.define(version: 2021_03_13_234747) do
 
   add_foreign_key "carteiras", "investidores"
   add_foreign_key "carteiras", "referencias"
+  add_foreign_key "conta_correntes", "carteiras"
   add_foreign_key "cotacoes", "ativos"
   add_foreign_key "extratos", "conta_correntes"
+  add_foreign_key "movimentacoes", "carteiras"
+  add_foreign_key "movimentacoes", "corretoras"
+  add_foreign_key "movimentacoes", "extratos"
   add_foreign_key "operacoes", "ativos"
   add_foreign_key "operacoes", "carteiras"
   add_foreign_key "operacoes", "corretoras", name: "operacoes_corretoras_id_fk"
+  add_foreign_key "proventos", "ativos"
+  add_foreign_key "proventos", "carteiras"
+  add_foreign_key "proventos", "corretoras"
+  add_foreign_key "proventos", "extratos"
   add_foreign_key "referencia_ativos", "ativos"
   add_foreign_key "referencia_ativos", "referencias"
 end

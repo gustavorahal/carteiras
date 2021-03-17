@@ -16,7 +16,7 @@ class ProventosController < ApplicationController
     @mes_a_mes_rendimento.each do |mes, valor|
       next if mes < data_max
       
-      ca = CarteiraAtivos.new(@carteira, data_carteira)
+      ca = CarteiraAtivos.new(@carteira, mes)
       @total_fii_mes_a_mes[mes] = 0 unless @total_fii_mes_a_mes.key? mes
       @total_fii_mes_a_mes[mes] += ca.total_fii
     end

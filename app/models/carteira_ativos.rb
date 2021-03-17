@@ -7,7 +7,7 @@ class CarteiraAtivos
   def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira
     @investidor = carteira.investidor
-    @data = data
+    @data = data > Date.today ? Date.today : data
     @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
     @saldo_cc_por_corretora = nil
     @saldo_cc_total = nil

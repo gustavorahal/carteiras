@@ -1,10 +1,9 @@
 class ContaCorrente < ApplicationRecord
   has_many :extratos
   belongs_to :corretora
-  belongs_to :investidor
   belongs_to :carteira
 
-  validates :investidor_id, uniqueness: { scope: [ :moeda, :corretora_id ] }
+  validates :carteira_id, uniqueness: { scope: [ :moeda, :corretora_id ] }
 
   def saldo(data)
     extratos.where("liquidacao <= '#{data}'::date").sum(:valor)

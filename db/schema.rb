@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_15_211428) do
+ActiveRecord::Schema.define(version: 2021_03_17_215649) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,16 +38,14 @@ ActiveRecord::Schema.define(version: 2021_03_15_211428) do
   end
 
   create_table "conta_correntes", force: :cascade do |t|
-    t.bigint "investidor_id", null: false
     t.bigint "corretora_id", null: false
     t.string "moeda", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "carteira_id"
+    t.index ["carteira_id", "corretora_id", "moeda"], name: "index_cc_on_carteira_id_and_corretora_id_and_moeda", unique: true
     t.index ["carteira_id"], name: "index_conta_correntes_on_carteira_id"
     t.index ["corretora_id"], name: "index_conta_correntes_on_corretora_id"
-    t.index ["investidor_id", "corretora_id", "moeda"], name: "index_cc_on_investidor_id_and_corretora_id_and_moeda", unique: true
-    t.index ["investidor_id"], name: "index_conta_correntes_on_investidor_id"
   end
 
   create_table "corretoras", force: :cascade do |t|

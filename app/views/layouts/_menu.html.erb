@@ -36,8 +36,15 @@
           <a class="nav-link" href="<%= carteira_proventos_path(@carteira) %>">Proventos</a>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="<%= carteira_conta_correntes_path(@carteira) %>">C.Cs</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            C.Cs
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <% @carteira.conta_correntes.each do |cc| %>
+              <%= link_to "#{cc.corretora.nome} #{cc.moeda}", carteira_conta_corrente_path(@carteira, cc), class: "dropdown-item" %>
+            <% end %>
+          </div>
         </li>
 
         <li class="nav-item">

@@ -1,6 +1,6 @@
 <%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} carteira #{@carteira.nome} em #{@conta_corrente.moeda}" %>
 
-<%= bootstrap_form_for [@conta_corrente, @extrato] do |f| %>
+<%= bootstrap_form_for [@carteira, @conta_corrente, @extrato] do |f| %>
   <% if @extrato.errors[:base].present? %>
     <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @extrato.errors[:base][0] %>
   <% else %>

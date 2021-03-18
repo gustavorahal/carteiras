@@ -1,0 +1,9 @@
+<% size = local_assigns.fetch :size, '' %>
+<% disabled = local_assigns.fetch :disabled, false %>
+<% label = local_assigns.fetch :label, 'Editar' %>
+<% url = local_assigns.fetch :url, false %>
+<% url = polymorphic_path(resource, action: :new) unless url %>
+
+
+<%= link_to bootstrap_icon("pencil-square") + " #{label}",
+            url, class: "btn #{size} btn-success", disabled: disabled %>

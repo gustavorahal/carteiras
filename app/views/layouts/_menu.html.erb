@@ -44,6 +44,8 @@
             <% @carteira.conta_correntes.each do |cc| %>
               <%= link_to "#{cc.corretora.nome} #{cc.moeda}", carteira_conta_corrente_path(@carteira, cc), class: "dropdown-item" %>
             <% end %>
+            <div class="dropdown-divider"></div>
+            <%= link_to "Nova C.C.", new_carteira_conta_corrente_path(@carteira), class: "dropdown-item" %>
           </div>
         </li>
 

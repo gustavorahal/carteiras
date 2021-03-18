@@ -7,7 +7,7 @@ class CotacaoService
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
       cotacao = Cotacao.where(ativo: ativo, data: data).order(data: :desc).first
       if cotacao.nil?
-        Rails.logger.info "CotacaoService: Cotação para #{ativo.nome} em #{data} não encontrada no BD, buscando"
+        Rails.logger.info "Cotação para #{ativo.nome}: não encontrado no BD em #{data}, vamos resolver"
         cotacao = _resolve_cotacao(ativo, data)
       end
 
@@ -22,17 +22,20 @@ class CotacaoService
 
     # Se eu pedi cotaçao para data de hoje (e não tem no BD), supõem-se então
     # que eu queira a data mais próxima
-    return ultima_cotacao if ultima_cotacao.data > data_ajustada && data == Date.today
+    if ultima_cotacao.data > data_ajustada && data == Date.today
+      Rails.logger.info "Cotação para #{ativo.nome}: retornando última cotação disponível no BD em #{ultima_cotacao.data}"
+      return ultima_cotacao
+    end
 
     if data_ajustada != data
-      Rails.logger.info "CotacaoService: Cotação para #{ativo.nome}: Data ajustada de #{data} para #{data_ajustada}"
+      Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
 
     cotacao = Cotacao.where(ativo: ativo, data: data_ajustada).order(data: :desc).first
     if cotacao
-      Rails.logger.info "CotacaoService: Cotação para #{ativo.nome} em #{data_ajustada} disponível no BD"
+      Rails.logger.info "Cotação para #{ativo.nome}: cotação em #{data_ajustada} disponível no BD"
     else
-      Rails.logger.info "CotacaoService: Buscando cotação para #{ativo.nome} em #{data_ajustada}"
+      Rails.logger.info "Cotação para #{ativo.nome}: não encontranda no BD em #{data_ajustada}, buscando"
       cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
     end
 
@@ -105,7 +108,7 @@ class CotacaoService
     data_efetiva, preco = BuscaBolsa.busca(ativo, data)
 
     if preco.nil?
-      Rails.logger.info("Não encontrei preço para #{ativo.nome} em #{data_efetiva}. Pegando última cotação")
+      Rails.logger.info("Cotação para #{ativo.nome}: não encontrei preço em #{data_efetiva}, pegando última cotação")
       Cotacao.where(ativo_id: ativo.id).last
     else
       # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro

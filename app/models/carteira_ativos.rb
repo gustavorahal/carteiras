@@ -131,7 +131,6 @@ class CarteiraAtivos
     total = 0
     ativos_posicao.each do |ap|
       total += ap.valor_em_brl if ap.ativo.fii?
-      Rails.logger.info "#{ap.ativo.nome} #{ap.valor_em_brl}" if ap.ativo.fii?
     end
 
     total

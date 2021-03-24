@@ -12,12 +12,12 @@ class ImportaBase
 
   def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor)
     extrato_atual = conta_corrente.extratos
-    Rails.logger.info("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
     return unless extrato_atual.find_by(liquidacao: liquidacao,
                                         movimentacao: movimentacao,
                                         descricao: descricao,
                                         valor: valor).nil?
 
+    Rails.logger.info("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
     Extrato.create!(conta_corrente: conta_corrente,
                     liquidacao: liquidacao,
                     movimentacao: movimentacao,

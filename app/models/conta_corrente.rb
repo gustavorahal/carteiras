@@ -6,14 +6,14 @@ class ContaCorrente < ApplicationRecord
   validates :carteira_id, uniqueness: { scope: [ :moeda, :corretora_id ] }
 
   def saldo(data)
-    extratos.where("liquidacao <= '#{data}'::date").sum(:valor)
+    extratos.where("movimentacao <= '#{data}'::date").sum(:valor)
   end
 
   def self.saldo_cc_brl(carteira, data)
     Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'BRL')
-           .where("liquidacao::date <= '#{data}'")
+           .where("movimentacao::date <= '#{data}'")
            .sum(:valor)
   end
     
@@ -21,7 +21,7 @@ class ContaCorrente < ApplicationRecord
     Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'USD')
-           .where("liquidacao::date <= '#{data}'")
+           .where("movimentacao::date <= '#{data}'")
            .sum(:valor)
   end
   

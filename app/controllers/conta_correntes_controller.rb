@@ -8,7 +8,7 @@ class ContaCorrentesController < ApplicationController
 
   def show
     @conta_corrente = ContaCorrente.find params[:id]
-    @extratos = @conta_corrente.extratos.where("liquidacao::date <= '#{@data}'").order(liquidacao: :desc, created_at: :desc)
+    @extratos = @conta_corrente.extratos.where("movimentacao::date <= '#{@data}'").order(movimentacao: :desc, created_at: :desc)
     @carteira = @conta_corrente.carteira
   end
 

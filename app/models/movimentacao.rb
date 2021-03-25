@@ -4,7 +4,7 @@ class Movimentacao < ApplicationRecord
   belongs_to :extrato
 
   def self.mes_a_mes
-    group("DATE_TRUNC('month', data)").order("DATE_TRUNC('month', data)").sum(:valor)
+    group(Arel.sql("DATE_TRUNC('month', data)")).order(Arel.sql("DATE_TRUNC('month', data)")).sum(:valor)
   end
 
   def self.total

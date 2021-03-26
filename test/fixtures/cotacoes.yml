@@ -1,7 +1,17 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  ativo: one
+USDBRL:
+  ativo: USDBRL
+  valor_unit: 5.5
+  data: 2021-03-15
+
+BRLUSD:
+  ativo: BRLUSD
+  valor_unit: 0.2
+  data: 2021-03-15
+
+itsa4:
+  ativo: itsa4
   valor_unit: 1.5
   data: 2020-07-11
 

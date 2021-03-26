@@ -3,11 +3,11 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 class BuscaMoeda
 
   def self.busca(ativo, data)
-    if ativo.id == Moedas.config.ativo_brlusd.id
+    if ativo.id == Ativo.find_by_nome('BRLUSD').id
       _brl_usd
-    elsif ativo.id == Moedas.config.ativo_usdbrl.id
+    elsif ativo.id == Ativo.find_by_nome('USDBRL').id
       _usd_brl(data)
-    elsif ativo.id == Moedas.config.ativo_btcbrl.id
+    elsif ativo.id == Ativo.find_by_nome('BTCBRL').id
       _btc_brl
     else
       raise StandardError, "Tipo de moeda #{ativo.tipo} ativo ID #{ativo.id} não suportado para busca de cotação"

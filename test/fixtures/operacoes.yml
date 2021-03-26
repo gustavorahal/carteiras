@@ -2,8 +2,8 @@
 
 <% 2.times do |n| %>
   itsa4_op<%= n %>:
-    carteira_ativo: itsa4_example_growth
-    corretora: XP
+    ativo: itsa4
+    corretora: Vitreo
     operacao: 1
     valor_unit: 10
     quantidade: 100

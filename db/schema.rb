@@ -96,7 +96,7 @@ ActiveRecord::Schema.define(version: 2021_03_17_215649) do
     t.index ["extrato_id"], name: "index_movimentacoes_on_extrato_id"
   end
 
-  create_table "operacoes", id: :bigint, default: -> { "nextval('trades_id_seq'::regclass)" }, force: :cascade do |t|
+  create_table "operacoes", force: :cascade do |t|
     t.date "data", null: false
     t.integer "mon_ou_des"
     t.integer "operacao", null: false

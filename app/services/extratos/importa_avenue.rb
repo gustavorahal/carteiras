@@ -21,6 +21,10 @@ class ImportaAvenue < ImportaBase
   end
 
   def self._corrige_valor(valor_header, valor)
+    # Para extrato em BRL, o Excel em portugues converte o valor sinalizado em R$ para um valor float
+    # portanto nada a se fazer.
+    return valor if valor.is_a? Float
+    # Para extrato em USD, o Excel em portugues mantem o valor monetario como string.
     # O celula do valor esta como string na planilha, e não objeto moeda portanto devemos
     # ajeitar o valor para formar en_US para pode ser "casteado" para float
     if valor_header == 'Valor (U$)'

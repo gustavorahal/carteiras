@@ -1,5 +1,20 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+USDBRL:
+  nome: USDBRL
+  tipo: 3
+  moeda: BRL
+
+BRLUSD:
+  nome: BRLUSD
+  tipo: 3
+  moeda: USD
+
+BTCBRL:
+  nome: BTCBRL
+  tipo: 3
+  moeda: BRL
+
 itsa4:
   nome: ITSA4
   tipo: 1

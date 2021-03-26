@@ -43,11 +43,11 @@ class CotacaoService
   end
   
   def self.cotacao_usdbrl(data)
-    cotacao(Moedas.config.ativo_usdbrl, data)
+    cotacao(Ativo.find_by_nome('USDBRL'), data)
   end
 
   def self.cotacao_brlusd(data)
-    cotacao(Moedas.config.ativo_brlusd, data)
+    cotacao(Ativo.find_by_nome('BRLUSD'), data)
   end
 
   def self.busca_e_registra_tudo(data = Date.today)

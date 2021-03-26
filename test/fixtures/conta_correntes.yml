@@ -1,0 +1,19 @@
+vitreo_brl:
+  corretora: vitreo
+  moeda: 'BRL'
+  carteira: example_growth
+
+xp_brl:
+  corretora: xp
+  moeda: 'BRL'
+  carteira: example_growth
+
+avenue_brl:
+  corretora: avenue
+  moeda: 'BRL'
+  carteira: example_growth
+
+avenue_usd:
+  corretora: avenue
+  moeda: 'USD'
+  carteira: example_growth

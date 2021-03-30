@@ -26,3 +26,9 @@ bpan4:
   tipo: 1
   moeda: BRL
   descricao: Banco PAN
+
+gndi3:
+  nome: GNDI3
+  tipo: 1
+  moeda: BRL
+  descricao: Notre Dame

@@ -13,7 +13,7 @@ class AtivoPosicao
              else # passei um ID
                Ativo.find(ativo_ref)
              end
-    @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id)
+    @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id).where('DATE(data) <= DATE(?)', data)
     # Faz sentido inferir que o ativo esta na corretora em que a ultima operação foi feita
     # O "first" é porque a ordem das operacoes e decrescente
     @corretora = @operacoes_ativo.first.corretora
@@ -33,7 +33,6 @@ class AtivoPosicao
     Rails.cache.fetch("data_montagem_carteira_id-#{@carteira.id}_ativo_id-#{@ativo.id}", expires_in: 5.seconds) do
       @operacoes_ativo
         .where(mon_ou_des: 1)
-        .where("operacoes.data::date <= '#{@data_str}'")
         .limit(1)[0].data
     end
   end
@@ -82,22 +81,17 @@ class AtivoPosicao
     return @quantidade unless @quantidade.nil?
 
     @operacoes_ativo
-      .where("operacoes.data::date <= '#{@data_str}'")
       .sum(:quantidade)
   end
 
   def valor_investido
-    @operacoes_ativo
-      .where("operacoes.data::date <= '#{@data_str}'")
-      .sum('valor_unit * quantidade')
+    @operacoes_ativo.where('DATE(data) >= DATE(?)', data_montagem).sum('valor_unit * quantidade')
   end
 
   def valor_investido_em_brl
     # sendo o ativo em BRL ou USD, a mesma conta se aplica visto que se
     # ativo em BRL o 'usdbrl' terá 1 de valor.
-    @operacoes_ativo
-      .where("operacoes.data::date <= '#{@data_str}'")
-      .sum('valor_unit * quantidade * usdbrl')
+    @operacoes_ativo.where('DATE(data) >= DATE(?)', data_montagem).sum('valor_unit * quantidade * usdbrl')
   end
 
   def valor

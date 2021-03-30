@@ -22,7 +22,7 @@ class CotacaoService
 
     # Se eu pedi cotaçao para data de hoje (e não tem no BD), supõem-se então
     # que eu queira a data mais próxima
-    if ultima_cotacao.data > data_ajustada && data == Date.today
+    if ultima_cotacao && ultima_cotacao.data > data_ajustada && data == Date.today
       Rails.logger.info "Cotação para #{ativo.nome}: retornando última cotação disponível no BD em #{ultima_cotacao.data}"
       return ultima_cotacao
     end

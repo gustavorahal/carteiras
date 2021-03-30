@@ -112,6 +112,10 @@ class AtivoPosicao
     end
   end
 
+  def valor_montagem
+    quantidade * preco_medio
+  end
+
   def rentabilidade
     ((@cotacao.valor_unit / preco_medio) - 1) * 100
   end

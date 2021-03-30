@@ -10,7 +10,8 @@ Rails.application.routes.draw do
 
   resources :carteiras do
     resources :operacoes
-    get 'impostos', to: 'impostos#index'
+    get 'ganho_de_capital', to: 'impostos#ganho_de_capital'
+    get 'posicao_ano_anterior', to: 'impostos#posicao_ano_anterior'
     get 'movimentacoes', to: 'movimentacoes#index'
     get 'proventos', to: 'proventos#index'
     resources :conta_correntes do

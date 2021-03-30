@@ -1,13 +1,13 @@
-<%= render 'common/titulo_pagina', titulo: "Posição por corretora em #{display_data @data}" %>
+<%= render 'common/titulo_pagina', titulo: "Posição em #{display_data @data} (em teste)" %>
 
 <table class="table table-sm">
   <thead class="thead-dark">
   <tr>
     <th scope="col">Ativo</th>
-    <th scope="col">Posição<br></th>
     <th scope="col">Quantidade<br></th>
-    <th scope="col">Preço<br></th>
     <th scope="col">Preço Médio<br></th>
+    <th scope="col">Valor montagem<br></th>
+    <th scope="col">Data montagem</th>
   </tr>
   </thead>
 
@@ -27,11 +27,11 @@
       <% ativos_posicoes.each do |ativo_posicao| %>
         <% ativo = ativo_posicao.ativo %>
         <tr>
-          <td><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></td>
-          <td><%= display_moeda ativo_posicao.valor, moeda: ativo.moeda %></td>
+          <td><%= link_to ativo.nome, carteira_ativo_path(@carteira, ativo) %></td>
           <td><%= display_numero ativo_posicao.quantidade %></td>
-          <td><%= display_preco_atual ativo_posicao %></td>
           <td><%= display_preco_medio ativo_posicao %></td>
+          <td><%= display_moeda ativo_posicao.valor_montagem, moeda: ativo.moeda %></td>
+          <td><%= display_data ativo_posicao.data_montagem %></td>
         </tr>
       <% end %>
     <% end %>

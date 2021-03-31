@@ -6,7 +6,7 @@
     <th scope="col">Ativo</th>
     <th scope="col">Quantidade<br></th>
     <th scope="col">Preço Médio<br></th>
-    <th scope="col">Valor montagem<br></th>
+    <th scope="col">Valor investido<br></th>
     <th scope="col">Data montagem</th>
   </tr>
   </thead>
@@ -30,7 +30,7 @@
           <td><%= link_to ativo.nome, carteira_ativo_path(@carteira, ativo) %></td>
           <td><%= display_numero ativo_posicao.quantidade %></td>
           <td><%= display_preco_medio ativo_posicao %></td>
-          <td><%= display_moeda ativo_posicao.valor_montagem, moeda: ativo.moeda %></td>
+          <td><%= display_valor_investido ativo_posicao %></td>
           <td><%= display_data ativo_posicao.data_montagem %></td>
         </tr>
       <% end %>

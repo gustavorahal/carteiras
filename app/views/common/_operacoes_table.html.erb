@@ -32,7 +32,7 @@
       <td><%= oper.corretora.nome %></td>
       <td><%= oper.operacao.capitalize %></td>
       <td><%= oper.mon_ou_des %></td>
-      <td><%= oper.quantidade %></td>
+      <td><%= display_numero oper.quantidade %></td>
       <td><%= display_moeda oper.valor_unit, moeda: oper.ativo.moeda %></td>
       <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.ativo.moeda, cores: true %></td>
       <td><%= display_moeda oper.usdbrl %></td>

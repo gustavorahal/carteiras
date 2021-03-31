@@ -80,18 +80,19 @@ class AtivoPosicao
   def quantidade
     return @quantidade unless @quantidade.nil?
 
-    @operacoes_ativo
-      .sum(:quantidade)
+    @operacoes_ativo.sum(:quantidade)
   end
 
   def valor_investido
-    @operacoes_ativo.where('DATE(data) >= DATE(?)', data_montagem).sum('valor_unit * quantidade')
+    # O valor em 31/12/2019 deve ser inserido pelo valor do custo médio das ações multiplicado
+    # pela quantidade de ativos nesta mesma data.
+    # Fonte: https://blog.clear.com.br/aprenda-como-declarar-acoes-no-imposto-de-renda/
+    quantidade * preco_medio
+    #@operacoes_ativo.where('DATE(data) >= DATE(?)', data_montagem).sum('valor_unit * quantidade')
   end
 
   def valor_investido_em_brl
-    # sendo o ativo em BRL ou USD, a mesma conta se aplica visto que se
-    # ativo em BRL o 'usdbrl' terá 1 de valor.
-    @operacoes_ativo.where('DATE(data) >= DATE(?)', data_montagem).sum('valor_unit * quantidade * usdbrl')
+    quantidade * preco_medio_em_brl
   end
 
   def valor
@@ -104,10 +105,6 @@ class AtivoPosicao
     elsif @ativo.moeda == 'USD'
       valor_unit_brl * quantidade.to_f
     end
-  end
-
-  def valor_montagem
-    quantidade * preco_medio
   end
 
   def rentabilidade

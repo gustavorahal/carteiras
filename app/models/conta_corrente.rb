@@ -9,15 +9,8 @@ class ContaCorrente < ApplicationRecord
     extratos.where("movimentacao <= '#{data}'::date").sum(:valor)
   end
 
-  def saldo_por_extrato_id
-    saldos = {}
-    saldo_acumulado = 0
-    extratos.order(movimentacao: :asc, created_at: :asc).each do |extrato|
-      saldo_acumulado += extrato.valor
-      saldos[extrato.id] = saldo_acumulado
-    end
-
-    saldos
+  def extratos_data(data)
+    extratos.where("movimentacao::date <= '#{data}'").order(movimentacao: :desc, created_at: :desc)
   end
 
   def self.saldo_cc_brl(carteira, data)

@@ -10,7 +10,7 @@ class ImportaXp < ImportaBase
       break unless row[0].is_a? Date
 
       descricao = row[2].gsub('* PROV * ', '')
-      _insere_linha_extrato(conta_corrente, row[0], row[1], descricao, row[3])
+      _insere_linha_extrato(conta_corrente, row[0], row[1], descricao, row[3], row[4])
       i += 1
     end
   end

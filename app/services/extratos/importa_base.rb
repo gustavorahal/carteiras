@@ -10,19 +10,21 @@ class ImportaBase
     raise NotImplementedError
   end
 
-  def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor)
+  def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor, saldo)
     extrato_atual = conta_corrente.extratos
     return unless extrato_atual.find_by(liquidacao: liquidacao,
                                         movimentacao: movimentacao,
                                         descricao: descricao,
-                                        valor: valor).nil?
+                                        valor: valor,
+                                        saldo: saldo).nil?
 
-    Rails.logger.info("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}")
+    Rails.logger.info("Inserindo na conta_corrente ##{conta_corrente.id} -> #{liquidacao}, #{movimentacao}, #{descricao}, #{valor}, #{saldo}")
     Extrato.create!(conta_corrente: conta_corrente,
                     liquidacao: liquidacao,
                     movimentacao: movimentacao,
                     descricao: descricao,
-                    valor: valor)
+                    valor: valor,
+                    saldo: saldo)
   end
 
 end

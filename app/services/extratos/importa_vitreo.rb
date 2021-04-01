@@ -13,7 +13,7 @@ class ImportaVitreo < ImportaBase
       break if row[0].blank?
       next if row[2] == 'SALDO DO DIA'
 
-      _insere_linha_extrato(conta_corrente, row[0], row[0], row[2], row[3])
+      _insere_linha_extrato(conta_corrente, row[0], row[0], row[2], row[3], row[4])
     end
   end
 

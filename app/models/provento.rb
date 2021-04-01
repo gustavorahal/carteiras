@@ -12,9 +12,9 @@ class Provento < ApplicationRecord
 
   def self.mes_a_mes(evento = nil)
     if evento
-      where(evento: evento).group("DATE_TRUNC('month', data)").order("DATE_TRUNC('month', data)").sum(:valor_liquido)
+      where(evento: evento).group(Arel.sql("DATE_TRUNC('month', data)")).order(Arel.sql("DATE_TRUNC('month', data)")).sum(:valor_liquido)
     else
-      group("DATE_TRUNC('month', data)").order("DATE_TRUNC('month', data)").sum(:valor_liquido)
+      group(Arel.sql("DATE_TRUNC('month', data)")).order(Arel.sql("DATE_TRUNC('month', data)")).sum(:valor_liquido)
     end
   end
 

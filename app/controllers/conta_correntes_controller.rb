@@ -10,6 +10,7 @@ class ContaCorrentesController < ApplicationController
     @conta_corrente = ContaCorrente.find params[:id]
     @extratos = @conta_corrente.extratos.where("movimentacao::date <= '#{@data}'").order(movimentacao: :desc, created_at: :desc)
     @carteira = @conta_corrente.carteira
+    @saldo_por_extrato_id = @conta_corrente.saldo_por_extrato_id
   end
 
   def new

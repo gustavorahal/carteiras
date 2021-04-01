@@ -19,6 +19,7 @@
     <th scope="col">Movimentação</th>
     <th scope="col">Descrição</th>
     <th scope="col">Valor</th>
+    <th scope="col">Saldo</th>
     <th scope="col">Processado?</th>
   </tr>
   </thead>
@@ -30,6 +31,7 @@
       <td><%= display_data extrato.movimentacao %></td>
       <td><%= extrato.descricao %></td>
       <td><%= display_moeda extrato.valor, moeda: @conta_corrente.moeda, cores: true %></td>
+      <td><%= display_moeda @saldo_por_extrato_id[extrato.id], moeda: @conta_corrente.moeda, cores: true %></td>
       <td><%= extrato.processado %></td>
     </tr>
   <% end %>

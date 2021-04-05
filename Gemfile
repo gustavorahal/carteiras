@@ -33,6 +33,7 @@ gem 'bootstrap_form', '~> 4.0'
 gem 'bootstrap-icons-helper'
 gem 'roo'
 gem 'holidays'
+gem 'rufus-scheduler'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

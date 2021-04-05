@@ -15,6 +15,35 @@ class CotacaoService
     end
   end
 
+  def self.cotacao_usdbrl(data)
+    cotacao(Ativo.find_by_nome('USDBRL'), data)
+  end
+
+  def self.cotacao_brlusd(data)
+    cotacao(Ativo.find_by_nome('BRLUSD'), data)
+  end
+
+  # Buscar cotação de todos ativos presentes nas diferentes carteiras
+  # Útil para rodar diariamente e proativamente já buscar e registrar as
+  # cotações
+  def self.busca_e_registra_tudo(data)
+    # Mesmo que os ativos se repitam nas carteiras, a primeira
+    # vez que ele vai aparecer vai acontecer a busca pela cotacao
+    # e nas subsequente vezes, vai encontrar no banco e não buscar mais.
+    Carteira.all.each do |carteira|
+      # No interessa saber quais os ativos 'hoje' presentes
+      # nas carteiras e a partir deles, dai sim buscar suas
+      # cotações na data informada
+      ca = CarteiraAtivos.new(carteira, Date.today)
+      ca.ativos.each { |ativo| cotacao(ativo, data) }
+    end
+  end
+
+
+  #
+  # Métodos privados
+  #
+
   # Encontra uma cotacão mais adequada de acordo com a data informada
   def self._resolve_cotacao(ativo, data)
     data_ajustada = Utils.ajusta_data(data, ativo)
@@ -41,26 +70,6 @@ class CotacaoService
 
     cotacao
   end
-  
-  def self.cotacao_usdbrl(data)
-    cotacao(Ativo.find_by_nome('USDBRL'), data)
-  end
-
-  def self.cotacao_brlusd(data)
-    cotacao(Ativo.find_by_nome('BRLUSD'), data)
-  end
-
-  def self.busca_e_registra_tudo(data = Date.today)
-    Ativo.all.each do |ativo|
-      cotacao(ativo, data)
-    end
-  end
-
-
-  #
-  # Métodos privados
-  #
-
 
   #
   # Pela maneira que nossa Backend funciona, esta função faz algo

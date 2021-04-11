@@ -40,7 +40,7 @@
     <% @mes_a_mes.each do |data, valor| %>
       <% acumulado += valor %>
       <tr>
-        <td><%= I18n.l data, format: "%b %Y" %></td>
+        <td><%= display_mes_ano data %></td>
         <td><%= display_moeda valor %></td>
         <td><%= display_moeda acumulado %></td>
       </tr>

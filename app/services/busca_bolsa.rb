@@ -9,13 +9,20 @@ class BuscaBolsa
     preco = _api_busca(ativo.nome, data_efetiva, bolsa)
     # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
     tentativas = 3
+    tentar_api = 'marketstack'
     while preco.blank?
       if tentativas.zero?
         preco = nil
         break
       else
         data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
-        preco = _api_busca(ativo.nome, data_efetiva, bolsa)
+        if tentar_api == 'marketstack'
+          preco = _api_marketstack(ativo.nome, data_efetiva, bolsa)
+          tentar_api = 'yahoo'
+        else
+          preco = _api_yahoo_finance(ativo.nome, data_efetiva, bolsa)
+          tentar_api = 'marketstack'
+        end
         Rails.logger.info("BuscaBolsa: Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
         tentativas -= 1
       end
@@ -31,9 +38,11 @@ class BuscaBolsa
 
   def self._api_busca(ticker, data, bolsa)
     begin
-      preco = _api_yahoo_finance(ticker, data, bolsa)
-    rescue StandardError
+      # As cotações do Market Stack são mais corretas do que as que
+      # Yahoo puxa muitas vezes
       preco = _api_marketstack(ticker, data, bolsa)
+    rescue StandardError
+      preco = _api_yahoo_finance(ticker, data, bolsa)
     end
 
     preco = _api_marketstack(ticker, data, bolsa) if preco.nil?

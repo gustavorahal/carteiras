@@ -5,7 +5,11 @@ module ApplicationHelper
   end
 
   def display_data(data)
-    I18n.l data, format: :default
+    l(data, format: :default)
+  end
+
+  def display_mes_ano(data)
+    l(data, format: '%b %Y')
   end
 
   def display_porcentagem(valor, cores: false)

@@ -32,6 +32,7 @@ gem 'bootsnap', '>= 1.4.4', require: false
 gem 'bootstrap_form', '~> 4.0'
 gem 'bootstrap-icons-helper'
 gem 'roo'
+gem 'roo-xls'
 gem 'holidays'
 gem 'rufus-scheduler'
 

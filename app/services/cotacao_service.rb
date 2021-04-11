@@ -71,11 +71,12 @@ class CotacaoService
     cotacao
   end
 
-  #
-  # Pela maneira que nossa Backend funciona, esta função faz algo
+  # Pela maneira como o Backend funciona, esta função faz algo
   # atipico. Aproveitando que a busca é custosa (download de arquivo de 30MB+)
   # e retorna informações de todos os fundos, vamos aproveitar e atualizar
   # informações de todos os fundos mas retornar só o que foi pedido
+  #
+  # @return Cotacao ActiveRecord object
   def self._busca_e_registra_fundo(ativo, data)
     cnpjs = Ativo.where(tipo: 'fundo').pluck(:cnpj)
     dados = BuscaFundos.busca(cnpjs, data.year, data.month)
@@ -92,6 +93,20 @@ class CotacaoService
     Cotacao.find_by(ativo: ativo, data: data)
   end
 
+  # Pela maneira como o Backend funciona, esta função faz algo
+  # atipico. Aproveitando que a busca é custosa (download de arquivo como dados de todo ano)
+  # e retorna informações de todos data, vamos aproveitar e atualizar
+  # informações para várias data
+  #
+  # @return Cotacao ActiveRecord object
+  def self._busca_e_registra_tesouro(ativo, data)
+    dados = BuscaTesouro.busca ativo.nome, data
+    dados.each do |data_api, preco|
+      Cotacao.find_or_create_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
+    end
+
+    Cotacao.find_by(ativo: ativo, data: data)
+  end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_criptomoeda(ativo, data)
@@ -101,14 +116,6 @@ class CotacaoService
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
     preco = BuscaMoeda.busca(ativo, data)
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
-  end
-
-  # @return Cotacao ActiveRecord object
-  def self._busca_e_registra_tesouro(ativo, data)
-    data_api, preco = BuscaTesouro.busca ativo.nome
-    # Ignoramos a data_api e consideramos a data fornecida porque
-    # a api sempre vai no fornecer a ultima data disponivel
     Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 

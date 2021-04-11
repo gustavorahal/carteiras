@@ -32,3 +32,9 @@ gndi3:
   tipo: 1
   moeda: BRL
   descricao: Notre Dame
+
+dis:
+  nome: DIS
+  tipo: 1
+  moeda: USD
+  descricao: Disney

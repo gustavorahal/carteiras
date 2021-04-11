@@ -20,7 +20,6 @@
     <th scope="col">Descrição</th>
     <th scope="col">Valor</th>
     <th scope="col">Saldo</th>
-    <th scope="col">Processado?</th>
   </tr>
   </thead>
 
@@ -29,10 +28,14 @@
     <tr>
       <td><%= display_data extrato.liquidacao %></td>
       <td><%= display_data extrato.movimentacao %></td>
-      <td><%= extrato.descricao %></td>
+      <td>
+        <%= extrato.descricao %>
+        <% if extrato.processado %>
+          <span class="badge badge-pill badge-primary">processado</span>
+        <% end %>
+      </td>
       <td><%= display_moeda extrato.valor, moeda: @conta_corrente.moeda, cores: true %></td>
       <td><%= display_moeda(extrato.saldo, moeda: @conta_corrente.moeda, cores: true) if extrato.saldo %></td>
-      <td><%= extrato.processado %></td>
     </tr>
   <% end %>
   </tbody>

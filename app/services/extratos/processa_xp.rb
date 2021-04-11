@@ -30,8 +30,9 @@ class ProcessaXp < ProcessaBase
   def self.aporte?(texto)
     # Exemplos:
     # TED - RECEBIMENTO DE TED - SPB
+    # RECEBIMENTO DE TED - SPB
     # TED BCO 001 AGE 4858 CTA 503770 - RECEBIMENTO DE TED - SPB
-    regex_aporte = %r{TED .* RECEBIMENTO DE TED}
+    regex_aporte = %r{RECEBIMENTO DE TED}
     match = regex_aporte.match(texto)
     match ? true : false
   end

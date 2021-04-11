@@ -13,25 +13,33 @@ class ContaCorrente < ApplicationRecord
     extratos.where("movimentacao::date <= '#{data}'").order(movimentacao: :desc, created_at: :desc)
   end
 
-  def self.saldo_cc_brl(carteira, data)
-    Extrato.joins(:conta_corrente)
+  def self.saldo_cc_brl(carteira, data, corretora = nil)
+    query = Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'BRL')
            .where("movimentacao::date <= '#{data}'")
-           .sum(:valor)
+    if corretora
+      query = query.where('conta_correntes.corretora_id': corretora.id)
+    end
+
+    query.sum(:valor)
   end
-    
-  def self.saldo_cc_usd(carteira, data)
-    Extrato.joins(:conta_corrente)
+
+  def self.saldo_cc_usd(carteira, data, corretora = nil)
+    query = Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'USD')
            .where("movimentacao::date <= '#{data}'")
-           .sum(:valor)
+    if corretora
+      query = query.where('conta_correntes.corretora_id': corretora.id)
+    end
+
+    query.sum(:valor)
   end
-  
-  def self.saldo_cc_total(carteira, data)
-    total_brl = saldo_cc_brl(carteira, data)
-    total_usd = saldo_cc_usd(carteira, data)
+
+  def self.saldo_cc_total(carteira, data, corretora = nil)
+    total_brl = saldo_cc_brl(carteira, data, corretora)
+    total_usd = saldo_cc_usd(carteira, data, corretora)
     total_usdbrl = total_usd * CotacaoService.cotacao_usdbrl(data).valor_unit
 
     total_brl + total_usdbrl

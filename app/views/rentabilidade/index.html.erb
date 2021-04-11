@@ -1,0 +1,12 @@
+<%= render 'common/titulo_pagina', titulo: "Rentabilidade"  %>
+
+<h6>Evolução mês a mês. Valor no fechamento do mês</h6>
+
+<br>
+<h4>Geral</h4>
+<%= render 'tabela', corretora: nil %>
+
+<% @corretoras.each do |corretora| %>
+  <h4><%= corretora.nome %></h4>
+  <%= render 'tabela', corretora: corretora %>
+<% end %>

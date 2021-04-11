@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     get 'posicao_ano_anterior', to: 'impostos#posicao_ano_anterior'
     get 'movimentacoes', to: 'movimentacoes#index'
     get 'proventos', to: 'proventos#index'
+    get 'rentabilidade', to: 'rentabilidade#index'
     resources :conta_correntes do
       resources :extratos do
         collection { post 'import' }

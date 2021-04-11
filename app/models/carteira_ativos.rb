@@ -2,17 +2,14 @@
 # Posição da Carteira em determinada data. Quais ativos e qual a posicao deles
 class CarteiraAtivos
 
-  attr_reader :carteira
+  attr_reader :carteira, :data
 
   def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira
     @investidor = carteira.investidor
     @data = data > Date.today ? Date.today : data
     @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
-    @saldo_cc_por_corretora = nil
-    @saldo_cc_total = nil
     @ativos_posicao = [] # lista de CarteiraAtivoPosicao
-    @total_ativos = nil
     @referencia = @carteira.referencia
   end
 
@@ -112,19 +109,23 @@ class CarteiraAtivos
     percent_moeda
   end
 
-  def total_investido
-    @carteira.movimentacoes.total
+  def total_investido(corretora = nil)
+    query = @carteira.movimentacoes.where('DATE(data) <= DATE(?)', @data)
+    if corretora
+      query = query.where(corretora: corretora )
+    end
+    query.total
   end
 
-  def total_ativos
-    return @total_ativos unless @total_ativos.nil?
-
-    @total_ativos = 0
+  def total_ativos(corretora = nil)
+    total_ativos = 0
     ativos_posicao.each do |ap|
-      @total_ativos += ap.valor_em_brl
+      next if corretora && ap.corretora.id != corretora.id
+
+      total_ativos += ap.valor_em_brl
     end
 
-    @total_ativos
+    total_ativos
   end
 
   def total_fii
@@ -136,22 +137,20 @@ class CarteiraAtivos
     total
   end
 
-  def saldo_cc_total
-    return @saldo_cc_total unless @saldo_cc_total.nil?
-
-    @saldo_cc_total = ContaCorrente.saldo_cc_total(@carteira, @data)
+  def saldo_cc_total(corretora = nil)
+    ContaCorrente.saldo_cc_total(@carteira, @data, corretora)
   end
 
-  def total_geral
-    total_ativos + saldo_cc_total
+  def total_geral(corretora = nil)
+    total_ativos(corretora) + saldo_cc_total(corretora)
   end
 
-  def rentabilidade
-    (total_geral / total_investido - 1) * 100
+  def rentabilidade(corretora = nil)
+    (total_geral(corretora) / total_investido(corretora) - 1) * 100
   end
 
-  def rendimento
-    total_geral - total_investido
+  def rendimento(corretora = nil)
+    total_geral(corretora) - total_investido(corretora)
   end
 
   def porcentagem_ativo(ativo)
@@ -159,11 +158,20 @@ class CarteiraAtivos
     ap ? (ap.valor_em_brl / total_geral * 100) : 0
   end
 
-  def total_c_e_v
-    @carteira.operacoes
-      .where("operacoes.data::date <= '#{@data}'")
-      .sum('quantidade * valor_unit * usdbrl')
+  def corretoras
+    corretoras = []
+    ativos_posicao.each do |ativo_posicao|
+      corretoras.push ativo_posicao.corretora
+    end
+
+    corretoras.uniq
   end
+
+  # def total_c_e_v
+  #   @carteira.operacoes
+  #     .where("operacoes.data::date <= '#{@data}'")
+  #     .sum('quantidade * valor_unit * usdbrl')
+  # end
 
   def busca_ativo_posicao(ativo)
     ap_buscado = nil

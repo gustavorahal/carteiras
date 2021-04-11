@@ -1,0 +1,27 @@
+<% corretora = local_assigns.fetch :corretora, nil %>
+
+<table class="table table-striped table-sm">
+  <thead class="thead-dark">
+  <tr>
+    <th>Mês</th>
+    <th>Posição</th>
+    <th>Investido (acumulado)</th>
+    <th>Desde o inicio</th>
+    <th>No mês</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% rent_ultimo_mes = 0 %>
+  <% @ultimos_carteira_ativos.each do |carteira_ativos| %>
+    <% rentabilidade = carteira_ativos.rentabilidade(corretora) %>
+    <tr>
+      <td><%= display_data carteira_ativos.data %></td>
+      <td><%= display_moeda carteira_ativos.total_geral(corretora) %></td>
+      <td><%= display_moeda carteira_ativos.total_investido(corretora) %></td>
+      <td><%= display_porcentagem rentabilidade %></td>
+      <td><%= display_porcentagem rentabilidade - rent_ultimo_mes %></td>
+      <% rent_ultimo_mes = rentabilidade %>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

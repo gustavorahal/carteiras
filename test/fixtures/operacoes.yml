@@ -30,3 +30,22 @@ gndi3_op3:
   valor_unit: 74.10
   quantidade: 100
   data: 2020-12-14
+
+dis_op1:
+  carteira: example_growth
+  ativo: dis
+  corretora: avenue
+  operacao: C
+  mon_ou_des: M
+  valor_unit: 154.07
+  quantidade: 1.93
+  data: 2020-12-08
+
+dis_op2:
+  carteira: example_growth
+  ativo: dis
+  corretora: avenue
+  operacao: C
+  valor_unit: 186.15
+  quantidade: 1
+  data: 2021-03-24

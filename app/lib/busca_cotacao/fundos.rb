@@ -1,7 +1,7 @@
 require 'open-uri' # para 'open' não conflitar com Kernel.open
 require 'csv'
 
-module BuscaAtivos
+module BuscaCotacao
   #
   # Busca informações de fundos na base de dados da CVM
   #

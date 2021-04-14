@@ -1,6 +1,6 @@
 require 'open-uri' # para 'open' não conflitar com Kernel.open
 
-module BuscaAtivos
+module BuscaCotacao
   class Tesouro
     def self.urls
       { '2021': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/462:100856',

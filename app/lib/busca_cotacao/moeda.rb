@@ -1,6 +1,6 @@
 require 'open-uri' # para 'open' não conflitar com Kernel.open
 
-module BuscaAtivos
+module BuscaCotacao
   class Moeda
 
     def self.busca(ativo, data)

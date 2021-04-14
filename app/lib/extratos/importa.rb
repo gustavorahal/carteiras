@@ -1,4 +1,5 @@
-class ImportaExtrato
+module Extratos
+  class Importa
 
   def self.importar(conta_corrente, file_path)
     case conta_corrente.corretora.nome
@@ -11,5 +12,6 @@ class ImportaExtrato
     else
       raise StandardError, 'Corretora não suportada'
     end
+  end
   end
 end

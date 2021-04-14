@@ -79,7 +79,7 @@ class CotacaoService
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_fundo(ativo, data)
     cnpjs = Ativo.where(tipo: 'fundo').pluck(:cnpj)
-    dados = BuscaFundos.busca(cnpjs, data.year, data.month)
+    dados = BuscaAtivos::Fundos.busca(cnpjs, data.year, data.month)
     dados.each do |cnpj, vl_cotas|
       vl_cotas.each do |vl_cota|
         ativo = Ativo.find_by(cnpj: cnpj)
@@ -100,7 +100,7 @@ class CotacaoService
   #
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_tesouro(ativo, data)
-    dados = BuscaTesouro.busca ativo.nome, data
+    dados = BuscaAtivos::Tesouro.busca ativo.nome, data
     dados.each do |data_api, preco|
       Cotacao.find_or_create_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
     end
@@ -115,13 +115,13 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = BuscaMoeda.busca(ativo, data)
+    preco = BuscaAtivos::Moeda.busca(ativo, data)
     Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
   end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_bolsa(ativo, data)
-    data_efetiva, preco = BuscaBolsa.busca(ativo, data)
+    data_efetiva, preco = BuscaAtivos::Bolsa.busca(ativo, data)
 
     if preco.nil?
       Rails.logger.info("Cotação para #{ativo.nome}: não encontrei preço em #{data_efetiva}, pegando última cotação")

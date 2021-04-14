@@ -5,7 +5,7 @@ class ExtratosController < ApplicationController
     carteira = cc.carteira
     extrato_file = params[:file]
     begin
-      ImportaExtrato.importar(cc, extrato_file.path)
+      Extratos::Importa.importar(cc, extrato_file.path)
       redirect_to carteira_conta_corrente_path(carteira, cc), notice: 'Extrato importado com sucesso'
     rescue StandardError => e
       redirect_to carteira_conta_corrente_path(carteira, cc), alert: e.message

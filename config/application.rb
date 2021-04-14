@@ -15,8 +15,6 @@ module Carteiras
 
     config.time_zone = 'Brasilia'
 
-    config.eager_load_paths += ['app/services/extratos']
-
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

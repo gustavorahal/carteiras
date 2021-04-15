@@ -5,14 +5,7 @@ class CotacaoService
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
-      data_ajustada = Utils.ajusta_data(data, ativo)
-      cotacao = Cotacao.where(ativo: ativo, data: data_ajustada).order(data: :desc).first
-      if cotacao.nil?
-        Rails.logger.info "Cotação para #{ativo.nome}: não encontrado no BD em #{data}, vamos resolver"
-        cotacao = _resolve_cotacao(ativo, data)
-      end
-
-      cotacao
+      _resolve_cotacao(ativo, data)
     end
   end
 
@@ -48,28 +41,18 @@ class CotacaoService
   # Encontra uma cotacão mais adequada de acordo com a data informada
   def self._resolve_cotacao(ativo, data)
     data_ajustada = Utils.ajusta_data(data, ativo)
-    ultima_cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
-
-    # Se eu pedi cotaçao para data de hoje (e não tem no BD), supõem-se então
-    # que eu queira a data mais próxima
-    if ultima_cotacao && ultima_cotacao.data > data_ajustada && data == Date.today
-      Rails.logger.info "Cotação para #{ativo.nome}: retornando última cotação disponível no BD em #{ultima_cotacao.data}"
-      return ultima_cotacao
-    end
-
     if data_ajustada != data
       Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
 
-    cotacao = Cotacao.where(ativo: ativo, data: data_ajustada).order(data: :desc).first
-    if cotacao
-      Rails.logger.info "Cotação para #{ativo.nome}: cotação em #{data_ajustada} disponível no BD"
-    else
-      Rails.logger.info "Cotação para #{ativo.nome}: não encontranda no BD em #{data_ajustada}, buscando"
-      cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+    ultima_cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
+    if ultima_cotacao.data == data_ajustada
+      Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} disponivel no BD, retornando"
+      return ultima_cotacao
     end
 
-    cotacao
+    Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} não encontrado no BD, vamos buscar"
+    send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
   end
 
   # Pela maneira como o Backend funciona, esta função faz algo

@@ -95,7 +95,7 @@ class CotacaoService
         ativo = Ativo.find_by(cnpj: cnpj)
         data = vl_cota[0].to_date
         unless Cotacao.find_by(ativo: ativo, data: data)
-          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1])
+          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1], fonte: 'cvm_gov')
         end
       end
     end
@@ -112,7 +112,7 @@ class CotacaoService
   def self._busca_e_registra_tesouro(ativo, data)
     dados = BuscaCotacao::Tesouro.busca ativo.nome, data
     dados.each do |data_api, preco|
-      Cotacao.find_or_create_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
+      Cotacao.find_or_create_by(ativo_id: ativo.id, valor_unit: preco, data: data_api, fonte: 'tesouro_gov')
     end
 
     Cotacao.find_by(ativo: ativo, data: data)
@@ -125,13 +125,13 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = BuscaCotacao::Moeda.busca(ativo, data)
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
+    preco, fonte = BuscaCotacao::Moeda.busca(ativo, data)
+    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data, fonte: fonte)
   end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_bolsa(ativo, data)
-    data_efetiva, preco = BuscaCotacao::Bolsa.busca(ativo, data)
+    data_efetiva, preco, fonte = BuscaCotacao::Bolsa.busca(ativo, data)
 
     if preco.nil?
       Rails.logger.info("Cotação para #{ativo.nome}: não encontrei preço em #{data_efetiva}, pegando última cotação")
@@ -140,7 +140,7 @@ class CotacaoService
       # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
       # dela e "sobreescrever"
       Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
-      Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
+      Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco, fonte: fonte)
     end
   end
 

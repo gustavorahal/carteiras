@@ -38,3 +38,15 @@ dis:
   tipo: 1
   moeda: USD
   descricao: Disney
+
+tesouro_selic:
+  nome: Tesouro Selic
+  tipo: tesouro
+  moeda: BRL
+  descricao: Tesouro Selic
+
+fundo_dolar:
+  nome: Fundo Dolar X
+  tipo: fundo
+  moeda: BRL
+  descricao: Fundo Dolar X

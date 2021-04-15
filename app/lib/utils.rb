@@ -7,29 +7,6 @@ class Utils
                      observacao: "Transferência de custódia para #{nova_corretora.nome}")
   end
 
-
-  # Ajusta data considerando ultimo dia de pregão
-  #
-  # Se estamos no horário do pregão, pegar cotação do dia anterior.
-  # Só queremos armazenar a cotação de fechamento do dia.
-  # Atualmente considera-se 22h GMT como um horário em que todos pregões
-  # que importam já encerraram.
-  #
-  # @return Objeto data, considerando fatores como final de semana,
-  # feriado, fechamento de pregão e tipo de ativo
-  def self.ajusta_data(data, ativo)
-    data_ajustada = data
-    data_ajustada = Date.today if data > Date.today
-    data_ajustada -= 1.day if data == Date.today && dia_util?(data) && Time.now.hour < 22
-    data_ajustada -= 1.day until dia_util?(data_ajustada)
-    # tesouro não negocia no ultimo dia do ano...
-    data_ajustada -= 1.days if ativo.tipo == 'tesouro' && data == Date.new(data.year, 12, 31)
-    # fundos tem um atraso de 3 dias uteis para atualizar cotas
-    data_ajustada -= 3.days if ativo.tipo == 'fundo' && data == Date.today
-    
-    data_ajustada
-  end
-
   def self.dia_util?(data)
     !data.on_weekend? && !Holidays.on(data, :br).present?
   end

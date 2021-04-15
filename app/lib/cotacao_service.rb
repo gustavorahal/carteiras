@@ -4,7 +4,7 @@ class CotacaoService
   # param @data: irá tentar buscar cotacao para data dada. Se não for possivel, retornar
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
-    Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
+    Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}") do
       _resolve_cotacao(ativo, data)
     end
   end
@@ -40,7 +40,7 @@ class CotacaoService
 
   # Encontra uma cotacão mais adequada de acordo com a data informada
   def self._resolve_cotacao(ativo, data)
-    data_ajustada = Utils.ajusta_data(data, ativo)
+    data_ajustada = _ajusta_data(data, ativo)
     if data_ajustada != data
       Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
@@ -53,6 +53,32 @@ class CotacaoService
 
     Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} não encontrado no BD, vamos buscar"
     send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+  end
+
+  # Ajusta data considerando de acordo com tipo de ativo
+  #
+  # Esta função precisa ter conhecimento das caracteristicas de cada ativo assim como do backend
+  # Consider também fatores como final de semana, feriado, fechamento de pregão e tipo de ativo
+  #
+  # @return Objeto data
+  def self._ajusta_data(data, ativo)
+    data_ajustada = data
+    # Caso passem data no futuro, ajeitar
+    data_ajustada = Date.today if data > Date.today
+    # vamos buscar o ultimo dia útil
+    data_ajustada -= 1.day until Utils.dia_util?(data_ajustada)
+    # tesouro tem um atraso de 3 dias uteis para atualizar cotas
+    data_ajustada -= 2.days if ativo.tipo == 'tesouro' && data == Date.today
+    # tesouro não negocia no ultimo dia do ano...
+    data_ajustada -= 1.days if ativo.tipo == 'tesouro' && data_ajustada == Date.new(data.year, 12, 31)
+    # fundos tem um atraso de 3 dias uteis para atualizar cotas
+    data_ajustada -= 3.days if ativo.tipo == 'fundo' && data == Date.today
+
+    # Caso cheguemos aqui e a data_ajustada ainda é a data de hoje, ajeitar
+    # nenhum backend passa informação do dia, todas tem 1 dia util de atraso, ao menos
+    data_ajustada -= 1.day if data == Date.today && Utils.dia_util?(data) && data_ajustada == data
+
+    data_ajustada
   end
 
   # Pela maneira como o Backend funciona, esta função faz algo

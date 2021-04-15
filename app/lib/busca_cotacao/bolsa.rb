@@ -8,13 +8,13 @@ module BuscaCotacao
       data_efetiva = data
       preco = _api_busca(ativo.nome, data_efetiva, bolsa)
       # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
-      tentativas = 3
+      tentativas = 4
       while preco.blank?
         if tentativas.zero?
           preco = nil
           break
         else
-          data_efetiva = Utils.ajusta_data(data_efetiva - 1.day, ativo)
+          data_efetiva -= 1.day
           preco = _api_busca(ativo.nome, data_efetiva, bolsa)
           Rails.logger.info("BuscaBolsa: Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
           tentativas -= 1
@@ -93,7 +93,7 @@ module BuscaCotacao
 
       if data == Date.today || data.nil?
         url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ticker_str}"
-        json_response =  Utils.fetch_rapidapi_json(url, api_host)
+        json_response = Utils.fetch_rapidapi_json(url, api_host)
         result = json_response['quoteResponse']['result']
         return result[0]['regularMarketPrice'].to_f unless result.empty?
       else
@@ -101,7 +101,7 @@ module BuscaCotacao
         to_data = (data + 1.day).to_time.to_i
         url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
         Rails.logger.info "BuscaBolsa: Chamando #{url}"
-        json_response =  Utils.fetch_rapidapi_json(url, api_host)
+        json_response = Utils.fetch_rapidapi_json(url, api_host)
         if json_response['chart']['result'].nil?
           raise StandardError, "Yahoo API: Não foi possivel obter cotação de #{ticker_str}: #{json_response['chart']['error']['description']}"
         end

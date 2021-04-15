@@ -19,6 +19,7 @@ class Utils
   # feriado, fechamento de pregão e tipo de ativo
   def self.ajusta_data(data, ativo)
     data_ajustada = data
+    data_ajustada = Date.today if data > Date.today
     data_ajustada -= 1.day if data == Date.today && dia_util?(data) && Time.now.hour < 22
     data_ajustada -= 1.day until dia_util?(data_ajustada)
     # tesouro não negocia no ultimo dia do ano...

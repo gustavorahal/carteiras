@@ -5,7 +5,8 @@ class CotacaoService
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
     Rails.cache.fetch("cotacao_ativo_#{ativo.id}_#{data}", expires_in: 20.seconds) do
-      cotacao = Cotacao.where(ativo: ativo, data: data).order(data: :desc).first
+      data_ajustada = Utils.ajusta_data(data, ativo)
+      cotacao = Cotacao.where(ativo: ativo, data: data_ajustada).order(data: :desc).first
       if cotacao.nil?
         Rails.logger.info "Cotação para #{ativo.nome}: não encontrado no BD em #{data}, vamos resolver"
         cotacao = _resolve_cotacao(ativo, data)

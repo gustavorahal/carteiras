@@ -6,7 +6,7 @@ module Extratos
     def self.processar(conta_corrente)
       corretora_nome = conta_corrente.corretora.nome
       carteira = conta_corrente.carteira
-      @processa_class = "Processa#{corretora_nome.capitalize}".constantize
+      @processa_class = "Extratos::Processa#{corretora_nome.capitalize}".constantize
 
       conta_corrente.extratos.where(processado: false).each do |extrato|
         Rails.logger.info "Processando extrato id ##{extrato.id} '#{extrato.descricao}'"

@@ -11,6 +11,17 @@ class Utils
     !data.on_weekend? && !Holidays.on(data, :br).present?
   end
 
+  # Retorna o ultimo dia util, excluindo hoje (se for o caso)
+  # Ou seja, se hoje for dia util, retorna ontem (ou o ultimo dia util)
+  # Ex. Hoje "Segunda", retorna "Sexta"
+  def self.ultimo_dia_util(data)
+    data_ajustada = data
+    data_ajustada -= 1.day until Utils.dia_util?(data_ajustada)
+    # Vamos excluir o dia de hoje caso seja dia util porque queremos o ultimo dia
+    data_ajustada = ultimo_dia_util(data_ajustada - 1.day) if data == Date.today && Utils.dia_util?(data) && data_ajustada == data
+    data_ajustada
+  end
+
   # Retorna uma lista com as datas do ultimo dia dos ultimos meses
   # do ano especificado
   #

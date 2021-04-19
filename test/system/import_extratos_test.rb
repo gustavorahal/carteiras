@@ -5,7 +5,7 @@ class ImportExtratosTest < ApplicationSystemTestCase
     _test_importa_extrato(:vitreo_brl, 'extrato_vitreo.csv',
                           ['Pagamento de Frações CSAN3',
                            'TED BCO 341 AGE 8294 CTA 04463 4 - CREDITO EM C/C',
-                           '-R$ 24.745,41', 'R$ 25.598,52'])
+                           '-R$ 24.745,41', 'R$ 25.598,52'], ["* PROV * Pagamento de Rendimentos RBRR11"])
   end
 
   test 'importa extrato XP' do
@@ -34,7 +34,7 @@ class ImportExtratosTest < ApplicationSystemTestCase
   # Private
   #
 
-  def _test_importa_extrato(cc_nome_sym, file_name, checa_textos)
+  def _test_importa_extrato(cc_nome_sym, file_name, checa_textos, nao_textos = [])
     cc = conta_correntes(cc_nome_sym)
     carteira = cc.carteira
 
@@ -48,6 +48,9 @@ class ImportExtratosTest < ApplicationSystemTestCase
 
     checa_textos.each do |texto|
       assert_selector 'td', text: texto
+    end
+    nao_textos.each do |texto|
+      assert_selector 'td', { count: 0, text: texto }
     end
   end
 

@@ -22,7 +22,7 @@ class AtivoPosicao
     @quantidade = quantidade
     @cotacao = CotacaoService.cotacao(@ativo, @data)
 
-    raise StandardError, "Não foi possível obter cotação de #{@ativo.nome} em #{data}" unless @cotacao.is_a? Cotacao
+    raise StandardError, "AtivoPosicao: Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end
 
   def operacoes

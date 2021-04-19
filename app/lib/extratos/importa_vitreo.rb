@@ -13,8 +13,9 @@ module Extratos
         row = sheet.row(i)
         break if row[0].blank?
         next if row[2] == 'SALDO DO DIA'
+        descricao = row[2].gsub('* PROV * ', '')
 
-        _insere_linha_extrato(conta_corrente, row[0], row[0], row[2], row[3], row[4])
+        _insere_linha_extrato(conta_corrente, row[0], row[0], descricao, row[3], row[4])
       end
     end
 

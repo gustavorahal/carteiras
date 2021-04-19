@@ -31,7 +31,7 @@ module BuscaCotacao
       json_response = JSON.parse(response)
       return nil if json_response['value'].empty?
 
-      json_response['value'][0]['cotacaoCompra'].to_f
+      [json_response['value'][0]['cotacaoCompra'].to_f, 'bcb_gov']
     end
 
     def self._brl_usd
@@ -39,7 +39,7 @@ module BuscaCotacao
       url = 'https://currency-converter5.p.rapidapi.com/currency/convert?format=json&from=BRL&to=USD&amount=1'
       Rails.logger.info "BuscaCotacao.brl_usd: Chamando #{url}"
       json_response = Utils.fetch_rapidapi_json(url, api_host)
-      json_response['rates']['USD']['rate'].to_f
+      [json_response['rates']['USD']['rate'].to_f, 'currency_converter_rapidapi']
     end
 
     def self._btc_brl
@@ -48,7 +48,7 @@ module BuscaCotacao
       api_host = 'coingecko.p.rapidapi.com'
 
       json_response = Utils.fetch_rapidapi_json(url, api_host)
-      json_response['bitcoin']['brl']
+      [json_response['bitcoin']['brl'], 'coingecko_rapidapi']
     end
   end
 end

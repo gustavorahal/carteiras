@@ -3,10 +3,11 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 module BuscaCotacao
   class Bolsa
 
+    # @return: [data_efetiva, preco, fonte]
     def self.busca(ativo, data)
       bolsa = ('BVMF' if ativo.moeda == 'BRL')
       data_efetiva = data
-      preco = _api_busca(ativo.nome, data_efetiva, bolsa)
+      preco, fonte = _api_busca(ativo.nome, data_efetiva, bolsa)
       # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
       tentativas = 4
       while preco.blank?
@@ -15,13 +16,13 @@ module BuscaCotacao
           break
         else
           data_efetiva -= 1.day
-          preco = _api_busca(ativo.nome, data_efetiva, bolsa)
+          preco, fonte = _api_busca(ativo.nome, data_efetiva, bolsa)
           Rails.logger.info("BuscaBolsa: Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
           tentativas -= 1
         end
       end
 
-      [data_efetiva, preco]
+      [data_efetiva, preco, fonte]
     end
 
 
@@ -40,7 +41,7 @@ module BuscaCotacao
         Rails.logger.info("BuscaAtivos::Bolsa._api_busca: #{e.message}")
       end
 
-      return preco unless preco.nil?
+      return [preco, 'marketstack'] unless preco.nil?
 
       begin
         preco = _api_yahoo_finance(ticker, data, bolsa)
@@ -48,7 +49,7 @@ module BuscaCotacao
         Rails.logger.info("BuscaAtivos::Bolsa._api_busca: #{e.message}")
       end
 
-      preco
+      [preco, 'yahoo_finance_rapidapi']
     end
 
     def self._api_marketstack(ticker, data, bolsa = nil)

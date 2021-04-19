@@ -72,18 +72,14 @@ class CotacaoService
     data_ajustada = data
     # Caso passem data no futuro, ajeitar
     data_ajustada = Date.today if data > Date.today
-    # vamos buscar o ultimo dia útil
-    data_ajustada -= 1.day until Utils.dia_util?(data_ajustada)
-    # tesouro tem um atraso de 3 dias uteis para atualizar cotas
+    # vamos buscar o ultimo dia útil, excluindo hoje (caso seja um dia util)
+    data_ajustada = Utils.ultimo_dia_util(data_ajustada)
+    # tesouro tem um atraso de 2 dias uteis para atualizar cotas
     data_ajustada -= 2.days if ativo.tipo == 'tesouro' && data == Date.today
     # tesouro não negocia no ultimo dia do ano...
     data_ajustada -= 1.days if ativo.tipo == 'tesouro' && data_ajustada == Date.new(data.year, 12, 31)
     # fundos tem um atraso de 3 dias uteis para atualizar cotas
     data_ajustada -= 3.days if ativo.tipo == 'fundo' && data == Date.today
-
-    # Caso cheguemos aqui e a data_ajustada ainda é a data de hoje, ajeitar
-    # nenhum backend passa informação do dia, todas tem 1 dia util de atraso, ao menos
-    data_ajustada -= 1.day if data == Date.today && Utils.dia_util?(data) && data_ajustada == data
 
     data_ajustada
   end
@@ -102,7 +98,7 @@ class CotacaoService
         ativo = Ativo.find_by(cnpj: cnpj)
         data = vl_cota[0].to_date
         unless Cotacao.find_by(ativo: ativo, data: data)
-          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1])
+          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1], fonte: 'cvm_gov')
         end
       end
     end
@@ -119,7 +115,8 @@ class CotacaoService
   def self._busca_e_registra_tesouro(ativo, data)
     dados = BuscaCotacao::Tesouro.busca ativo.nome, data
     dados.each do |data_api, preco|
-      Cotacao.find_or_create_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
+      cotacao = Cotacao.find_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
+      Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data_api, fonte: 'tesouro_gov') if cotacao.blank?
     end
 
     Cotacao.find_by(ativo: ativo, data: data)
@@ -132,13 +129,13 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco = BuscaCotacao::Moeda.busca(ativo, data)
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data)
+    preco, fonte = BuscaCotacao::Moeda.busca(ativo, data)
+    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data, fonte: fonte)
   end
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_bolsa(ativo, data)
-    data_efetiva, preco = BuscaCotacao::Bolsa.busca(ativo, data)
+    data_efetiva, preco, fonte = BuscaCotacao::Bolsa.busca(ativo, data)
 
     if preco.nil?
       Rails.logger.info("Cotação para #{ativo.nome}: não encontrei preço em #{data_efetiva}, pegando última cotação")
@@ -147,7 +144,7 @@ class CotacaoService
       # Como podemos ter escolhido uma data diferente da fornecida, ver se já temos o registro
       # dela e "sobreescrever"
       Cotacao.find_by(ativo: ativo, data: data_efetiva).try(:destroy)
-      Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco)
+      Cotacao.create!(ativo: ativo, data: data_efetiva, valor_unit: preco, fonte: fonte)
     end
   end
 

@@ -52,10 +52,10 @@ class CotacaoService
       Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
 
-    ultima_cotacao = Cotacao.where(ativo: ativo).order(data: :desc).first
-    if ultima_cotacao.data == data_ajustada
+    cotacao = Cotacao.where(ativo: ativo, data: data_ajustada)
+    if cotacao.present?
       Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} disponivel no BD, retornando"
-      return ultima_cotacao
+      return cotacao
     end
 
     Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} não encontrado no BD, vamos buscar"

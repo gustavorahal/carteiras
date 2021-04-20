@@ -18,9 +18,9 @@ class UtilsTest < ActiveSupport::TestCase
   end
 
   test "ultimo dia util: se data no passado final de semana, retorna dia util anterior" do
-    travel_to Date.new(2021, 4, 18) # domingo
-    data_teste = Date.today.prev_occurring(:saunda) ###
-    data_esperada = Date.new(2021, 4, 16) # sexta
+    travel_to Date.new(2021, 4, 18) # domingo "hoje"
+    data_teste = Date.new(2021, 4, 11) # domingo anterior
+    data_esperada = Date.new(2021, 4, 9) # sexta
     data_retornada = Utils.ultimo_dia_util(data_teste)
     assert_equal data_esperada, data_retornada
   end

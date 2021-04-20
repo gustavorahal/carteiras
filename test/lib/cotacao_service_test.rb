@@ -31,6 +31,14 @@ class CotacaoServiceTest < ActiveSupport::TestCase
     assert_equal data_esperada, data_retornada
   end
 
+  test "ajusta data: quando tipo tesouro e data hoje (uma terça), retorna 2 dias uteis atrás" do
+    travel_to Date.new(2021, 4, 20) # terça feira
+    data_teste = Date.today
+    data_esperada = Date.new(2021, 4, 16) # sexta
+    data_retornada = CotacaoService._ajusta_data(data_teste, ativos(:tesouro_selic))
+    assert_equal data_esperada, data_retornada
+  end
+
   test "ajusta data: quando tipo tesouro e data passada no meio de semana, retorna o proprio dia" do
     data_teste = Date.today.prev_occurring(:tuesday)
     data_esperada = data_teste
@@ -42,6 +50,14 @@ class CotacaoServiceTest < ActiveSupport::TestCase
     travel_to Date.new(2021, 4, 19) # segunda feira
     data_teste = Date.today
     data_esperada = Date.new(2021, 4, 13) # terça
+    data_retornada = CotacaoService._ajusta_data(data_teste, ativos(:fundo_dolar))
+    assert_equal data_esperada, data_retornada
+  end
+
+  test "ajusta data: quando tipo fundo e data hoje (uma quarta), retorna 3 dias uteis atrás" do
+    travel_to Date.new(2021, 4, 21) # quarta feira
+    data_teste = Date.today
+    data_esperada = Date.new(2021, 4, 16) # sexta
     data_retornada = CotacaoService._ajusta_data(data_teste, ativos(:fundo_dolar))
     assert_equal data_esperada, data_retornada
   end

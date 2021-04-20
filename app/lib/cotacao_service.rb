@@ -75,11 +75,19 @@ class CotacaoService
     # vamos buscar o ultimo dia útil, excluindo hoje (caso seja um dia util)
     data_ajustada = Utils.ultimo_dia_util(data_ajustada)
     # tesouro tem um atraso de 2 dias uteis para atualizar cotas
-    data_ajustada -= 2.days if ativo.tipo == 'tesouro' && data == Date.today
-    # tesouro não negocia no ultimo dia do ano...
-    data_ajustada -= 1.days if ativo.tipo == 'tesouro' && data_ajustada == Date.new(data.year, 12, 31)
+    if ativo.tipo == 'tesouro' && data == Date.today
+      data_ajustada = Utils.ultimo_dia_util(data_ajustada - 2.days)
+    end
+
+    # tesouro não negocia no ultimo dia do ano, mesmo que seja no meio da semana
+    if ativo.tipo == 'tesouro' && data_ajustada == Date.new(data.year, 12, 31)
+      data_ajustada -= 1.days
+    end
+
     # fundos tem um atraso de 3 dias uteis para atualizar cotas
-    data_ajustada -= 3.days if ativo.tipo == 'fundo' && data == Date.today
+    if ativo.tipo == 'fundo' && data == Date.today
+      data_ajustada = Utils.ultimo_dia_util(data_ajustada - 3.days)
+    end
 
     data_ajustada
   end

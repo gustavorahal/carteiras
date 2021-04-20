@@ -52,7 +52,7 @@ class CotacaoService
       Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
 
-    cotacao = Cotacao.where(ativo: ativo, data: data_ajustada)
+    cotacao = Cotacao.find_by(ativo: ativo, data: data_ajustada)
     if cotacao.present?
       Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} disponivel no BD, retornando"
       return cotacao

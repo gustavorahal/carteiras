@@ -1,24 +1,5 @@
+<%= render 'common/titulo_pagina', titulo: "Cotações #{@ativo.nome_amigavel}" %>
 
-<h4>Cotações <%= @ativo.nome_amigavel %></h4>
 <%= render 'common/btn_new', label:'Nova cotação', url: new_ativo_cotacao_path %>
 
-<table class="table table-sm">
-  <thead>
-    <th>Data</th>
-    <th>Preço</th>
-    <th>Timestamp</th>
-    <th>Fonte
-    <th></th>
-  </thead>
-  <tbody>
-    <% @cotacoes.each do |cotacao| %>
-      <tr>
-        <td><%= display_data cotacao.data  %></td>
-        <td><%= display_moeda cotacao.valor_unit, moeda: cotacao.ativo.moeda %></td>
-        <td><%= cotacao.created_at %></td>
-        <td><%= cotacao.fonte %></td>
-        <td><%= link_to 'Editar', edit_ativo_cotacao_path(@ativo, cotacao) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<%= render 'cotacoes_table' %>

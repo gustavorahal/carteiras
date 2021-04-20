@@ -5,6 +5,9 @@ Rails.application.routes.draw do
   resources :ativos do
     resources :cotacoes
   end
+
+  get '/cotacoes', to: 'cotacoes#index_all'
+
   resources :corretoras
   resources :investidores
 

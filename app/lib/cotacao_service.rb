@@ -58,7 +58,7 @@ class CotacaoService
       return cotacao
     end
 
-    Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} não encontrado no BD, vamos buscar"
+    Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponivel no BD, vamos buscar"
     send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
   end
 

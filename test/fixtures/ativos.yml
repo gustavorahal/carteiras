@@ -27,11 +27,23 @@ bpan4:
   moeda: BRL
   descricao: Banco PAN
 
+vale3:
+  nome: VALE3
+  tipo: acao
+  moeda: BRL
+  descricao: Vale do Rio Doce
+
 gndi3:
   nome: GNDI3
   tipo: 1
   moeda: BRL
   descricao: Notre Dame
+
+rbrf11:
+  nome: RBRF11
+  tipo: fii
+  moeda: BRL
+  descricao: RBRF11
 
 dis:
   nome: DIS

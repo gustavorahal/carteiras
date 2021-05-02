@@ -1,6 +1,6 @@
 # Posição da Carteira em determinada data.
 # Quais ativos e qual a posicao deles
-class Posicao
+class PosicaoDeleteMe
 
   def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira

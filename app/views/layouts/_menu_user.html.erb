@@ -1,0 +1,18 @@
+<% if user_signed_in? %>
+  <li class="nav-item dropdown justify-content-end">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <%= current_user.email %> <b class="caret"></b>
+    </a>
+    <div class="dropdown-menu">
+      <%= link_to 'Editar conta', edit_user_registration_path, class: 'dropdown-item' %>
+      <div class="dropdown-divider"></div>
+      <%= link_to 'Sair', destroy_user_session_path, :method =>'delete', class: 'dropdown-item' %>
+    </div>
+  </li>
+<% else %>
+  <%#= link_to 'Entrar', new_user_session_path, class: 'nav-item nav-link' %>
+  <!-- FIXME: solução temporária para não deixar qualquer um criar conta, apenas admins -->
+  <% if current_user and current_user.admin? %>
+    <%= link_to 'Criar conta', new_user_registration_path, class: 'nav-item nav-link' %>
+  <% end %>
+<% end %>

@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  include Pundit
+  before_action :authenticate_user!
   before_action :set_data
 
   private

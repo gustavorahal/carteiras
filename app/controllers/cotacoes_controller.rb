@@ -13,12 +13,14 @@ class CotacoesController < ApplicationController
   def new
     @ativo = Ativo.find params[:ativo_id]
     @cotacao = Cotacao.new
+    authorize @cotacao
   end
 
   def create
     @ativo = Ativo.find params[:ativo_id]
     @cotacao = Cotacao.new secure_params
     @cotacao.ativo = @ativo
+    authorize @cotacao
 
     if @cotacao.save
       redirect_to ativo_cotacoes_path ativo_id: params[:ativo_id]
@@ -30,10 +32,12 @@ class CotacoesController < ApplicationController
   def edit
     @ativo = Ativo.find params[:ativo_id]
     @cotacao = Cotacao.find params[:id]
+    authorize @cotacao
   end
 
   def update
     @cotacao = Cotacao.find params[:id]
+    authorize @cotacao
     if @cotacao.update(secure_params)
       redirect_to ativo_cotacoes_path ativo_id: params[:ativo_id], notice: "Cotação atualizada com sucesso!"
     else

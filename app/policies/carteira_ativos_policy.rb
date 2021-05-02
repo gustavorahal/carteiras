@@ -1,0 +1,2 @@
+class CarteiraAtivosPolicy < ApplicationPolicy
+end

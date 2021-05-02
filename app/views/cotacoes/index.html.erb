@@ -1,5 +1,7 @@
 <%= render 'common/titulo_pagina', titulo: "Cotações #{@ativo.nome_amigavel}" %>
 
-<%= render 'common/btn_new', label:'Nova cotação', url: new_ativo_cotacao_path %>
+<% if policy(Cotacao).create? %>
+  <%= render 'common/btn_new', label:'Nova cotação', url: new_ativo_cotacao_path %>
+<% end %>
 
 <%= render 'cotacoes_table' %>

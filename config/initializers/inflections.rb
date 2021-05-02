@@ -59,4 +59,7 @@ ActiveSupport::Inflector.inflections do |inflect|
   inflect.uncountable %w( tórax tênis ônibus lápis fênix )
   # Irregulares
   inflect.irregular "país", "países"
+
+  # suporte a termos em ingles que usamos no sistema
+  inflect.irregular "user", "users"
 end

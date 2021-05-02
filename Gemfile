@@ -31,9 +31,12 @@ gem 'bootsnap', '>= 1.4.4', require: false
 
 gem 'bootstrap_form', '~> 4.0'
 gem 'bootstrap-icons-helper'
+gem 'devise'
+gem 'devise-i18n'
+gem 'holidays'
+gem 'pundit'
 gem 'roo'
 gem 'roo-xls'
-gem 'holidays'
 gem 'rufus-scheduler'
 
 group :development, :test do

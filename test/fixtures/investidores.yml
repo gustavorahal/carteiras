@@ -2,6 +2,8 @@
 
 example_investor:
   nome: Example Investor
+  user: example_investor
 
 second_investor:
   nome: Claudio
+  user: claudio

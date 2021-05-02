@@ -1,0 +1,2 @@
+class CarteiraPolicy < ApplicationPolicy
+end

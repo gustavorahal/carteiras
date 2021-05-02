@@ -2,7 +2,7 @@
 # Posição da Carteira em determinada data. Quais ativos e qual a posicao deles
 class CarteiraAtivos
 
-  attr_reader :carteira, :data
+  attr_reader :carteira, :data, :investidor
 
   def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira

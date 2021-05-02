@@ -3,12 +3,14 @@ class CarteiraAtivosController < ApplicationController
   before_action :set_vars, only: [:index, :show]
 
   def index
+    authorize @carteira_ativos
     @view = params[:view]
 
     set_vars_view_atual_vs_ref if @view == 'atual_vs_ref'
   end
 
   def show
+    authorize @carteira_ativos
     @ativo_posicao = AtivoPosicao.new(params[:carteira_id], params[:ativo_id], @data)
     @ativo = @ativo_posicao.ativo
   end

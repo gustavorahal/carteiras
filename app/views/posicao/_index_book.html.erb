@@ -1,0 +1,35 @@
+
+<%= render 'common/titulo_pagina', titulo: "Posição por Book em #{display_data @data}" %>
+
+<table class="table table-sm">
+  <tbody>
+  <% @ativos_posicao_por_book.each do |book, ativo_posicoes| %>
+    <tr class="table-primary">
+      <td>
+        <h6><%= book %></h6>
+      </td>
+      <td> <!-- Rendimento --> </td>
+      <td>
+        <h6><%= display_moeda @valor_por_book_carteira[book] %>
+          (<%= display_porcentagem @porcentagens_por_book_carteira[book] %>) </h6>
+      </td>
+      <td><!-- Quantidade --></td>
+      <td>Preço</td>
+      <td>Preço Médio</td>
+    </tr>
+    <% ativo_posicoes.each do |posicao_ativo| %>
+      <tr>
+        <td><%= link_to posicao_ativo.ativo.nome_amigavel, posicao_ativo_path(@carteira, posicao_ativo.ativo) %>
+          <small>desde <%= display_data posicao_ativo.data_montagem %> </small></td>
+        <td><%= display_rentabilidade posicao_ativo %></td>
+        <td><%= display_moeda posicao_ativo.valor, moeda: posicao_ativo.ativo.moeda, cores: true %>
+          (<%= display_porcentagem @posicao.porcentagem_ativo(posicao_ativo.ativo) %>)
+        </td>
+        <td><%= display_numero posicao_ativo.quantidade %></td>
+        <td><%= display_preco_atual posicao_ativo %></td>
+        <td><%= display_preco_medio posicao_ativo %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  </tbody>
+</table>

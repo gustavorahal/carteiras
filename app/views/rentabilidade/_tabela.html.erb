@@ -13,14 +13,14 @@
   <tbody>
   <% total_geral_ultimo_mes = 0 %>
   <% movimentacoes_mes_a_mes = @carteira.movimentacoes.mes_a_mes(corretora) %>
-  <% @ultimos_carteira_ativos.each do |carteira_ativos| %>
-    <% total_geral = carteira_ativos.total_geral(corretora) %>
-    <% total_movimentacoes_mes = (movimentacoes_mes_a_mes[carteira_ativos.data] || 0) %>
+  <% @ultimos_posicao.each do |posicao| %>
+    <% total_geral = posicao.total_geral(corretora) %>
+    <% total_movimentacoes_mes = (movimentacoes_mes_a_mes[posicao.data] || 0) %>
     <% total_base_comparacao = total_geral_ultimo_mes + total_movimentacoes_mes %>
     <tr>
-      <td><%= display_mes_ano carteira_ativos.data %></td>
+      <td><%= display_mes_ano posicao.data %></td>
       <td><%= display_moeda total_geral %></td>
-      <td><%= display_moeda movimentacoes_mes_a_mes[carteira_ativos.data] %></td>
+      <td><%= display_moeda movimentacoes_mes_a_mes[posicao.data] %></td>
       <td><%= display_moeda total_geral - total_base_comparacao %></td>
       <td><%= display_porcentagem ((total_geral / total_base_comparacao) - 1) * 100 %></td>
       <% total_geral_ultimo_mes = total_geral %>

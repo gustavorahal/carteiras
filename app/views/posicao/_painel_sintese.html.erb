@@ -3,19 +3,19 @@
     <div class="card-group">
       <div class="card">
         <div class="card-body">
-          <h3><%= display_moeda @carteira_ativos.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
+          <h3><%= display_moeda @posicao.total_geral %> <small class="text-muted">em <%= display_data @data %></small></h3>
           <h5>
             <small class="font-weight-lighter">
-              <%= display_moeda @carteira_ativos.rendimento %> de rendimento
-              (<%= display_porcentagem @carteira_ativos.rentabilidade, cores: true %>) dos
-              <%= display_moeda @carteira_ativos.total_investido %> <%= link_to 'movimentados', carteira_movimentacoes_path(@carteira)  %>
+              <%= display_moeda @posicao.rendimento %> de rendimento
+              (<%= display_porcentagem @posicao.rentabilidade, cores: true %>) dos
+              <%= display_moeda @posicao.total_investido %> <%= link_to 'movimentados', carteira_movimentacoes_path(@carteira)  %>
             </small>
           </h5>
           <br>
-          <h5><%= display_moeda @carteira_ativos.total_ativos %>
+          <h5><%= display_moeda @posicao.total_ativos %>
             <small class="text-muted"> em ativos</small>
           </h5>
-          <% @carteira_ativos.total_ativos_por_corretora.each do |corretora, moeda_total| %>
+          <% @posicao.total_ativos_por_corretora.each do |corretora, moeda_total| %>
             <% moeda_total.each do |moeda, total| %>
               <span class="font-weight-lighter">
                 <%= display_moeda total, moeda: moeda %> <small class="text-muted"><%= corretora.nome %></small>
@@ -24,7 +24,7 @@
             <br>
           <% end %>
           <br>
-          <h5><%= display_moeda @carteira_ativos.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
+          <h5><%= display_moeda @posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
           <% @contas_correntes.each do |cc| %>
             <% saldo = cc.saldo(@data)  %>
             <% next if saldo == 0  %>
@@ -54,7 +54,7 @@
               <td><%= display_porcentagem porcentagem_ref %></td>
             </tr>
           <% end %>
-          <% pm = @carteira_ativos.porcentagem_por_moeda %>
+          <% pm = @posicao.porcentagem_por_moeda %>
           <% pm_ref = @carteira.referencia.porcentagem_por_moeda %>
           <tr>
             <td>em BRL</td>

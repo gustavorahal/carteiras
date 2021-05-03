@@ -1,19 +1,19 @@
 
 # Posição da Carteira em relação a Referência que segue
-class CarteiraAtivosReferencia
-  def initialize(carteira_ativos)
-    raise TypeError unless carteira_ativos.is_a? CarteiraAtivos
+class PosicaoReferencia
+  def initialize(posicao)
+    raise TypeError unless posicao.is_a? Posicao
 
-    @carteira_ativos = carteira_ativos
-    @carteira = carteira_ativos.carteira
+    @posicao = posicao
+    @carteira = posicao.carteira
     @referencia = @carteira.referencia
-    @ativos_posicao = carteira_ativos.ativos_posicao
+    @posicao_ativos = posicao.posicao_ativos
     @cotacao_usdbrl = CotacaoService.cotacao_usdbrl(Date.today)
   end
 
   def ativos_posicao_por_book
     lista = {}
-    @ativos_posicao.each do |cap|
+    @posicao_ativos.each do |cap|
       book = _book_ativo(cap.ativo)
       lista[book] = [] unless book.in? lista
       lista[book].push cap
@@ -25,10 +25,10 @@ class CarteiraAtivosReferencia
   def porcentagens_por_book
     lista = {}
 
-    @ativos_posicao.each do |ativo_posicao|
-      book = _book_ativo(ativo_posicao.ativo)
+    @posicao_ativos.each do |posicao_ativo|
+      book = _book_ativo(posicao_ativo.ativo)
       lista[book] = 0 unless book.in? lista
-      lista[book] += (ativo_posicao.valor_em_brl / @carteira_ativos.total_geral) * 100
+      lista[book] += (posicao_ativo.valor_em_brl / @posicao.total_geral) * 100
     end
 
     lista
@@ -36,7 +36,7 @@ class CarteiraAtivosReferencia
 
   def valor_por_book
     lista = {}
-    @ativos_posicao.each do |cap|
+    @posicao_ativos.each do |cap|
       book = _book_ativo(cap.ativo)
       lista[book] = 0 unless book.in? lista
       lista[book] += cap.valor_em_brl
@@ -46,10 +46,10 @@ class CarteiraAtivosReferencia
   end
 
   def diff_valor_referencia_brl(ativo)
-    ativo_posicao = @carteira_ativos.busca_ativo_posicao(ativo)
-    return _valor_teorico(ativo) if ativo_posicao.nil?
+    posicao_ativo = @posicao.busca_posicao_ativo(ativo)
+    return _valor_teorico(ativo) if posicao_ativo.nil?
 
-    ativo_posicao.valor_em_brl - _valor_teorico(ativo)
+    posicao_ativo.valor_em_brl - _valor_teorico(ativo)
   end
 
   def diff_valor_referencia_usd(ativo)
@@ -80,7 +80,7 @@ class CarteiraAtivosReferencia
     percent = _porcentagem_ref_ativo(ativo)
     return 0 if percent.nil? || percent.zero?
 
-    @carteira_ativos.total_geral * (percent / 100)
+    @posicao.total_geral * (percent / 100)
   end
 
   def _porcentagem_ref_ativo(ativo)

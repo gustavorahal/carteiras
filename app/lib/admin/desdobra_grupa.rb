@@ -41,9 +41,9 @@ module Admin
       #
       # É necessário marcar como montagem e desmontagem senão o valor de calculo do preço_medio
       # pós desdobramento não ficaria correto. Precisamos de fato recomeçar
-      ativo_posicao = AtivoPosicao.new(carteira, ativo, Date.today)
-      preco_medio = ativo_posicao.preco_medio
-      quantidade = ativo_posicao.quantidade
+      posicao_ativo = PosicaoAtivo.new(carteira, ativo, Date.today)
+      preco_medio = posicao_ativo.preco_medio
+      quantidade = posicao_ativo.quantidade
       if quantidade.zero?
         Rails.logger.info "Quantidade de #{ativo.nome} é ZERO. Não há o que desdobrar ou grupar"
         return nil

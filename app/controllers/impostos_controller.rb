@@ -10,7 +10,7 @@ class ImpostosController < ApplicationController
   def posicao_ano_anterior
     @carteira = Carteira.find params[:carteira_id]
     @data = Date.new(Date.today.year - 1, 12, 31) # data ano anterior
-    @carteira_ativos = CarteiraAtivos.new(@carteira, @data)
+    @posicao = Posicao.new(@carteira, @data)
   end
 
 end

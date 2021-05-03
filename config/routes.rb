@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+
   devise_for :users
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
   root to: 'application#index'
@@ -26,8 +27,8 @@ Rails.application.routes.draw do
     end
   end
 
-  get '/carteira_ativos/:carteira_id', to: 'carteira_ativos#index', as: 'carteira_ativos'
-  get '/carteira_ativos/:carteira_id/ativos/:ativo_id', to: 'carteira_ativos#show', as: 'carteira_ativo'
+  get '/posicao/:carteira_id', to: 'posicao#index', as: 'posicao'
+  get '/posicao/:carteira_id/ativos/:ativo_id', to: 'posicao#show', as: 'posicao_ativo'
 
   resources :referencias do
     resources :referencia_ativos

@@ -3,7 +3,7 @@
 <h4>
   Seguida por
   <% @referencia.carteiras.each do |carteira| %>
-    <%= link_to(carteira.nome, carteira_ativos_path(carteira)) %>
+    <%= link_to(carteira.nome, posicao_path(carteira)) %>
   <% end %>
 </h4>
 

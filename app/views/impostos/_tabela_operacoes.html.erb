@@ -25,7 +25,7 @@
         <td><%= display_data imp_oper.data_venda %></td>
         <td><%= display_data imp_oper.data_montagem %></td>
         <td><%= link_to imp_oper.ativo.nome_amigavel,
-                        carteira_ativo_path(@carteira, imp_oper.ativo) %></td>
+                        posicao_ativo_path(@carteira, imp_oper.ativo) %></td>
         <td><%= display_moeda imp_oper.preco_medio_compra %></td>
         <td><%= display_moeda imp_oper.preco_venda %></td>
         <td><%= display_numero imp_oper.quantidade_vendida %></td>

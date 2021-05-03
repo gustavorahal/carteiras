@@ -1,6 +1,6 @@
 
-<% if @carteira_ativo.errors[:base].present? %>
-  <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @carteira_ativo.errors[:base][0] %>
+<% if @posicao_ativo.errors[:base].present? %>
+  <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @posicao_ativo.errors[:base][0] %>
 <% else %>
   <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
 <% end %>

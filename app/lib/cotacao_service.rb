@@ -35,7 +35,7 @@ class CotacaoService
       # No interessa saber quais os ativos 'hoje' presentes
       # nas carteiras e a partir deles, dai sim buscar suas
       # cotações na data informada
-      ca = CarteiraAtivos.new(carteira, Date.today)
+      ca = Posicao.new(carteira, Date.today)
       ca.ativos.each { |ativo| cotacao(ativo, data) }
     end
   end

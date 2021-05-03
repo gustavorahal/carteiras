@@ -12,7 +12,7 @@
   </thead>
 
   <tbody>
-  <% @carteira_ativos.ativos_posicao_por_corretora.each do |corretora_nome, tipos|  %>
+  <% @posicao.por_corretora.each do |corretora_nome, tipos|  %>
     <tr class="table-primary">
       <td colspan="5">
         <h6><%= corretora_nome %></h6>
@@ -24,14 +24,14 @@
           <h6><%= tipo.upcase %></h6>
         </td>
       </tr>
-      <% ativos_posicoes.each do |ativo_posicao| %>
-        <% ativo = ativo_posicao.ativo %>
+      <% ativos_posicoes.each do |posicao_ativo| %>
+        <% ativo = posicao_ativo.ativo %>
         <tr>
-          <td><%= link_to ativo.nome, carteira_ativo_path(@carteira, ativo) %></td>
-          <td><%= display_numero ativo_posicao.quantidade %></td>
-          <td><%= display_preco_medio ativo_posicao %></td>
-          <td><%= display_valor_investido ativo_posicao %></td>
-          <td><%= display_data ativo_posicao.data_montagem %></td>
+          <td><%= link_to ativo.nome, posicao_ativo_path(@carteira, ativo) %></td>
+          <td><%= display_numero posicao_ativo.quantidade %></td>
+          <td><%= display_preco_medio posicao_ativo %></td>
+          <td><%= display_valor_investido posicao_ativo %></td>
+          <td><%= display_data posicao_ativo.data_montagem %></td>
         </tr>
       <% end %>
     <% end %>

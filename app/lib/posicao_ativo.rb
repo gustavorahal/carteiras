@@ -1,4 +1,4 @@
-class AtivoPosicao
+class PosicaoAtivo
 
   attr_reader :cotacao, :ativo, :corretora
 
@@ -22,7 +22,7 @@ class AtivoPosicao
     @quantidade = quantidade
     @cotacao = CotacaoService.cotacao(@ativo, @data)
 
-    raise StandardError, "AtivoPosicao: Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
+    raise StandardError, "PosicaoAtivo: Não foi possível obter cotação de #{@ativo.nome}" unless @cotacao.is_a? Cotacao
   end
 
   def operacoes
@@ -30,11 +30,7 @@ class AtivoPosicao
   end
 
   def data_montagem
-    Rails.cache.fetch("data_montagem_carteira_id-#{@carteira.id}_ativo_id-#{@ativo.id}", expires_in: 5.seconds) do
-      @operacoes_ativo
-        .where(mon_ou_des: 1)
-        .limit(1)[0].data
-    end
+    @operacoes_ativo.where(mon_ou_des: 1).limit(1)[0].data
   end
 
   def preco_medio
@@ -49,32 +45,6 @@ class AtivoPosicao
     else
       preco_medio
     end
-  end
-
-  # Calcula preço médio de compra
-  #
-  # Q & A
-  # -----
-  #
-  # 1. Porque pegar apenas operações de compra? não teria que incluir pequenas vendas desde a data
-  # de montagem?
-  #  R. se desejo auferir os ganhos, o fato de ter vendido por 12 quando paguei 10, por exemplo,
-  #  não deveria aumentar o preço médio para 11. O preço médio de compra continuaria 10 enquanto
-  #  referência para ganhos ou perdas de vendas futuras.
-  def _preco_medio_sql(sum_str)
-    data_montagem_str = data_montagem.strftime '%F'
-    sql = <<~SQL
-      SELECT sum(#{sum_str})/sum(quantidade) AS preco_medio
-      FROM operacoes
-      WHERE 
-       carteira_id = #{@carteira.id} AND 
-       ativo_id = #{@ativo.id} AND  
-       operacao IN (1,4) AND 
-       data::date >= '#{data_montagem_str}' AND
-       data::date <= '#{@data_str}'
-    SQL
-
-    ActiveRecord::Base.connection.execute(sql).values[0][0]
   end
 
   def quantidade
@@ -119,5 +89,35 @@ class AtivoPosicao
     @cotacao.valor_unit * CotacaoService.cotacao_usdbrl(@data).valor_unit
   end
 
+
+  #
+  # Private
+  #
+
+  # Calcula preço médio de compra
+  #
+  # Q & A
+  # -----
+  #
+  # 1. Porque pegar apenas operações de compra? não teria que incluir pequenas vendas desde a data
+  # de montagem?
+  #  R. se desejo auferir os ganhos, o fato de ter vendido por 12 quando paguei 10, por exemplo,
+  #  não deveria aumentar o preço médio para 11. O preço médio de compra continuaria 10 enquanto
+  #  referência para ganhos ou perdas de vendas futuras.
+  def _preco_medio_sql(sum_str)
+    data_montagem_str = data_montagem.strftime '%F'
+    sql = <<~SQL
+      SELECT sum(#{sum_str})/sum(quantidade) AS preco_medio
+      FROM operacoes
+      WHERE 
+       carteira_id = #{@carteira.id} AND
+       ativo_id = #{@ativo.id} AND
+       operacao IN (1,4) AND
+       data::date >= '#{data_montagem_str}' AND
+       data::date <= '#{@data_str}'
+    SQL
+
+    ActiveRecord::Base.connection.execute(sql).values[0][0]
+  end
 
 end

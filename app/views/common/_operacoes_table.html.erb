@@ -27,7 +27,7 @@
       <td><%= display_data oper.data %></td>
       <% if mostra_nome  %>
         <td><%= link_to oper.ativo.nome_amigavel,
-                        carteira_ativo_path(oper.carteira, oper.ativo) %></td>
+                        posicao_ativo_path(oper.carteira, oper.ativo) %></td>
       <% end %>
       <td><%= oper.corretora.nome %></td>
       <td><%= oper.operacao.capitalize %></td>

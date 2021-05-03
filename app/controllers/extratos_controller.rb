@@ -2,6 +2,7 @@ class ExtratosController < ApplicationController
 
   def import
     cc = ContaCorrente.find params[:conta_corrente_id]
+    authorize cc
     carteira = cc.carteira
     extrato_file = params[:file]
     begin
@@ -16,12 +17,14 @@ class ExtratosController < ApplicationController
   def new
     @extrato = Extrato.new
     @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    authorize @conta_corrente
     @carteira = @conta_corrente.carteira
   end
 
   def create
     @extrato = Extrato.new secure_params
     @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    authorize @conta_corrente
     @carteira = @conta_corrente.carteira
 
     if @extrato.save

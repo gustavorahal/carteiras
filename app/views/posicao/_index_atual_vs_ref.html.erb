@@ -29,26 +29,26 @@
       <% referencia_ativos.each do |referencia_ativo| %>
         <% ativo = referencia_ativo.ativo %>
         <% if @carteira_lista_de_ativos.include?(ativo) %>
-          <% @carteira_ativos_restante.delete ativo %>
+          <% @posicao_restante.delete ativo %>
         <% end %>
-        <% percent_ativo = @carteira_ativos.porcentagem_ativo(ativo) %>
+        <% percent_ativo = @posicao.porcentagem_ativo(ativo) %>
         <tr <%= 'class=table-warning' if percent_ativo.zero? %>>
-          <td><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></td>
+          <td><%= link_to ativo.nome_amigavel, posicao_ativo_path(@carteira, ativo) %></td>
           <td>
             <%= display_porcentagem percent_ativo %>
           </td>
           <td><%= display_porcentagem referencia_ativo.porcentagem %></td>
           <td>
-            <% diff_valor_brl = @carteira_ativos_referencia.diff_valor_referencia_brl(ativo) %>
-            <% quant = @carteira_ativos_referencia.diff_quant_referencia(ativo) %>
-            <% ap = @carteira_ativos.busca_ativo_posicao(ativo) %>
+            <% diff_valor_brl = @posicao_referencia.diff_valor_referencia_brl(ativo) %>
+            <% quant = @posicao_referencia.diff_quant_referencia(ativo) %>
+            <% ap = @posicao.busca_posicao_ativo(ativo) %>
             <% operacao = (diff_valor_brl.negative? || percent_ativo.zero?) ? 'C' : 'V' %>
 
             <!-- Agora mostra conteúdo -->
             <%= render 'common/btn_oper_corretora', corretora: ap ? ap.corretora : nil,
                                                       ativo: ativo, operacao: operacao, disabled: ap.nil?  %>
             <%= quant.round(4).abs %>
-            (<%= display_moeda(@carteira_ativos_referencia.diff_valor_referencia_usd(ativo).abs, moeda: ativo.moeda) if ativo.usd? %>
+            (<%= display_moeda(@posicao_referencia.diff_valor_referencia_usd(ativo).abs, moeda: ativo.moeda) if ativo.usd? %>
             <%= display_moeda(diff_valor_brl.abs) %>)
           </td>
         </tr>
@@ -62,10 +62,10 @@
       <td></td>
       <td></td>
     </tr>
-    <% @carteira_ativos_restante.each do |ativo| %>
+    <% @posicao_restante.each do |ativo| %>
       <tr>
-        <td><span class="font-weight-light"><%= link_to ativo.nome_amigavel, carteira_ativo_path(@carteira, ativo) %></span></td>
-        <td><span class="font-weight-light"><%= display_porcentagem @carteira_ativos.porcentagem_ativo(ativo) %></span></td>
+        <td><span class="font-weight-light"><%= link_to ativo.nome_amigavel, posicao_ativo_path(@carteira, ativo) %></span></td>
+        <td><span class="font-weight-light"><%= display_porcentagem @posicao.porcentagem_ativo(ativo) %></span></td>
         <td></td>
         <td></td>
       </tr>

@@ -1,7 +1,7 @@
 <%= render 'common/titulo_pagina', titulo: "Editar ativo para carteira #{@carteira.nome}" %>
 
-<%= bootstrap_form_for [@carteira, @carteira_ativo],
-                       url: carteira_carteira_referencia_path(@carteira, @carteira_ativo) do |f| %>
+<%= bootstrap_form_for [@carteira, @posicao_ativo],
+                       url: carteira_carteira_referencia_path(@carteira, @posicao_ativo) do |f| %>
 
   <%= render 'form', f: f %>
 

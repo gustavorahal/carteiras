@@ -1,22 +1,22 @@
 
-# Posição da Carteira em determinada data. Quais ativos e qual a posicao deles
-class CarteiraAtivos
+# Posição de uma Carteira em determinada data.
+class Posicao
 
   attr_reader :carteira, :data, :investidor
 
   def initialize(carteira, data)
     @carteira = carteira # ActiveRecord Carteira
-    @investidor = carteira.investidor
     @data = data > Date.today ? Date.today : data
+    @investidor = carteira.investidor
     @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
-    @ativos_posicao = [] # lista de CarteiraAtivoPosicao
+    @posicao_ativos = [] # lista de PosicaoAtivos
     @referencia = @carteira.referencia
   end
 
   def ativos
     lista = []
-    ativos_posicao.each do |ativo_posicao|
-      lista.push ativo_posicao.ativo
+    posicao_ativos.each do |posicao_ativo|
+      lista.push posicao_ativo.ativo
     end
 
     lista
@@ -24,51 +24,34 @@ class CarteiraAtivos
 
   # Quais ativos eu tenho na carteira até determinada data?
   #
-  # @return lista de AtivoPosicao
-  def ativos_posicao
-    return @ativos_posicao unless @ativos_posicao.empty?
+  # @return lista de PosicaoAtivo
+  def posicao_ativos
+    return @posicao_ativos unless @posicao_ativos.empty?
 
-    data_str = @data.strftime '%F'
-    # Para isso somamos a quantidade que temos de cada ativo
-    # e o que for diferente de zero significa que temos o ativo na carteira.
-    # Quantidade pode ser negativo, por exemplo, operação de short
-    sql = <<~SQL
-      SELECT ativos.id, ROUND(SUM(quantidade)::numeric, 10)
-      FROM ativos
-      JOIN operacoes ON operacoes.ativo_id = ativos.id
-      WHERE
-          operacoes.carteira_id = #{@carteira.id} AND
-          operacoes.data::date <= '#{data_str}'
-      GROUP BY ativos.id, ativos.nome
-      HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
-      ORDER BY ativos.nome ASC;
-    SQL
-
-    resultado = ActiveRecord::Base.connection.execute(sql).values
-
+    resultado = _ativos_quantidade(@carteira, @data)
     resultado.each do |ativo_id, quantidade|
-      cap = AtivoPosicao.new(@carteira, ativo_id, @data, quantidade)
-      @ativos_posicao.push cap
+      posicao_ativo = PosicaoAtivo.new(@carteira, ativo_id, @data, quantidade)
+      @posicao_ativos.push posicao_ativo
     end
 
-    @ativos_posicao
+    @posicao_ativos
   end
 
-  def ativos_posicao_por_corretora
+  def por_corretora
     pc = {}
-    ativos_posicao.each do |cap|
-      corretora_nome = cap.corretora.nome
-      tipo = cap.ativo.tipo
+    posicao_ativos.each do |posicao_ativo|
+      corretora_nome = posicao_ativo.corretora.nome
+      tipo = posicao_ativo.ativo.tipo
       pc[corretora_nome] = {} unless corretora_nome.in? pc
       pc[corretora_nome][tipo] = [] unless tipo.in? pc[corretora_nome]
-      pc[corretora_nome][tipo].push cap
+      pc[corretora_nome][tipo].push posicao_ativo
     end
 
     # fazer o sort agora por tamanho de posição. Este é o padrão de display na XP por exemplo
     pc_sorted = pc.clone
     pc.each do |corretora_nome, tipos|
-      tipos.each do |tipo, carteira_ativos_posicao|
-        pc_sorted[corretora_nome][tipo] = carteira_ativos_posicao.sort_by { |cap| cap.valor_em_brl }.reverse
+      tipos.each do |tipo, posicao_posicao|
+        pc_sorted[corretora_nome][tipo] = posicao_posicao.sort_by { |pa| pa.valor_em_brl }.reverse
       end
     end
 
@@ -77,11 +60,11 @@ class CarteiraAtivos
 
   def total_ativos_por_corretora
     tc = {}
-    ativos_posicao.each do |ativo_posicao|
-      moeda = ativo_posicao.ativo.moeda
-      corretora = ativo_posicao.corretora
+    posicao_ativos.each do |posicao_ativo|
+      moeda = posicao_ativo.ativo.moeda
+      corretora = posicao_ativo.corretora
       tc[corretora] = { 'USD' => 0, 'BRL' => 0 } unless corretora.in? tc
-      tc[corretora][moeda] += ativo_posicao.valor
+      tc[corretora][moeda] += posicao_ativo.valor
     end
 
     tc
@@ -93,9 +76,9 @@ class CarteiraAtivos
     moeda_valores['BRL'] = 0
 
     # Calcula valores em ativos
-    ativos_posicao.each do |ativo_posicao|
-      moeda = ativo_posicao.ativo.moeda
-      moeda_valores[moeda] += ativo_posicao.valor_em_brl
+    posicao_ativos.each do |posicao_ativo|
+      moeda = posicao_ativo.ativo.moeda
+      moeda_valores[moeda] += posicao_ativo.valor_em_brl
     end
 
     # Soma valores em CCs
@@ -119,7 +102,7 @@ class CarteiraAtivos
 
   def total_ativos(corretora = nil)
     total_ativos = 0
-    ativos_posicao.each do |ap|
+    posicao_ativos.each do |ap|
       next if corretora && ap.corretora.id != corretora.id
 
       total_ativos += ap.valor_em_brl
@@ -130,7 +113,7 @@ class CarteiraAtivos
 
   def total_fii
     total = 0
-    ativos_posicao.each do |ap|
+    posicao_ativos.each do |ap|
       total += ap.valor_em_brl if ap.ativo.fii?
     end
 
@@ -154,14 +137,14 @@ class CarteiraAtivos
   end
 
   def porcentagem_ativo(ativo)
-    ap = busca_ativo_posicao(ativo)
+    ap = busca_posicao_ativo(ativo)
     ap ? (ap.valor_em_brl / total_geral * 100) : 0
   end
 
   def corretoras
     corretoras = []
-    ativos_posicao.each do |ativo_posicao|
-      corretoras.push ativo_posicao.corretora
+    posicao_ativos.each do |posicao_ativo|
+      corretoras.push posicao_ativo.corretora
     end
 
     corretoras.uniq
@@ -173,13 +156,37 @@ class CarteiraAtivos
   #     .sum('quantidade * valor_unit * usdbrl')
   # end
 
-  def busca_ativo_posicao(ativo)
+  def busca_posicao_ativo(ativo)
     ap_buscado = nil
-    @ativos_posicao.each do |ap|
+    @posicao_ativos.each do |ap|
       ap_buscado = ap if ap.ativo == ativo
     end
 
     ap_buscado
   end
 
+  #
+  # Private
+  #
+
+  # @return: lista de tuplas [ativo_id, quantidade]
+  def _ativos_quantidade(carteira, data)
+    data_str = data.strftime '%F'
+    # Para isso somamos a quantidade que temos de cada ativo
+    # e o que for diferente de zero significa que temos o ativo na carteira.
+    # Quantidade pode ser negativo, por exemplo, operação de short
+    sql = <<~SQL
+        SELECT ativos.id, ROUND(SUM(quantidade)::numeric, 10)
+        FROM ativos
+        JOIN operacoes ON operacoes.ativo_id = ativos.id
+        WHERE
+            operacoes.carteira_id = #{carteira.id} AND
+            operacoes.data::date <= '#{data_str}'
+        GROUP BY ativos.id, ativos.nome
+        HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
+        ORDER BY ativos.nome ASC;
+    SQL
+
+    ActiveRecord::Base.connection.execute(sql).values
+  end
 end

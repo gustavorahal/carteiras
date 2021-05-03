@@ -1,2 +1,0 @@
-class CarteiraAtivosPolicy < ApplicationPolicy
-end

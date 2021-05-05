@@ -2,6 +2,7 @@ class RentabilidadeController < ApplicationController
 
   def index
     @carteira = Carteira.find params[:carteira_id]
+    authorize @carteira
     @ultimos_posicao = []
     corretoras_tmp = []
     ate_dia_do_mes = Utils.ultimo_dia_util Date.today

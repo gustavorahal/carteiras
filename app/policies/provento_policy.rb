@@ -1,0 +1,2 @@
+class ProventoPolicy < ApplicationPolicy
+end

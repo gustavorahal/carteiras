@@ -38,8 +38,15 @@ class ApplicationPolicy < Struct.new(:user, :record)
 
   def owner?
     return false if record.is_a? Symbol
+    return false unless respond_to? :user
 
-    user&.investidor.id == record.investidor.id
+    if record.respond_to? :investidor
+      user&.investidor.id == record.investidor.id
+    elsif record.respond_to? :carteira
+      user&.investidor.id == record.carteira.investidor.id
+    else
+      false
+    end
   end
 
   def scope

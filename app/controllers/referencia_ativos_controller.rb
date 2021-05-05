@@ -8,11 +8,13 @@ class ReferenciaAtivosController < ApplicationController
   def new
     @ativos = @referencia.ativos_disponiveis
     @referencia_ativo = ReferenciaAtivo.new
+    authorize @referencia_ativo
   end
 
   def create
     @ativos = @referencia.ativos_disponiveis
     @referencia_ativo = ReferenciaAtivo.new secure_params
+    authorize @referencia_ativo
 
     if @referencia_ativo.porcentagem.zero?
       # se esta adicionando um novo ativo, não faz sentido deixar em zero
@@ -29,10 +31,13 @@ class ReferenciaAtivosController < ApplicationController
 
   def edit
     @referencia_ativo = ReferenciaAtivo.find params[:id]
+    authorize @referencia_ativo
   end
 
   def update
     @referencia_ativo = ReferenciaAtivo.find params[:id]
+    authorize @referencia_ativo
+
     if @referencia_ativo.update(secure_params)
       redirect_to referencia_path(@referencia),
                   notice: "Referencia ativo #{@referencia_ativo.ativo.nome} atualizado com sucesso!"

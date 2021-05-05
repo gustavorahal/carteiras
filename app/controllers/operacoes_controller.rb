@@ -4,6 +4,7 @@ class OperacoesController < ApplicationController
 
   def index
     @operacoes = @carteira.operacoes
+    authorize @operacoes.take
     # refazemos a query sem reusar a de cima porque o uso de "order by" acima
     # complica o uso do distinct depois
     @operacoes_hoje = Operacao.where(carteira: @carteira, data: Date.today)
@@ -11,10 +12,12 @@ class OperacoesController < ApplicationController
 
   def new
     @operacao = Operacao.new
+    authorize @operacao
   end
 
   def create
     @operacao = Operacao.new secure_params
+    authorize @operacao
 
     if @operacao.save
       redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
@@ -25,10 +28,13 @@ class OperacoesController < ApplicationController
 
   def edit
     @operacao = Operacao.find params[:id]
+    authorize @operacao
   end
 
   def update
     @operacao = Operacao.find params[:id]
+    authorize @operacao
+
     if @operacao.update(secure_params)
       redirect_to carteira_operacoes_path carteira_id: params[:carteira_id],
                                           notice: "Operação atualizada com sucesso!"

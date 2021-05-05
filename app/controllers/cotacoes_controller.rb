@@ -3,11 +3,13 @@ class CotacoesController < ApplicationController
   def index_all
     # por enqunato não temos paginação, então limitar
     @cotacoes = Cotacao.includes(:ativo).order(data: :desc).limit(400)
+    authorize @cotacoes.take
   end
 
   def index
     @ativo = Ativo.find params[:ativo_id]
     @cotacoes = Cotacao.where(ativo_id: @ativo.id).includes(:ativo).order(data: :desc)
+    authorize @cotacoes.take
   end
 
   def new

@@ -1,0 +1,2 @@
+class ReferenciaAtivoPolicy < ApplicationPolicy
+end

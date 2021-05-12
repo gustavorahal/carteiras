@@ -2,7 +2,7 @@ class CarteirasController < ApplicationController
 
   def index
     @carteiras = Carteira.all
-    authorize @carteiras
+    @carteiras.each { |carteira| authorize carteira }
   end
 
 end

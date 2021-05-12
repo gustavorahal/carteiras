@@ -42,9 +42,9 @@ class ApplicationPolicy < Struct.new(:user, :record)
 
     # em caso de novos objetos ex. Operacao.new, apesar do método que aponta para outro objeto (ex.
     # investidor) estar presente, o mesmo não esta instanciado (nil), portanto checar isso.
-    if record.respond_to? :investidor && record.investidor.present?
+    if record.respond_to?(:investidor) && record.investidor.present?
       user&.investidor.id == record.investidor.id
-    elsif record.respond_to? :carteira && record.carteira.present?
+    elsif record.respond_to?(:carteira) && record.carteira.present?
       user&.investidor.id == record.carteira.investidor.id
     else
       false

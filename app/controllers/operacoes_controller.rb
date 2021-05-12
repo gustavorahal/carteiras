@@ -12,7 +12,8 @@ class OperacoesController < ApplicationController
 
   def new
     @operacao = Operacao.new
-    authorize @operacao
+    # se tem permissão na carteira, então tb pode criar operacoes
+    authorize @carteira
   end
 
   def create

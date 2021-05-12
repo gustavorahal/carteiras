@@ -40,9 +40,11 @@ class ApplicationPolicy < Struct.new(:user, :record)
     return false if record.is_a? Symbol
     return false unless respond_to? :user
 
-    if record.respond_to? :investidor
+    # em caso de novos objetos ex. Operacao.new, apesar do método que aponta para outro objeto (ex.
+    # investidor) estar presente, o mesmo não esta instanciado (nil), portanto checar isso.
+    if record.respond_to? :investidor && record.investidor.present?
       user&.investidor.id == record.investidor.id
-    elsif record.respond_to? :carteira
+    elsif record.respond_to? :carteira && record.carteira.present?
       user&.investidor.id == record.carteira.investidor.id
     else
       false

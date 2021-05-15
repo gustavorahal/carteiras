@@ -2,8 +2,11 @@ module Extratos
   class ProcessaXp < ProcessaBase
 
     def self.dividendo(texto)
-      # Exemplo: DIVIDENDOS DE CLIENTES VIVT4 S/ 300
-      regex_dividendo = %r{DIVIDENDOS DE CLIENTES (\w+) S/ ([0-9.]+)$}
+      # Exemplos:
+      # DIVIDENDOS DE CLIENTES VIVT4 S/ 300
+      # DIVIDENDOS DE CLIENTES BPAN4 S/ 3,700 --> uso de virgula porém valor é mesmo 3500
+      # DIVIDENDOS DE CLIENTES LJQQ3 S/ 2.500 --> uso de ponto para representar 2500
+      regex_dividendo = %r{DIVIDENDOS DE CLIENTES (\w+) S/ ([0-9.,]+)$}
       _processa_common(texto, regex_dividendo)
     end
 
@@ -48,7 +51,9 @@ module Extratos
       return nil unless match
 
       nome_ativo = match[1]
-      quantidade = match[2].gsub('.', '') # números podem aparecer no formato "1.400" (para 1400)
+      # números podem aparecer no formato "1.400" (para 1400) ou 3,700 (porém representando 3700, ou seja,
+      # formato en_US)
+      quantidade = match[2].gsub('.', '').gsub(',', '')
       [nome_ativo, quantidade]
     end
 

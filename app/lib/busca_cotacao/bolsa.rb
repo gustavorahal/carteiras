@@ -3,26 +3,13 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 module BuscaCotacao
   class Bolsa
 
-    # @return: [data_efetiva, preco, fonte]
-    def self.busca(ativo, data)
-      bolsa = ('BVMF' if ativo.moeda == 'BRL')
+    # @return: [preco, fonte]
+    def self.busca(ticker, bolsa, data)
       data_efetiva = data
-      preco, fonte = _api_busca(ativo.nome, data_efetiva, bolsa)
-      # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
-      tentativas = 4
-      while preco.blank?
-        if tentativas.zero?
-          preco = nil
-          break
-        else
-          data_efetiva -= 1.day
-          preco, fonte = _api_busca(ativo.nome, data_efetiva, bolsa)
-          Rails.logger.info("BuscaBolsa: Tentando nova cotação para #{ativo.nome} na data #{data_efetiva}")
-          tentativas -= 1
-        end
-      end
+      preco, fonte = _api_busca(ticker, data_efetiva, bolsa)
+      return [preco, fonte] unless preco.blank?
 
-      [data_efetiva, preco, fonte]
+      nil
     end
 
 

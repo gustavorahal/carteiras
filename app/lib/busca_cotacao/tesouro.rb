@@ -39,8 +39,13 @@ module BuscaCotacao
       }
     end
 
+    # @return dados: Array de data e preços [(data1, preço1), ...] para todo o ano corrente
+    # data é um objeto Date.
     def self.busca(titulo, data)
-      raise StandardError, "Não sei como buscar dados para #{titulo}" unless titulo.in? titulos
+      unless titulo.in? titulos
+        Rails.logger.error "Não sei como buscar dados para #{titulo}"
+        return nil
+      end
 
       titulo_codigo = titulos[titulo][:codigo]
       titulo_tipo = titulos[titulo][:tipo]

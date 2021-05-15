@@ -3,15 +3,15 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 module BuscaCotacao
   class Moeda
 
-    def self.busca(ativo, data)
-      if ativo.id == Ativo.find_by_nome('BRLUSD').id
+    def self.busca(de_para, data)
+      if de_para == Ativo.find_by_nome('BRLUSD').nome
         _brl_usd
-      elsif ativo.id == Ativo.find_by_nome('USDBRL').id
+      elsif de_para == Ativo.find_by_nome('USDBRL').nome
         _usd_brl(data)
-      elsif ativo.id == Ativo.find_by_nome('BTCBRL').id
+      elsif de_para == Ativo.find_by_nome('BTCBRL').nome
         _btc_brl
       else
-        raise StandardError, "Tipo de moeda #{ativo.tipo} ativo ID #{ativo.id} não suportado para busca de cotação"
+        raise "Conversão de #{de_para} não suportado para busca de cotação"
       end
     end
 

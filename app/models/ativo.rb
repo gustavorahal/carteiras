@@ -2,7 +2,7 @@ class Ativo < ApplicationRecord
   has_many :cotacoes
   has_many :referencia_ativos
 
-  before_save :checa_cnpj
+  before_save :checa_cnpj, :ativo_suportado?
 
   enum tipo: {
       acao: 1,
@@ -35,10 +35,22 @@ class Ativo < ApplicationRecord
   end
 
   def na_bolsa?
-    tipo.in? %w[acao fii etf]
+    tipo.in? tipos_bolsa
   end
 
+  def self.tipos_bolsa
+    %w[acao fii etf]
+  end
+
+
   private
+
+  def ativo_suportado?
+    unless CotacaoService.ativo_suportado?(nome, moeda, tipo)
+      errors.add(:base, "Ativo não é suportado porque não conseguimos obter cotações")
+      throw :abort
+    end
+  end
 
   # Se estamos manipulando um ativo tipo "fundo", é obrigatório
   # especificar um CNPJ porque esta informação é usada para buscar valor de cotas

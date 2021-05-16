@@ -3,6 +3,7 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 module BuscaCotacao
   class Moeda
 
+    # @return tupla [preco, fonte]. Exemplo: [5.5744, "bcb_gov"]
     def self.busca(de_para, data)
       if de_para == Ativo.find_by_nome('BRLUSD').nome
         _brl_usd

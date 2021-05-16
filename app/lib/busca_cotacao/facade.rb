@@ -46,9 +46,23 @@ module BuscaCotacao
         end
       end
 
-      if preco
-        return Resultado.new(ticker, preco, data_efetiva, fonte)
-      end
+      return Resultado.new(ticker, preco, data_efetiva, fonte) if preco
+
+      nil
+    end
+
+    # @return [Resultado]
+    def self.fundo(cnpj, data)
+      valor_cota = BuscaCotacao::Fundo.busca(cnpj, data)
+      return Resultado.new(cnpj, valor_cota, data, 'cvm_gov') if valor_cota
+
+      nil
+    end
+
+    # @return [Resultado]
+    def self.moeda(de_para, data)
+      preco, fonte = BuscaCotacao::Moeda.busca(de_para, data)
+      return Resultado.new(de_para, preco, data, fonte) if preco
 
       nil
     end

@@ -71,7 +71,12 @@ class CotacaoService
     end
 
     Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponivel no BD, vamos buscar"
-    send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+    cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+
+    unless cotacao
+      Rails.logger.info("Cotação para #{ativo.nome}: não encontrei cotacao em #{data}, pegando última disponível no BD")
+      Cotacao.where(ativo: ativo).order(data: :desc).first
+    end
   end
 
   # Ajusta data considerando de acordo com tipo de ativo
@@ -106,26 +111,17 @@ class CotacaoService
     data_ajustada
   end
 
-  # Pela maneira como o Backend funciona, esta função faz algo
-  # atipico. Aproveitando que a busca é custosa (download de arquivo de 30MB+)
-  # e retorna informações de todos os fundos, vamos aproveitar e atualizar
-  # informações de todos os fundos mas retornar só o que foi pedido
-  #
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_fundo(ativo, data)
-    cnpjs = Ativo.where(tipo: 'fundo').pluck(:cnpj)
-    dados = BuscaCotacao::Fundos.busca(cnpjs, data.year, data.month)
-    dados.each do |cnpj, vl_cotas|
-      vl_cotas.each do |vl_cota|
-        ativo = Ativo.find_by(cnpj: cnpj)
-        data = vl_cota[0].to_date
-        unless Cotacao.find_by(ativo: ativo, data: data)
-          Cotacao.create!(ativo: ativo, data: data, valor_unit: vl_cota[1], fonte: 'cvm_gov')
-        end
-      end
+    resultado = BuscaCotacao::Facade.fundo(ativo.cnpj, data)
+    if resultado
+      Cotacao.find_or_create_by!(ativo: ativo,
+                                 valor_unit: resultado.preco,
+                                 data: resultado.data,
+                                 fonte: resultado.fonte)
     end
 
-    Cotacao.find_by(ativo: ativo, data: data)
+    nil
   end
 
   #
@@ -139,6 +135,8 @@ class CotacaoService
                                  data: resultado.data,
                                  fonte: resultado.fonte)
     end
+
+    nil
   end
 
   # @return Cotacao ActiveRecord object
@@ -148,8 +146,13 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_moeda(ativo, data)
-    preco, fonte = BuscaCotacao::Moeda.busca(ativo.nome, data)
-    Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data, fonte: fonte)
+    resultado = BuscaCotacao::Facade.moeda(ativo.nome, data)
+    if resultado
+      Cotacao.find_or_create_by!(ativo: ativo,
+                                 valor_unit: resultado.preco,
+                                 data: resultado.data,
+                                 fonte: resultado.fonte)
+    end
   end
 
   # @return Cotacao ActiveRecord object
@@ -160,10 +163,9 @@ class CotacaoService
                                  valor_unit: resultado.preco,
                                  data: resultado.data,
                                  fonte: resultado.fonte)
-    else
-      Rails.logger.info("Cotação para #{ativo.nome}: não encontrei preço em #{resultado.data}, pegando última cotação")
-      Cotacao.where(ativo_id: ativo.id).last
     end
+
+    nil
   end
 
   def self._busca_e_registra_fii(ativo, data)
@@ -180,8 +182,8 @@ class CotacaoService
 
   def self._busca_e_registra_cra(ativo, data)
     # como não temos um jeito automatizado de buscar cra ou debenture
-    # retornar ultima cotação
-    Cotacao.where(ativo: ativo).order(data: :desc).first
+    # retorna nil e deixa pegar ultima cotação
+    nil
   end
 
   def self._busca_e_registra_debenture(ativo, data)

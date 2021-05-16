@@ -58,7 +58,8 @@ tesouro_selic:
   descricao: Tesouro Selic
 
 fundo_dolar:
-  nome: Fundo Dolar X
+  nome: Vitreo Dolar
   tipo: fundo
+  cnpj: '33.952.939/0001-05'
   moeda: BRL
-  descricao: Fundo Dolar X
+  descricao: Vitreo Dolar

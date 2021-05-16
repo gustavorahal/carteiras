@@ -5,25 +5,22 @@ module BuscaCotacao
   #
   # Busca informações de fundos na base de dados da CVM
   #
-  class Fundos
+  class Fundo
 
     @url_cvm = 'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS'
 
-    def self.busca(cnpjs, num_ano, num_mes)
-      raise TypeError unless cnpjs.is_a? Array
+    def self.busca(cnpj, data)
+      arquivo_csv = _busca_arquivo_cvm(data.year, data.month)
 
-      arquivo_csv = _busca_arquivo_cvm(num_ano, num_mes)
-
-      dados = {}
+      valor_cota = nil
       # Headers arquivo CSV: CNPJ_FUNDO;DT_COMPTC;VL_TOTAL;VL_QUOTA;VL_PATRIM_LIQ;CAPTC_DIA;RESG_DIA;NR_COTST
       CSV.foreach(arquivo_csv, headers: true, col_sep: ';') do |row|
-        if row['CNPJ_FUNDO'].in? cnpjs
-          dados[row['CNPJ_FUNDO']] = [] unless dados.has_key? row['CNPJ_FUNDO']
-          dados[row['CNPJ_FUNDO']].push [ row['DT_COMPTC'], row['VL_QUOTA'].to_f ]
+        if row['CNPJ_FUNDO'] == cnpj && row['DT_COMPTC'].to_date == data
+          valor_cota = row['VL_QUOTA'].to_f
         end
       end
 
-      dados
+      valor_cota
     end
 
 
@@ -36,10 +33,22 @@ module BuscaCotacao
     # @return nome do arquivo baixado
     def self._busca_arquivo_cvm(num_ano, num_mes)
       nome_arquivo_cvm = "inf_diario_fi_#{num_ano}#{'%02d' % num_mes}.csv"
-      # Só podemos aproveitar o arquivo já baixado se já viramos o mês e portanto
+      arquivo_timestamp = nome_arquivo_cvm + "#{Date.today.strftime('%F')}"
+
+      # Podemos aproveitar o arquivo já baixado se foi baixado hoje
+      # e portanto não terá novas atualizações
+      if File.exist?(arquivo_timestamp) &&
+        arquivo_timestamp.gsub(nome_arquivo_cvm,'').to_date == Date.today
+        Rails.logger.info "Arquivo CVM #{nome_arquivo_cvm} já baixado, reutilizando-o"
+        return nome_arquivo_cvm
+      else
+        FileUtils.touch arquivo_timestamp
+      end
+      # Podemos aproveitar também o arquivo já baixado se viramos o mês e portanto
       # ele já contém todos os dados daquele mês
       if (File.exist? nome_arquivo_cvm) &&
                 (Date.today.month != num_mes && Date.today.year != num_ano)
+        Rails.logger.info "Arquivo CVM #{nome_arquivo_cvm} já baixado e completo, reutilizando-o"
         return nome_arquivo_cvm
       end
 

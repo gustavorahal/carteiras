@@ -35,7 +35,7 @@ class Ativo < ApplicationRecord
   end
 
   def na_bolsa?
-    tipo.in? self.tipos_bolsa
+    tipo.in? Ativo.tipos_bolsa
   end
 
   def self.tipos_bolsa

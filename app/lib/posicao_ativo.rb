@@ -1,6 +1,6 @@
 class PosicaoAtivo
 
-  attr_reader :cotacao, :ativo, :corretora
+  attr_reader :cotacao, :ativo
 
   def initialize(carteira_ref, ativo_ref, data, quantidade = nil)
     @carteira = if carteira_ref.is_a? Carteira
@@ -14,9 +14,6 @@ class PosicaoAtivo
                Ativo.find(ativo_ref)
              end
     @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id).where('DATE(data) <= DATE(?)', data)
-    # Faz sentido inferir que o ativo esta na corretora em que a ultima operação foi feita
-    # O "first" é porque a ordem das operacoes e decrescente
-    @corretora = @operacoes_ativo.first.corretora
     @data = data
     @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
@@ -27,6 +24,12 @@ class PosicaoAtivo
 
   def operacoes
     @operacoes_ativo
+  end
+
+  def corretora
+    # Faz sentido inferir que o ativo esta na corretora em que a ultima operação foi feita
+    # O "first" é porque a ordem das operacoes e decrescente
+    @operacoes_ativo.first.corretora
   end
 
   def data_montagem
@@ -73,7 +76,7 @@ class PosicaoAtivo
     if @ativo.moeda == 'BRL'
       valor
     elsif @ativo.moeda == 'USD'
-      valor_unit_brl * quantidade.to_f
+      _valor_unit_brl * quantidade.to_f
     end
   end
 
@@ -82,17 +85,17 @@ class PosicaoAtivo
   end
 
   def rentabilidade_em_brl
-    ((valor_unit_brl / preco_medio_em_brl) - 1) * 100
-  end
-
-  def valor_unit_brl
-    @cotacao.valor_unit * CotacaoService.cotacao_usdbrl(@data).valor_unit
+    ((_valor_unit_brl / preco_medio_em_brl) - 1) * 100
   end
 
 
   #
   # Private
   #
+
+  def _valor_unit_brl
+    @cotacao.valor_unit * CotacaoService.moedas('USDBRL', @data).valor_unit
+  end
 
   # Calcula preço médio de compra
   #

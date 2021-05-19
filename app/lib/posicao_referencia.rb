@@ -8,7 +8,7 @@ class PosicaoReferencia
     @carteira = posicao.carteira
     @referencia = @carteira.referencia
     @posicao_ativos = posicao.posicao_ativos
-    @cotacao_usdbrl = CotacaoService.cotacao_usdbrl(Date.today)
+    @cotacao_usdbrl = CotacaoService.moedas('USDBRL', Date.today)
   end
 
   def ativos_posicao_por_book

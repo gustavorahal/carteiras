@@ -6,7 +6,7 @@ class ImpostoOperacao
     @operacao = operacao
     @carteira = operacao.carteira
     @ativo = operacao.ativo
-    @usdbrl_valor = CotacaoService.cotacao_usdbrl(@operacao.data).valor_unit
+    @usdbrl_valor = CotacaoService.moedas('USDBRL', @operacao.data).valor_unit
 
     raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(%w[acao fii])
 

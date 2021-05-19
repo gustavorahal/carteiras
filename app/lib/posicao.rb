@@ -8,7 +8,7 @@ class Posicao
     @carteira = carteira # ActiveRecord Carteira
     @data = data > Date.today ? Date.today : data
     @investidor = carteira.investidor
-    @valor_usdbrl = CotacaoService.cotacao_usdbrl(data).valor_unit
+    @valor_usdbrl = CotacaoService.moedas('USDBRL', data).valor_unit
     @posicao_ativos = [] # lista de PosicaoAtivos
     @referencia = @carteira.referencia
   end
@@ -169,6 +169,8 @@ class Posicao
   # Private
   #
 
+  # Retorna os ativos e suas quantidades na carteira
+  #
   # @return: lista de tuplas [ativo_id, quantidade]
   def _ativos_quantidade(carteira, data)
     data_str = data.strftime '%F'

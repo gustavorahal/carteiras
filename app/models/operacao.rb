@@ -41,7 +41,7 @@ class Operacao < ApplicationRecord
 
   def ajusta_dolar
     self.usdbrl = if ativo.usd? && usdbrl == 1
-                    CotacaoService.cotacao_usdbrl(data).valor_unit
+                    CotacaoService.moedas('USDBRL', data).valor_unit
                   elsif ativo.brl?
                     1
                   else

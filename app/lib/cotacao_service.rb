@@ -16,12 +16,10 @@ class CotacaoService
     end
   end
 
-  def self.cotacao_usdbrl(data)
-    cotacao(Ativo.find_by_nome('USDBRL'), data)
-  end
+  def self.moedas(de_para, data)
+    raise "Cotação moeda #{de_para} não suportada" unless de_para.in? %w{USDBRL BRLUSD BTCBRL}
 
-  def self.cotacao_brlusd(data)
-    cotacao(Ativo.find_by_nome('BRLUSD'), data)
+    cotacao(Ativo.find_by(nome: de_para), data)
   end
 
   # Conseguimos obter cotação para ativo especificado?

@@ -11,6 +11,6 @@ class ApplicationController < ActionController::Base
             else
               Date.today
             end
-    @cotacao_usdbrl = CotacaoService.cotacao_usdbrl(@data)
+    @cotacao_usdbrl = CotacaoService.moedas('USDBRL', @data)
   end
 end

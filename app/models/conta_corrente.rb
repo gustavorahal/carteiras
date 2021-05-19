@@ -40,7 +40,7 @@ class ContaCorrente < ApplicationRecord
   def self.saldo_cc_total(carteira, data, corretora = nil)
     total_brl = saldo_cc_brl(carteira, data, corretora)
     total_usd = saldo_cc_usd(carteira, data, corretora)
-    total_usdbrl = total_usd * CotacaoService.cotacao_usdbrl(data).valor_unit
+    total_usdbrl = total_usd * CotacaoService.moedas('USDBRL', data).valor_unit
 
     total_brl + total_usdbrl
   end

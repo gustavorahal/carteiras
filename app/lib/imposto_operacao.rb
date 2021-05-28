@@ -8,7 +8,7 @@ class ImpostoOperacao
     @ativo = operacao.ativo
     @usdbrl_valor = CotacaoService.moedas('USDBRL', @operacao.data).valor_unit
 
-    raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(%w[acao fii])
+    raise StandardError, "Operação ID #{operacao.id} não tributável" if operacao.operacao != 'V' || !@ativo.tipo.in?(Ativo.tipos_bolsa)
 
     @cap = PosicaoAtivo.new(@carteira, @ativo, operacao.data)
     @data_inicio = @cap.data_montagem

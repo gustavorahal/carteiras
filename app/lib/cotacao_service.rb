@@ -11,9 +11,9 @@ class CotacaoService
     # a cotacao correta, do dia exato pedido. Nesse sentido, não podemos gravar o cache indefinidamente.
     # A cotacao de "hoje" esta bom para hoje, passado um tempo, queremos a cotacao correta, ou seja
     # da data efetivamente pedida.
-    Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}", expires: 12.hours) do
-      _resolve_cotacao(ativo, data)
-    end
+    #Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}", expires: 12.hours) do
+    _resolve_cotacao(ativo, data)
+    #end
   end
 
   def self.moedas(de_para, data)

@@ -11,9 +11,9 @@ class CotacaoService
     # a cotacao correta, do dia exato pedido. Nesse sentido, não podemos gravar o cache indefinidamente.
     # A cotacao de "hoje" esta bom para hoje, passado um tempo, queremos a cotacao correta, ou seja
     # da data efetivamente pedida.
-    #Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}", expires: 12.hours) do
-    _resolve_cotacao(ativo, data)
-    #end
+    Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}", expires: 12.hours) do
+      _resolve_cotacao(ativo, data)
+    end
   end
 
   def self.moedas(de_para, data)
@@ -56,23 +56,31 @@ class CotacaoService
   #
 
   # Encontra uma cotacão mais adequada de acordo com a data informada
+  # @return [Cotacao]
   def self._resolve_cotacao(ativo, data)
     data_ajustada = _ajusta_data(data, ativo.tipo)
     if data_ajustada != data
       Rails.logger.info "Cotação para #{ativo.nome}: data ajustada de #{data} para #{data_ajustada}"
     end
 
+    # 1a tentativa: Tenho uma cotação no BD? Se sim, retorne-a
     cotacao = Cotacao.find_by(ativo: ativo, data: data_ajustada)
     if cotacao.present?
       Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} disponivel no BD, retornando"
       return cotacao
     end
 
+    # 2a tentativa: Busca cotação utilizando API de bolsa
     Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponivel no BD, vamos buscar"
     cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+    if cotacao.present?
+      Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} encontrada pelo backend/API, retornando"
+      return cotacao
+    end
 
+    # 3a tentativa: não encontrei na API, retornar a última cotação disponível
     unless cotacao
-      Rails.logger.info("Cotação para #{ativo.nome}: não encontrei cotacao em #{data}, pegando última disponível no BD")
+      Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma, pegando última cotação disponível no BD")
       Cotacao.where(ativo: ativo).order(data: :desc).first
     end
   end

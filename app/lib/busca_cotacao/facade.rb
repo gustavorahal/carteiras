@@ -32,21 +32,21 @@ module BuscaCotacao
       bolsa = ('BVMF' if moeda == 'BRL')
       preco, fonte = BuscaCotacao::Bolsa.busca(ticker, bolsa, data)
       # infelizmente nossa API é cheia de furos, com informações não disponíveis para determinadas datas
-      tentativas = 3
-      data_efetiva = data
-      while preco.blank?
-        if tentativas.zero?
-          preco = nil
-          break
-        else
-          data_efetiva -= 1.day
-          preco, fonte = BuscaCotacao::Bolsa.busca(ticker, bolsa, data_efetiva)
-          Rails.logger.info("Facade.bolsa: Tentando nova cotação para #{ticker} na data #{data_efetiva}")
-          tentativas -= 1
-        end
-      end
+      # tentativas = 3
+      # data_efetiva = data
+      # while preco.blank?
+      #   if tentativas.zero?
+      #     preco = nil
+      #     break
+      #   else
+      #     data_efetiva -= 1.day
+      #     preco, fonte = BuscaCotacao::Bolsa.busca(ticker, bolsa, data_efetiva)
+      #     Rails.logger.info("Facade.bolsa: Tentando nova cotação para #{ticker} na data #{data_efetiva}")
+      #     tentativas -= 1
+      #   end
+      # end
 
-      return Resultado.new(ticker, preco, data_efetiva, fonte) if preco
+      return Resultado.new(ticker, preco, data, fonte) if preco
 
       nil
     end

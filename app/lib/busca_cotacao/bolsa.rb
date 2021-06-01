@@ -5,8 +5,7 @@ module BuscaCotacao
 
     # @return: [preco, fonte]
     def self.busca(ticker, bolsa, data)
-      data_efetiva = data
-      preco, fonte = _api_busca(ticker, data_efetiva, bolsa)
+      preco, fonte = _api_busca(ticker, data, bolsa)
       return [preco, fonte] unless preco.blank?
 
       nil

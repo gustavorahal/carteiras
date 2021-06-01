@@ -40,7 +40,7 @@ module BuscaCotacao
           break
         else
           data_efetiva -= 1.day
-          preco, fonte = BuscaCotacao::Bolsa.busca(ticker, data_efetiva, bolsa)
+          preco, fonte = BuscaCotacao::Bolsa.busca(ticker, bolsa, data_efetiva)
           Rails.logger.info("Facade.bolsa: Tentando nova cotação para #{ticker} na data #{data_efetiva}")
           tentativas -= 1
         end

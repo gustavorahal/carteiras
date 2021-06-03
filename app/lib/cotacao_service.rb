@@ -11,6 +11,10 @@ class CotacaoService
     # a cotacao correta, do dia exato pedido. Nesse sentido, não podemos gravar o cache indefinidamente.
     # A cotacao de "hoje" esta bom para hoje, passado um tempo, queremos a cotacao correta, ou seja
     # da data efetivamente pedida.
+    # Não podemos deixar de ter o cache porque em casos do resolve_cotacao cair na 3a tentativa,
+    # ou seja, não tem no backend, não queremos que a cada requisição faça-se uma nova busca na API e novamente
+    # não encontre. Tente uma vez para "hoje", senão achar, deixa o cache já armezenar o que achou (ultima cotação)
+    # para assim as próximas chamadas serem mais rápidas e não dar timeout em produção.
     Rails.cache.fetch("cotacao_ativo_ID#{ativo.id}_#{data}", expires: 12.hours) do
       _resolve_cotacao(ativo, data)
     end
@@ -80,12 +84,14 @@ class CotacaoService
 
     # 3a tentativa: não encontrei na API, retornar a última cotação disponível
     unless cotacao
-      Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma, pegando última cotação disponível no BD")
-      Cotacao.where(ativo: ativo).order(data: :desc).first
+      cotacao = Cotacao.where(ativo: ativo).where("data <= '#{data}'").order(data: :desc).first
+      Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma, pegando última cotação disponível no BD em #{cotacao.data}")
     end
+
+    cotacao
   end
 
-  # Ajusta data considerando de acordo com tipo de ativo
+  # Ajusta data considerando de tipo de ativo
   #
   # Esta função precisa ter conhecimento das caracteristicas de cada ativo assim como do backend
   # Consider também fatores como final de semana, feriado, fechamento de pregão e tipo de ativo

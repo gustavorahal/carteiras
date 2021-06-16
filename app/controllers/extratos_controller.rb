@@ -1,5 +1,7 @@
 class ExtratosController < ApplicationController
 
+  before_action :set_vars, only: [:new, :create, :edit, :update, :destroy]
+
   def import
     cc = ContaCorrente.find params[:conta_corrente_id]
     authorize cc
@@ -16,16 +18,10 @@ class ExtratosController < ApplicationController
 
   def new
     @extrato = Extrato.new
-    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
-    authorize @conta_corrente
-    @carteira = @conta_corrente.carteira
   end
 
   def create
     @extrato = Extrato.new secure_params
-    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
-    authorize @conta_corrente
-    @carteira = @conta_corrente.carteira
 
     if @extrato.save
       redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente)
@@ -34,10 +30,36 @@ class ExtratosController < ApplicationController
     end
   end
 
+  def edit
+    @extrato = Extrato.find params[:id]
+  end
+
+  def update
+    @extrato = Extrato.find params[:id]
+
+    if @extrato.update(secure_params)
+      redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente)
+    else
+      render 'edit'
+    end
+  end
+
+  def destroy
+    @extrato = Extrato.find params[:id]
+    @extrato.destroy
+    redirect_to request.referrer || carteira_conta_corrente_path(@carteira, @conta_corrente)
+  end
+
   private
 
   def secure_params
-    params.require(:extrato).permit(:liquidacao, :movimentacao, :descricao, :valor, :file, :conta_corrente_id)
+    params.require(:extrato).permit(:liquidacao, :movimentacao, :descricao, :valor, :saldo, :file, :conta_corrente_id)
+  end
+
+  def set_vars
+    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    authorize @conta_corrente
+    @carteira = @conta_corrente.carteira
   end
 
 end

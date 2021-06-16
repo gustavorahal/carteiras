@@ -1,4 +1,4 @@
-<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} carteira #{@carteira.nome} em #{@conta_corrente.moeda}" %>
+<%= render 'common/titulo_pagina', titulo: "Entrada de CC #{@conta_corrente.corretora.nome} carteira #{@carteira.nome} em #{@conta_corrente.moeda}" %>
 
 <%= bootstrap_form_for [@carteira, @conta_corrente, @extrato] do |f| %>
   <% if @extrato.errors[:base].present? %>
@@ -13,7 +13,8 @@
   <%= f.date_select :movimentacao %>
   <%= f.text_field :descricao %>
   <%= f.number_field :valor, step: :any %>
+  <%= f.number_field :saldo, step: :any %>
 
-  <%= f.submit "Adicionar" %>
+  <%= f.submit "Salvar" %>
 
 <% end %>

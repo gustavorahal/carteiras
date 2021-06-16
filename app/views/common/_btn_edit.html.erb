@@ -1,6 +1,7 @@
 <% size = local_assigns.fetch :size, '' %>
 <% disabled = local_assigns.fetch :disabled, false %>
-<% label = local_assigns.fetch :label, 'Editar' %>
+<% show_label = local_assigns.fetch :show_label, false %>
+<% label = show_label ? 'Editar' : '' %>
 <% url = local_assigns.fetch :url, false %>
 <% url = polymorphic_path(resource, action: :new) unless url %>
 

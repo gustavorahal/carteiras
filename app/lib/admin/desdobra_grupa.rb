@@ -3,9 +3,9 @@ module Admin
 
     # O desdobramento de ações consiste na divisão do número de ações em circulação de uma empresa,
     # com o objetivo de reduzir o preço dos ativos e aumentar a liquidez no mercado acionário
-    def self.desdobrar(ativo, n_vezes)
+    def self.desdobrar(ativo, n_vezes, data)
       _carteiras_with_ativo(ativo).each do |carteira|
-        desdobrar_ativo_carteira(ativo, carteira, n_vezes)
+        desdobrar_ativo_carteira(ativo, carteira, n_vezes, data)
       end
     end
 
@@ -13,18 +13,18 @@ module Admin
     # várias ações e as transforma em apenas uma.
     # O objetivo da companhia com essa estratégia é aumentar o preço dos papéis.
     # Em alguns casos, isso facilita a negociação.
-    def self.grupar(ativo, n_vezes)
+    def self.grupar(ativo, n_vezes, data)
       _carteiras_with_ativo(ativo).each do |carteira|
-        grupar_ativo_carteira(ativo, carteira, n_vezes)
+        grupar_ativo_carteira(ativo, carteira, n_vezes, data)
       end
     end
 
-    def self.desdobrar_ativo_carteira(ativo, carteira, n_vezes)
-      _desdobra_ou_grupa(ativo, carteira, n_vezes, 'D')
+    def self.desdobrar_ativo_carteira(ativo, carteira, n_vezes, data)
+      _desdobra_ou_grupa(ativo, carteira, n_vezes, 'D', data)
     end
 
-    def self.grupar_ativo_carteira(ativo, carteira, n_vezes)
-      _desdobra_ou_grupa(ativo, carteira, n_vezes, 'G')
+    def self.grupar_ativo_carteira(ativo, carteira, n_vezes, data)
+      _desdobra_ou_grupa(ativo, carteira, n_vezes, 'G', data)
     end
 
 
@@ -33,7 +33,7 @@ module Admin
     #
 
 
-    def self._desdobra_ou_grupa(ativo, carteira, n_vezes, desdobra_ou_grupa)
+    def self._desdobra_ou_grupa(ativo, carteira, n_vezes, desdobra_ou_grupa, data)
       raise StandardError "Ativo #{ativo.nome} não é desdobravel ou grupável" unless ativo.na_bolsa?
 
       # Passo 1. Desmontar posicao atual com valor_unit == valor_medio (para ficar no zero a zero)
@@ -63,8 +63,6 @@ module Admin
       else
         raise StandardError 'Operação inválida'
       end
-
-      data = Date.today
 
       Operacao.transaction do
         # Desmontar

@@ -3,10 +3,64 @@
 <h6>Evolução mês a mês. Valor no fechamento do mês</h6>
 
 <br>
-<h4>Geral</h4>
-<%= render 'tabela', corretora: nil %>
+<table class="table table-striped table-sm">
+  <thead class="thead-dark">
+  <tr>
+    <th></th> <!-- Mês -->
+    <th colspan="2" class="bg-info">Global</th>
+    <% @corretoras.each do |corretora| %>
+      <th colspan="2"><%= corretora.nome %></th>
+    <% end %>
+  </tr>
+  <tr>
+    <th>Mês</th>
+    <th class="bg-info">Total</th>
+    <th class="bg-info">Rentabilidade</th>
+    <% @corretoras.each do |corretora| %>
+      <th>Total</th>
+      <th>Rentabilidade</th>
+    <% end %>
+  </tr>
+  </thead>
+  <tbody>
+      <% @mes_a_mes_corretoras.keys.each do |data| %>
+        <tr>
+          <td><%= display_mes_ano data %></td>
+          <td class="bg-info"><%= display_moeda @mes_a_mes_global[data][:total] %></td>
+          <td class="bg-info"><%= display_porcentagem @mes_a_mes_global[data][:rentabilidade] %></td>
+          <% @mes_a_mes_corretoras[data].each do |corretora, dados| %>
+            <td><%= display_moeda dados[:total] %></td>
+            <td><%= display_porcentagem dados[:rentabilidade] %></td>
+          <% end %>
+        </tr>
+      <% end %>
+  </tbody>
+</table>
+
 
 <% @corretoras.each do |corretora| %>
   <h4><%= corretora.nome %></h4>
-  <%= render 'tabela', corretora: corretora %>
+  <table class="table table-striped table-sm">
+    <thead class="thead-dark">
+    <tr>
+      <th>Mês</th>
+      <th>Total</th>
+      <th>Movimentações</th>
+      <th>Rendimento</th>
+      <th>Rentabilidade</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @mes_a_mes_corretoras.keys.each do |data| %>
+      <tr>
+        <td><%= display_mes_ano data %></td>
+        <td><%= display_moeda @mes_a_mes_corretoras[data][corretora.nome][:total] %></td>
+        <td><%= display_moeda @mes_a_mes_corretoras[data][corretora.nome][:movimentacoes] %></td>
+        <td><%= display_moeda @mes_a_mes_corretoras[data][corretora.nome][:rendimento] %></td>
+        <td><%= display_porcentagem @mes_a_mes_corretoras[data][corretora.nome][:rentabilidade] %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+
 <% end %>

@@ -25,18 +25,7 @@
           <% end %>
           <br>
           <h5><%= display_moeda @posicao.saldo_cc_total %> <small class="text-muted"> em conta corrente</small></h5>
-          <% @contas_correntes.each do |cc| %>
-            <% saldo = cc.saldo(@data)  %>
-            <% next if saldo == 0  %>
-            <span class="font-weight-lighter">
-              <%= display_moeda saldo, moeda: cc.moeda %>
-              <small class="text-muted">
-                <%= cc.corretora.nome %> (<%= link_to 'extrato', carteira_conta_corrente_path(@carteira, cc, data: @data) %>)
-              </small>
-            </span>
-            <br>
-          <% end %>
-
+          <%= render 'common/saldos_contas_corrente', contas_correntes: @contas_correntes %>
         </div>
       </div>
 

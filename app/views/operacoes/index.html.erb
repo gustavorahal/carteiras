@@ -1,13 +1,6 @@
 <%= render 'common/btn_new', url: new_carteira_operacao_path, label: 'Registrar operação' %>
 
-<% unless @operacoes_hoje.blank? %>
-  <h6>Saldo das operações hoje</h6>
-  <% corretoras = @operacoes_hoje.distinct.pluck(:corretora_id).uniq %>
-  <% corretoras.each do |corretora_id| %>
-    <% soma = @operacoes_hoje.where(corretora_id: corretora_id).sum('valor_unit * quantidade')  %>
-    <% moeda = @operacoes_hoje.where(corretora_id: corretora_id).take.ativo.moeda %>
-    <h6> <%= Corretora.find(corretora_id).nome %>: <%= display_moeda soma, moeda: moeda %></h6>
-  <% end %>
-<% end %>
+<h5>Saldo em Contas Correntes</h5>
+<%= render 'common/saldos_contas_corrente', contas_correntes: @contas_correntes %>
 
 <%= render 'common/operacoes_table', operacoes: @operacoes %>

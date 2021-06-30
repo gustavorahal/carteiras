@@ -5,9 +5,7 @@ class OperacoesController < ApplicationController
   def index
     @operacoes = @carteira.operacoes
     authorize @operacoes.take
-    # refazemos a query sem reusar a de cima porque o uso de "order by" acima
-    # complica o uso do distinct depois
-    @operacoes_hoje = Operacao.where(carteira: @carteira, data: Date.today)
+    @contas_correntes = ContaCorrente.includes(:corretora).where(carteira: @carteira)
   end
 
   def new

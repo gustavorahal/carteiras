@@ -6,7 +6,7 @@ class ContaCorrente < ApplicationRecord
   validates :carteira_id, uniqueness: { scope: [ :moeda, :corretora_id ] }
 
   def saldo(data)
-    extratos.where("movimentacao <= '#{data}'::date").sum(:valor)
+    extratos.where("movimentacao <= '#{data}'::date").sum(:valor).round(4)
   end
 
   def extratos_data(data)

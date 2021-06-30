@@ -7,6 +7,7 @@ class Operacao < ApplicationRecord
   validates_presence_of :quantidade
 
   before_save :ajusta_quantidade, :ajusta_dolar, :ajusta_mon_ou_des
+  after_save :insere_extrato
 
   enum operacao: {
     C: 1,
@@ -28,6 +29,9 @@ class Operacao < ApplicationRecord
     Operacao.where(carteira: carteira, ativo: ativo).where('data <= ?', data).sum(:quantidade)
   end
 
+  def valor
+    valor_unit * quantidade
+  end
 
   private
 
@@ -59,6 +63,28 @@ class Operacao < ApplicationRecord
       self.mon_ou_des = 'D'
     end
 
+  end
+
+  def insere_extrato
+    cc = ContaCorrente.find_by(corretora_id: corretora.id, carteira_id: carteira.id,
+                               moeda: ativo.moeda)
+    # Só faz sentido adicionar uma entrada temporária, se a operação é posterior
+    # a ultima entrada "real" (não temporária) do extrato para dada CC.
+    return if data <= cc.extratos.where(temporario: false).last.movimentacao
+
+    # a descrição é pobre propositalmente para podermos encontra-la em caso de edições
+    # subsequentes da operação e assim deleta-la para criação de outra entrada
+    descricao = "Operação ID##{id}"
+
+    # Entrada já adicionada? Por exemplo, estamos editando uma operação. Deletar para adicionar outra
+    Extrato.where(descricao: descricao, temporario: true).delete_all
+
+    Extrato.create!(conta_corrente: cc,
+                    liquidacao: data,
+                    movimentacao: data,
+                    valor: valor,
+                    descricao: descricao,
+                    temporario: true)
   end
 
 end

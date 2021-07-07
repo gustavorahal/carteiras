@@ -68,7 +68,7 @@ module BuscaCotacao
           # fim de arquivo
           break
         end
-        valor = row[4] # PU (preço unitário) Venda Manhã
+        valor = row[5] # PU Base Manhã -> é o que a XP usa
         dados[data] = valor
         i += 1
       end

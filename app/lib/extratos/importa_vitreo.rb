@@ -15,7 +15,9 @@ module Extratos
         next if row[2] == 'SALDO DO DIA'
         descricao = row[2].gsub('* PROV * ', '')
 
-        _insere_linha_extrato(conta_corrente, row[0], row[0], descricao, row[3], row[4])
+        # vitreo não mantem consistência dos valores da coluna de saldo, sendo eles recalculados
+        # sem muita consistência portanto não inseri-los e portanto não considera-los
+        _insere_linha_extrato(conta_corrente, row[0], row[0], descricao, row[3], nil)
       end
     end
 

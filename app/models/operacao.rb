@@ -79,10 +79,14 @@ class Operacao < ApplicationRecord
     # Entrada já adicionada? Por exemplo, estamos editando uma operação. Deletar para adicionar outra
     Extrato.where(descricao: descricao, temporario: true).delete_all
 
+    # No caso de venda, temos um valor negativo na operação, entretanto no extrato seria uma entrada,
+    # portanto positivo. Isso se aplica inversamente ao caso de compra.
+    valor_corrigido = valor * -1
+
     Extrato.create!(conta_corrente: cc,
                     liquidacao: data,
                     movimentacao: data,
-                    valor: valor,
+                    valor: valor_corrigido,
                     descricao: descricao,
                     temporario: true)
   end

@@ -4,7 +4,7 @@ module Extratos
     def self.importar(conta_corrente, file_path)
       # Load a csv and auto-strip the BOM (byte order mark)
       # csv files saved from MS Excel typically have the BOM marker at the beginning of the file
-      sheet = Roo::CSV.new(file_path, csv_options: { col_sep: ';', encoding: 'bom|utf-8' } )
+      sheet = Roo::Excelx.new(file_path).sheet(0)
       raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet)
 
       i = 1

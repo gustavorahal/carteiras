@@ -38,6 +38,7 @@ gem 'pundit'
 gem 'roo'
 gem 'roo-xls'
 gem 'rufus-scheduler'
+gem 'rexml'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

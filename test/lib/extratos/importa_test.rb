@@ -27,7 +27,7 @@ class ImportaTest < ActiveSupport::TestCase
 
   test 'importa extrato Vitreo' do
     cc = conta_correntes :vitreo_brl
-    Extratos::Importa.importar cc, file_path('extrato_vitreo.csv')
+    Extratos::Importa.importar cc, file_path('extrato_vitreo.xlsx')
 
     assert Extrato.find_by(conta_corrente: cc, descricao: 'Pagamento de Frações  CSAN3', valor: 7.68).present?
     assert Extrato.find_by(conta_corrente: cc, descricao: 'TED BCO 341 AGE 8294  CTA 04463 4  - CREDITO EM C/C', valor: 3029.50).present?

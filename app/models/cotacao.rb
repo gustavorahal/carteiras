@@ -1,6 +1,8 @@
 class Cotacao < ApplicationRecord
   belongs_to :ativo
 
+  after_save :clear_cache
+
   enum fonte: {
     yahoo_finance_rapidapi: 1,
     marketstack: 2,
@@ -10,4 +12,10 @@ class Cotacao < ApplicationRecord
     coingecko_rapidapi: 6,
     currency_converter_rapidapi: 7
   }
+
+  private
+
+  def clear_cache
+    CacheService.clear_cotacao(ativo, data)
+  end
 end

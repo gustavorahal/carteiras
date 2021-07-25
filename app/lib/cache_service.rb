@@ -17,8 +17,8 @@ class CacheService
     end
   end
 
-  def self.clear_cotacao(ativo, data)
-    Rails.cache.clear(_cache_cotacao_str(ativo, data))
+  def self.delete_cotacao(ativo, data)
+    Rails.cache.delete(_cache_cotacao_str(ativo, data))
   end
 
   private

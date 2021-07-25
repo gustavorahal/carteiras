@@ -1,7 +1,7 @@
 class Cotacao < ApplicationRecord
   belongs_to :ativo
 
-  after_save :clear_cache
+  after_save :delete_cache
 
   enum fonte: {
     yahoo_finance_rapidapi: 1,
@@ -15,7 +15,7 @@ class Cotacao < ApplicationRecord
 
   private
 
-  def clear_cache
-    CacheService.clear_cotacao(ativo, data)
+  def delete_cache
+    CacheService.delete_cotacao(ativo, data)
   end
 end

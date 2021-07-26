@@ -35,10 +35,10 @@
       <td>
         <%= extrato.descricao %>
         <% if extrato.processado %>
-          <span class="badge badge-pill badge-primary">processado</span>
+          <span class="badge rounded-pill bg-primary">processado</span>
         <% end %>
         <% if extrato.temporario %>
-          <span class="badge badge-pill badge-dark">temporario</span>
+          <span class="badge rounded-pill bg-dark">temporario</span>
         <% end %>
       </td>
       <td><%= display_moeda extrato.valor, moeda: @conta_corrente.moeda, cores: true %></td>

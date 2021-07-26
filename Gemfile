@@ -29,7 +29,7 @@ gem 'jbuilder', '~> 2.7'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
-gem 'bootstrap_form', '~> 4.0'
+gem "bootstrap_form", git: "https://github.com/bootstrap-ruby/bootstrap_form.git", branch: "bootstrap-5"
 gem 'bootstrap-icons-helper'
 gem 'devise'
 gem 'devise-i18n'

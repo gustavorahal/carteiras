@@ -39,7 +39,7 @@
       <td>
         <small><%= oper.observacao.nil? ? oper.observacao : oper.observacao.html_safe %></small>
         <% if oper.operacao_sys %>
-          <span class="badge badge-pill badge-info">Operação de sistema</span>
+          <span class="badge rounded-pill bg-info">Operação de sistema</span>
         <% end %>
       </td>
       <td><%= display_moeda oper.custos_operacionais, moeda: oper.ativo.moeda %></td>

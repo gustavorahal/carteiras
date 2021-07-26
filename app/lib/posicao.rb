@@ -47,15 +47,7 @@ class Posicao
       pc[corretora_nome][tipo].push posicao_ativo
     end
 
-    # fazer o sort agora por tamanho de posição. Este é o padrão de display na XP por exemplo
-    pc_sorted = pc.clone
-    pc.each do |corretora_nome, tipos|
-      tipos.each do |tipo, posicao_posicao|
-        pc_sorted[corretora_nome][tipo] = posicao_posicao.sort_by { |pa| pa.valor_em_brl }.reverse
-      end
-    end
-
-    pc_sorted
+    pc
   end
 
   def total_ativos_por_corretora

@@ -18,13 +18,27 @@
         <h6><%= corretora_nome %></h6>
       </td>
     </tr>
-    <% tipos.each do |tipo, ativos_posicoes| %>
-      <tr class="table-dark">
-        <td colspan="5">
+    <% tipos.each do |tipo, posicao_ativos| %>
+      <tr class="table-info">
+        <td>
           <h6><%= tipo.upcase %></h6>
         </td>
+        <td colspan="4">
+          <h6><%= valor_total_posicao_ativos posicao_ativos %></h6>
+        </td>
       </tr>
-      <% ativos_posicoes.each do |posicao_ativo| %>
+
+      <% if corretora_nome == 'XP' %>
+        <!-- Sort por tamanho de posição é o padrão de display na XP -->
+        <% posicao_ativos_sorted = posicao_ativos.sort_by { |pa| pa.valor_em_brl }.reverse %>
+      <% elsif corretora_nome == 'Vitreo' || corretora_nome == 'Avenue' %>
+        <!-- Sort alfabetico é o padrão de display na Vitreo, Avenue tanto faz então deixamos alfabetico tb -->
+        <% posicao_ativos_sorted = posicao_ativos.sort_by { |pa| pa.ativo.nome } %>
+      <% else %>
+        <% posicao_ativos_sorted = posicao_ativos %>
+      <% end %>
+
+      <% posicao_ativos_sorted.each do |posicao_ativo| %>
         <% ativo = posicao_ativo.ativo %>
         <tr>
           <td><%= link_to ativo.nome_amigavel, posicao_ativo_path(@carteira, ativo) %></td>

@@ -21,7 +21,7 @@ module BuscaCotacao
 
       begin
         # As cotações do Market Stack são mais corretas do que as que
-        # Yahoo puxa muitas vezes
+        # Yahoo puxa muitas vezes. Porém Yahoo é mais completo de dados.
         preco = _api_marketstack(ticker, data, bolsa)
       rescue StandardError => e
         Rails.logger.info("BuscaAtivos::Bolsa._api_busca: #{e.message}")

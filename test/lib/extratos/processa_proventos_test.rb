@@ -2,17 +2,17 @@ require 'test_helper'
 
 class ProcessaProventosTest < ActiveSupport::TestCase
   test "vitreo: processa dividendo" do
-    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.csv')
+    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.xlsx')
     assert proventos.find_by(ativo: ativos(:vale3), evento: 'dividendo', valor_liquido: 342.59).present?
   end
 
   test "vitreo: processa JCP" do
-    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.csv')
+    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.xlsx')
     assert proventos.find_by(ativo: ativos(:vale3), evento: 'jcp', valor_liquido: 71.04).present?
   end
 
   test "vitreo: processa rendimentos FII" do
-    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.csv')
+    proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.xlsx')
     assert proventos.find_by(ativo: ativos(:rbrf11), evento: 'rendimento', valor_liquido: 7.20).present?
   end
 

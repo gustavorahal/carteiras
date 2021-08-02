@@ -8,6 +8,6 @@ class BuscaTesouroTest < ActiveSupport::TestCase
     # Dados buscados na planilha
     # 18/03/2021	0,35%	0,36%	10.583,62	10.577,38	10.576,09
 
-    assert_equal 10577.38, dados[data]
+    assert_equal 10576.09, dados[data]
   end
 end

@@ -14,15 +14,16 @@ class OperacaoTest < ActiveSupport::TestCase
     "Operação ID##{operacao.id}"
   end
 
-  test "entrada extrato adicionada após operação se data posterior a ultima entrada de extrato" do
+  test "entrada temporária do extrato adicionada se data da operação é posterior a última entrada de extrato" do
     op = Operacao.create(data: @ultimo_extrato.movimentacao + 1.day,
                     operacao: 'C',
                     quantidade: 100, valor_unit: 11,
                     ativo: @ativo,
                     carteira: @carteira,
                     corretora: @corretora)
+
     assert Extrato.find_by(descricao: descricao_operacao(op),
-                           temporario: true, valor: op.valor)
+                           temporario: true, valor: op.saldo_financeiro)
   end
 
   test "entrada extrato NÃO adicionada se data anterior a ultimo extrato" do
@@ -32,8 +33,9 @@ class OperacaoTest < ActiveSupport::TestCase
                          ativo: @ativo,
                          carteira: @carteira,
                          corretora: @corretora)
+
     assert_nil Extrato.find_by(descricao: descricao_operacao(op),
-                           temporario: true, valor: op.valor)
+                           temporario: true, valor: op.saldo_financeiro)
   end
 
   test "entrada extrato atualizada após edição de operação" do
@@ -43,13 +45,14 @@ class OperacaoTest < ActiveSupport::TestCase
                          ativo: @ativo,
                          carteira: @carteira,
                          corretora: @corretora)
-    assert Extrato.find_by(descricao: descricao_operacao(op),
-                               temporario: true, valor: op.valor)
 
-    valor_antigo = op.valor
+    assert Extrato.find_by(descricao: descricao_operacao(op),
+                               temporario: true, valor: op.saldo_financeiro)
+
+    valor_antigo = op.saldo_financeiro
     op.quantidade = 101
     op.save!
-    valor_novo = op.valor
+    valor_novo = op.saldo_financeiro
 
     assert_nil Extrato.find_by(descricao: descricao_operacao(op),
                            temporario: true, valor: valor_antigo)

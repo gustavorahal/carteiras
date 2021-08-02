@@ -8,7 +8,7 @@ class FacadeTest < ActiveSupport::TestCase
 
     # Dados buscados na planilha
     # 18/03/2021	0,35%	0,36%	10.583,62	10.577,38	10.576,09
-    assert_equal 10577.38, resultado.preco
+    assert_equal 10576.09, resultado.preco
     assert_equal data, resultado.data
     assert_equal 'tesouro_gov', resultado.fonte
     assert_equal titulo, resultado.nome

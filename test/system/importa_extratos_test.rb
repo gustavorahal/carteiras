@@ -2,7 +2,7 @@ require 'application_system_test_case'
 
 class ImportaExtratosTest < ApplicationSystemTestCase
   test 'importa extrato Vitreo' do
-    _test_importa_extrato(:vitreo_brl, 'extrato_vitreo.csv',
+    _test_importa_extrato(:vitreo_brl, 'extrato_vitreo.xslx',
                           ['Pagamento de Frações CSAN3',
                            'TED BCO 341 AGE 8294 CTA 04463 4 - CREDITO EM C/C',
                            '-R$ 24.745,41', 'R$ 25.598,52'], ["* PROV * Pagamento de Rendimentos RBRR11"])

@@ -12,21 +12,20 @@ module Extratos
         i += 1
         row = sheet.row(i)
         break if row[0].blank?
-        next if row[2] == 'SALDO DO DIA'
-        descricao = row[2].gsub('* PROV * ', '')
+        descricao = row[3].gsub('* PROV * ', '')
 
         # vitreo não mantem consistência dos valores da coluna de saldo, sendo eles recalculados
         # sem muita consistência portanto não inseri-los e portanto não considera-los
-        _insere_linha_extrato(conta_corrente, row[0], row[0], descricao, row[3], nil)
+        _insere_linha_extrato(conta_corrente, row[1], row[0], descricao, row[4], nil)
       end
     end
 
     def self.formato_correto?(sheet)
       # verifica se formato adequado
       h = sheet.row(1)
-      h[0] == 'DataMovimentacao' && h[1] == 'Tipo' &&
-        h[2] == 'DescricaoLancamento' && h[3] == 'ValorLancamento' &&
-        h[4] == 'Saldo'
+      h[0] == 'Movimentação' && h[1] == 'Liquidação' &&
+        h[2] == 'Tipo' && h[3] == 'Descrição' &&
+        h[4] == 'Valor de transação' && h[5] == 'Saldo'
     end
 
   end

@@ -13,7 +13,8 @@ class Ativo < ApplicationRecord
       tesouro: 6,
       etf: 7,
       debenture: 8,
-      cra: 9
+      cra: 9,
+      cdb: 10
   }
 
   def nome_amigavel

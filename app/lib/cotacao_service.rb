@@ -187,6 +187,12 @@ class CotacaoService
     nil
   end
 
+  def self._busca_e_registra_cdb(ativo, data)
+    # como não temos um jeito automatizado de buscar cdb
+    # retornar ultima cotação
+    _busca_e_registra_cra(ativo, data)
+  end
+
   def self._busca_e_registra_debenture(ativo, data)
     # como não temos um jeito automatizado de buscar cra ou debenture
     # retornar ultima cotação

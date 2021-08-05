@@ -9,7 +9,7 @@ class CotacoesController < ApplicationController
   def index
     @ativo = Ativo.find params[:ativo_id]
     @cotacoes = Cotacao.where(ativo_id: @ativo.id).includes(:ativo).order(data: :desc)
-    authorize @cotacoes.take
+    authorize Cotacao
   end
 
   def new

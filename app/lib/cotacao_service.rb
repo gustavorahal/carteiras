@@ -65,11 +65,16 @@ class CotacaoService
 
     # 2a tentativa: Busca cotação utilizando API de bolsa
     Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponivel no BD, vamos buscar"
-    cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
-    if cotacao.present?
-      Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} encontrada pelo backend/API, retornando"
-      return cotacao
+    if busca_cotacao_enabled?(ativo.tipo)
+      cotacao = send("_busca_e_registra_#{ativo.tipo.downcase}", ativo, data_ajustada)
+      if cotacao.present?
+        Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada} encontrada pelo backend/API, retornando"
+        return cotacao
+      end
+    else
+      Rails.logger.info "Cotação para #{ativo.nome} em #{data_ajustada}: busca cotação está desabilitada para #{ativo.tipo}"
     end
+
 
     # 3a tentativa: não encontrei na API, retornar a última cotação disponível
     unless cotacao
@@ -78,6 +83,22 @@ class CotacaoService
     end
 
     cotacao
+  end
+
+  def self.busca_cotacao_enabled?(tipo_ativo)
+    if tipo_ativo.downcase.in? Ativo.tipos_bolsa
+      tipo = "bolsa"
+    else
+      tipo = tipo_ativo.downcase
+    end
+
+    config = Config.find_by(nome: "busca_cotacao_#{tipo}")
+    if config
+      ActiveModel::Type::Boolean.new.cast(config.valor)
+    else
+      # vamos assumir que se a configuração não existe, é porque não nos importamos em controla-la
+      true
+    end
   end
 
   # Ajusta data considerando de tipo de ativo

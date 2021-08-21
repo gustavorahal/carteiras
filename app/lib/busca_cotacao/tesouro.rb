@@ -52,6 +52,8 @@ module BuscaCotacao
       ano_sym = data.year.to_s.to_sym
 
       arquivo_excel = _busca_arquivo_tesouro(urls[ano_sym][titulo_tipo], titulo_codigo, data.year)
+      return nil unless arquivo_excel
+
       abre_xls = Roo::Spreadsheet.open(arquivo_excel, extension: :xls)
       sheet = abre_xls.sheet(titulo_codigo)
       # Headers na linha 2:
@@ -88,8 +90,13 @@ module BuscaCotacao
       nome_arquivo = "#{codigo.gsub(' ', '_')}_#{ano}.xls"
       Rails.logger.info "Baixando arquivo Tesouro para #{codigo} #{ano} em #{url}"
 
-      download = URI.parse(url).open
-      IO.copy_stream(download, nome_arquivo)
+      begin
+        download = URI.parse(url).open
+        IO.copy_stream(download, nome_arquivo)
+      rescue Net::OpenTimeout
+        Rails.logger.error "Erro baixando arquivo #{url}"
+        return nil
+      end
 
       nome_arquivo
     end

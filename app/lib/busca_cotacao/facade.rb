@@ -20,6 +20,7 @@ module BuscaCotacao
 
       dados = BuscaCotacao::Tesouro.busca nome, data
       return if dados.nil?
+
       dados.each do |data_api, preco|
         return Resultado.new(nome, preco, data_api,'tesouro_gov') if data_api == data
       end

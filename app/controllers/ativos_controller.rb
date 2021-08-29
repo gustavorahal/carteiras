@@ -11,7 +11,7 @@ class AtivosController < ApplicationController
   end
 
   def create
-    @ativo = Ativo.new secure_params
+    @ativo = Ativo.new
     authorize @ativo
 
     if @ativo.save

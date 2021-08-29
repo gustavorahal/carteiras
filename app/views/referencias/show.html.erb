@@ -40,7 +40,7 @@
       </tr>
       <% referencia_ativos.each do |referencia_ativo| %>
         <tr>
-          <td><%= link_to referencia_ativo.ativo.nome_amigavel, ativo_path(referencia_ativo.ativo) %></td>
+          <td><%= link_to referencia_ativo.ativo.nome_amigavel, ativo_cotacoes_path(referencia_ativo.ativo) %></td>
           <td><%= display_porcentagem referencia_ativo.porcentagem %></td>
           <td><%= referencia_ativo.updated_at %></td>
           <td><%= referencia_ativo.data_entrada %></td>

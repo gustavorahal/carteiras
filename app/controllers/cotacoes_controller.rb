@@ -20,7 +20,7 @@ class CotacoesController < ApplicationController
 
   def create
     @ativo = Ativo.find params[:ativo_id]
-    @cotacao = Cotacao.new
+    @cotacao = Cotacao.new secure_params
     @cotacao.ativo = @ativo
     authorize @cotacao
 

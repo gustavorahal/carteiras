@@ -3,7 +3,9 @@ module Extratos
 
     def self.importar(conta_corrente, file_path)
       sheet = Roo::Excelx.new(file_path).sheet(0)
-      raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet)
+      # verifica se formato adequado
+      # linha 15 esta o header
+      raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet.row(15))
 
       i = 16 # onde começa o extrato
       loop do
@@ -16,11 +18,8 @@ module Extratos
       end
     end
 
-    def self.formato_correto?(sheet)
-      # verifica se formato adequado
-      # linha 15 esta o header
-      h = sheet.row(15)
-      h[0] == 'Liq' && h[1] == 'Mov' && h[3] == 'Valor' && h[4] == 'Saldo'
+    def self.formato_correto?(hr)
+      hr[0] == 'Liq' && hr[1] == 'Mov' && hr[3] == 'Valor' && hr[4] == 'Saldo'
     end
 
   end

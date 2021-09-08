@@ -7,7 +7,7 @@ module Extratos
       raise NotImplementedError
     end
 
-    def self.formato_correto?(sheet)
+    def self.formato_correto?(header_row)
       raise NotImplementedError
     end
 

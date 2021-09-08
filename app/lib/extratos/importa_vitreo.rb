@@ -2,10 +2,8 @@ module Extratos
   class ImportaVitreo < ImportaBase
 
     def self.importar(conta_corrente, file_path)
-      # Load a csv and auto-strip the BOM (byte order mark)
-      # csv files saved from MS Excel typically have the BOM marker at the beginning of the file
       sheet = Roo::Excelx.new(file_path).sheet(0)
-      raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet)
+      raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet.row(1))
 
       i = 1
       loop do
@@ -20,12 +18,11 @@ module Extratos
       end
     end
 
-    def self.formato_correto?(sheet)
+    def self.formato_correto?(hr)
       # verifica se formato adequado
-      h = sheet.row(1)
-      h[0] == 'Movimentação' && h[1] == 'Liquidação' &&
-        h[2] == 'Tipo' && h[3] == 'Descrição' &&
-        h[4] == 'Valor de transação' && h[5] == 'Saldo'
+      hr[0] == 'Movimentação' && hr[1] == 'Liquidação' &&
+        hr[2] == 'Tipo' && hr[3] == 'Descrição' &&
+        hr[4] == 'Valor de transação' && hr[5] == 'Saldo'
     end
 
   end

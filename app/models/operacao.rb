@@ -75,7 +75,7 @@ class Operacao < ApplicationRecord
 
     def insere_extrato_entrada_tmp
       cc = ContaCorrente.find_by(corretora_id: corretora.id, carteira_id: carteira.id,
-                                 moeda: ativo.moeda)
+                                 moeda: ativo.moeda_negociacao)
       # Só faz sentido adicionar uma entrada temporária, se a operação é posterior
       # a ultima entrada "real" (não temporária) do extrato para dada CC.
       return if data <= cc.extratos.where(temporario: false).last.movimentacao

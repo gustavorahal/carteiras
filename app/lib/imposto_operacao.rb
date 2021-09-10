@@ -64,7 +64,7 @@ class ImpostoOperacao
   end
 
   def imposto_a_pagar
-    lucro_liquido * Impostos.porcentagem_imposto(@ativo.tipo, @ativo.moeda)
+    lucro_liquido * Impostos.porcentagem_imposto(@ativo.tipo, @ativo.moeda_negociacao)
   end
 
 end

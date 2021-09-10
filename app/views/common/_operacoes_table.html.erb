@@ -23,6 +23,7 @@
   </thead>
   <tbody>
   <% operacoes.each do |oper| %>
+    <% moeda_negociacao = oper.ativo.moeda_negociacao %>
     <tr>
       <td><%= display_data oper.data %></td>
       <% if mostra_nome  %>
@@ -33,8 +34,8 @@
       <td><%= oper.operacao.capitalize %></td>
       <td><%= oper.mon_ou_des %></td>
       <td><%= display_numero oper.quantidade %></td>
-      <td><%= display_moeda oper.valor_unit, moeda: oper.ativo.moeda %></td>
-      <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: oper.ativo.moeda, cores: true %></td>
+      <td><%= display_moeda oper.valor_unit, moeda: moeda_negociacao %></td>
+      <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: moeda_negociacao, cores: true %></td>
       <td><%= display_moeda oper.usdbrl %></td>
       <td>
         <small><%= oper.observacao.nil? ? oper.observacao : oper.observacao.html_safe %></small>
@@ -42,7 +43,7 @@
           <span class="badge rounded-pill bg-info">Operação de sistema</span>
         <% end %>
       </td>
-      <td><%= display_moeda oper.custos_operacionais, moeda: oper.ativo.moeda %></td>
+      <td><%= display_moeda oper.custos_operacionais, moeda: moeda_negociacao %></td>
       <td><%= link_to 'Editar', edit_carteira_operacao_path(params[:carteira_id], oper) %></td>
     </tr>
   <% end %>

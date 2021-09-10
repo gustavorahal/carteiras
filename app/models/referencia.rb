@@ -28,7 +28,7 @@ class Referencia < ApplicationRecord
   end
 
   def porcentagem_por_moeda
-    referencia_ativos.includes(:ativo).where.not(porcentagem: 0).group('ativos.moeda').sum(:porcentagem)
+    referencia_ativos.includes(:ativo).where.not(porcentagem: 0).group('ativos.moeda_exposicao').sum(:porcentagem)
   end
 
   def sum_porcentagem_ativos

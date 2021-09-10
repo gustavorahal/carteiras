@@ -2,16 +2,16 @@
 
 <dl class="row">
   <dt class="col-sm-3">Investido</dt>
-  <dd class="col-sm-9"><%= display_moeda @posicao_ativo.valor_investido, moeda: @ativo.moeda %></dd>
+  <dd class="col-sm-9"><%= display_moeda @posicao_ativo.valor_investido, moeda: @ativo.moeda_negociacao %></dd>
 
   <dt class="col-sm-3">Valor posição</dt>
   <dd class="col-sm-9">
-    <%= display_moeda @posicao_ativo.valor, moeda: @ativo.moeda %>
+    <%= display_moeda @posicao_ativo.valor, moeda: @ativo.moeda_negociacao %>
     (<%= display_rentabilidade @posicao_ativo %>)
   </dd>
 
   <dt class="col-sm-3">Preço Médio</dt>
-  <dd class="col-sm-9"><%= display_moeda @posicao_ativo.preco_medio, moeda: @ativo.moeda %></dd>
+  <dd class="col-sm-9"><%= display_moeda @posicao_ativo.preco_medio, moeda: @ativo.moeda_negociacao %></dd>
 
   <dt class="col-sm-3">Preço Atual</dt>
   <dd class="col-sm-9"><%= display_preco_atual @posicao_ativo %></dd>

@@ -42,7 +42,7 @@
         <% ativo = posicao_ativo.ativo %>
         <tr>
           <td><%= link_to ativo.nome_amigavel, posicao_ativo_path(@carteira, ativo) %></td>
-          <td><%= display_moeda posicao_ativo.valor, moeda: ativo.moeda %></td>
+          <td><%= display_moeda posicao_ativo.valor, moeda: ativo.moeda_negociacao %></td>
           <td><%= display_numero posicao_ativo.quantidade %></td>
           <td><%= display_preco_atual posicao_ativo %></td>
           <td><%= display_preco_medio posicao_ativo %></td>

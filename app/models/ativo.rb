@@ -28,11 +28,11 @@ class Ativo < ApplicationRecord
   end
 
   def usd?
-    moeda == 'USD'
+    moeda_negociacao == 'USD'
   end
 
   def brl?
-    moeda == 'BRL'
+    moeda_negociacao == 'BRL'
   end
 
   def na_bolsa?
@@ -47,7 +47,9 @@ class Ativo < ApplicationRecord
   private
 
   def ativo_suportado?
-    unless CotacaoService.ativo_suportado?(nome, moeda, tipo)
+    return unless Config.busca_cotacao_enabled?(tipo)
+
+    unless CotacaoService.ativo_suportado?(nome, moeda_negociacao, tipo)
       errors.add(:base, "Ativo não é suportado porque não conseguimos obter cotações")
       throw :abort
     end

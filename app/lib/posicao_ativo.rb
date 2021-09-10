@@ -42,7 +42,7 @@ class PosicaoAtivo
   end
 
   def preco_medio_em_brl
-    if @ativo.moeda == 'USD'
+    if @ativo.moeda_negociacao == 'USD'
       sum_str = 'quantidade * valor_unit * usdbrl'
       _preco_medio_sql(sum_str)
     else
@@ -73,9 +73,9 @@ class PosicaoAtivo
   end
 
   def valor_em_brl
-    if @ativo.moeda == 'BRL'
+    if @ativo.moeda_negociacao == 'BRL'
       valor
-    elsif @ativo.moeda == 'USD'
+    elsif @ativo.moeda_negociacao == 'USD'
       _valor_unit_brl * quantidade.to_f
     end
   end

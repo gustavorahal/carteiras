@@ -33,7 +33,7 @@ class FacadeTest < ActiveSupport::TestCase
   test 'busca ação brasileira (ITSA4) em data válida' do
     data = Date.new(2021,4,13)
     ativo = ativos(:itsa4)
-    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda, data)
+    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
 
     assert_equal 10.19, resultado.preco
     assert_equal data, resultado.data
@@ -43,7 +43,7 @@ class FacadeTest < ActiveSupport::TestCase
   test 'busca ação americana (DIS) em data válida' do
     data = Date.new(2021,4,13)
     ativo = ativos(:dis)
-    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda, data)
+    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
 
     assert_equal 185.49, resultado.preco
     assert_equal data, resultado.data
@@ -53,7 +53,7 @@ class FacadeTest < ActiveSupport::TestCase
   test 'busca ação ITSA4 em data INválida' do
     data = Date.today + 10.days
     ativo = ativos(:itsa4)
-    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda, data)
+    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
 
     assert_nil resultado
   end

@@ -48,7 +48,7 @@
             <%= render 'common/btn_oper_corretora', corretora: ap ? ap.corretora : nil,
                                                       ativo: ativo, operacao: operacao, disabled: ap.nil?  %>
             <%= quant.round(4).abs %>
-            (<%= display_moeda(@posicao_referencia.diff_valor_referencia_usd(ativo).abs, moeda: ativo.moeda) if ativo.usd? %>
+            (<%= display_moeda(@posicao_referencia.diff_valor_referencia_usd(ativo).abs, moeda: ativo.moeda_negociacao) if ativo.usd? %>
             <%= display_moeda(diff_valor_brl.abs) %>)
           </td>
         </tr>

@@ -40,7 +40,7 @@ class AtivosController < ApplicationController
   private
 
   def secure_params
-    params.require(:ativo).permit(:nome, :descricao, :moeda, :tipo, :cnpj)
+    params.require(:ativo).permit(:nome, :descricao, :moeda_negociacao, :moeda_exposicao, :tipo, :cnpj)
   end
 
 end

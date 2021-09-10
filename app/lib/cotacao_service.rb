@@ -163,7 +163,7 @@ class CotacaoService
 
   # @return Cotacao ActiveRecord object
   def self._busca_e_registra_bolsa(ativo, data)
-    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda, data)
+    resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
     if resultado
       Cotacao.find_or_create_by!(ativo: ativo,
                                  valor_unit: resultado.preco,

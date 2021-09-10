@@ -8,7 +8,11 @@
 
   <%= f.text_field :nome %>
   <%= f.text_field :descricao %>
-  <%= f.select :moeda, ['BRL', 'USD'] %>
+  <%= f.select :moeda_negociacao, ['BRL', 'USD'],
+               help: 'Moeda em que o ativo é negociado. Ex. BDRs são negociados em BRL mesmo sendo empresas expostas a USD' %>
+  <%= f.select :moeda_exposicao, ['BRL', 'USD'],
+               help: 'Moeda em que o ativo esta exposto.
+               Ex. MELI é negociado em USD porém a origem é Brasil portanto exposto ao BRL. BDRs tem negociação em BRL e exposição a USD. HASH11 é negociado em BRL porém criptos estão expostas ao dólar, portanto origem USD.' %>
   <%= f.select :tipo, Ativo.tipos.keys.to_a %>
   <%= f.text_field :cnpj, help: 'Relevante para fundos' %>
 

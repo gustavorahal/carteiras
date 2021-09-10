@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_20_233817) do
+ActiveRecord::Schema.define(version: 2021_09_08_143629) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -18,11 +18,12 @@ ActiveRecord::Schema.define(version: 2021_08_20_233817) do
   create_table "ativos", force: :cascade do |t|
     t.string "nome"
     t.integer "tipo"
-    t.string "moeda"
+    t.string "moeda_negociacao", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "descricao"
     t.string "cnpj"
+    t.string "moeda_exposicao"
     t.index ["cnpj"], name: "index_ativos_on_cnpj"
     t.index ["nome"], name: "ativos_nome_uindex", unique: true
   end

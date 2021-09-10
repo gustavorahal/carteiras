@@ -53,7 +53,7 @@ class Posicao
   def total_ativos_por_corretora
     tc = {}
     posicao_ativos.each do |posicao_ativo|
-      moeda = posicao_ativo.ativo.moeda
+      moeda = posicao_ativo.ativo.moeda_exposicao
       corretora = posicao_ativo.corretora
       tc[corretora] = { 'USD' => 0, 'BRL' => 0 } unless corretora.in? tc
       tc[corretora][moeda] += posicao_ativo.valor
@@ -69,7 +69,7 @@ class Posicao
 
     # Calcula valores em ativos
     posicao_ativos.each do |posicao_ativo|
-      moeda = posicao_ativo.ativo.moeda
+      moeda = posicao_ativo.ativo.moeda_exposicao
       moeda_valores[moeda] += posicao_ativo.valor_em_brl
     end
 

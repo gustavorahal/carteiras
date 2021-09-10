@@ -21,7 +21,7 @@
         <td><%= link_to ativo.nome_amigavel, ativo_cotacoes_path(ativo) %></td>
       <% end %>
       <td><%= display_data cotacao.data  %></td>
-      <td><%= display_moeda cotacao.valor_unit, moeda: cotacao.ativo.moeda %></td>
+      <td><%= display_moeda cotacao.valor_unit, moeda: cotacao.ativo.moeda_negociacao %></td>
       <td><%= cotacao.created_at %></td>
       <td><%= cotacao.fonte %></td>
       <% if policy(cotacao).edit? %>

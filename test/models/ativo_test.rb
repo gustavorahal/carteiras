@@ -2,7 +2,7 @@ require 'test_helper'
 
 class AtivoTest < ActiveSupport::TestCase
   test "ativo NÃO suportado" do
-    ativo = Ativo.new(nome: 'Nao existe', tipo: 'acao', moeda: 'BRL')
+    ativo = Ativo.new(nome: 'Nao existe', tipo: 'acao', moeda_negociacao: 'BRL')
     assert_raises ActiveRecord::RecordNotSaved do
       ativo.save!
     end
@@ -11,7 +11,7 @@ class AtivoTest < ActiveSupport::TestCase
   end
 
   test "ativo suportado" do
-    ativo = Ativo.new(nome: 'ITSA4', tipo: 'acao', moeda: 'BRL')
+    ativo = Ativo.new(nome: 'ITSA4', tipo: 'acao', moeda_negociacao: 'BRL')
     ativo.save!
   end
 

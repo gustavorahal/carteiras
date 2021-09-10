@@ -40,7 +40,7 @@ class CotacaoServiceTest < ActiveSupport::TestCase
   end
 
   test "ajusta_data: quando tipo tesouro e data passada no meio de semana, retorna o proprio dia" do
-    data_teste = Date.today.prev_occurring(:tuesday)
+    data_teste = Date.new(2021, 4, 20) # terça feira
     data_esperada = data_teste
     data_retornada = CotacaoService._ajusta_data(data_teste, ativos(:tesouro_selic).tipo)
     assert_equal data_esperada, data_retornada
@@ -63,7 +63,7 @@ class CotacaoServiceTest < ActiveSupport::TestCase
   end
 
   test "ajusta_data: quando tipo fundo e data passada no meio de semana, retorna o proprio dia" do
-    data_teste = Date.today.prev_occurring(:tuesday)
+    data_teste = Date.new(2021, 4, 20) # terça feira
     data_esperada = data_teste
     data_retornada = CotacaoService._ajusta_data(data_teste, ativos(:fundo_dolar).tipo)
     assert_equal data_esperada, data_retornada

@@ -76,7 +76,7 @@ class Impostos
                operacao: 'V',
                operacao_sys: false,
                'ativos.tipo': (tipos.map { |tipo| Ativo.tipos[tipo] }),
-               'ativos.moeda': moeda)
+               'ativos.moeda_negociacao': moeda)
   end
 
   def self.imposto_operacoes_no_mes(carteira, ano, mes, tipos, moeda)

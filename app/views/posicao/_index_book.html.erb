@@ -22,7 +22,7 @@
         <td><%= link_to posicao_ativo.ativo.nome_amigavel, posicao_ativo_path(@carteira, posicao_ativo.ativo) %>
           <small>desde <%= display_data posicao_ativo.data_montagem %> </small></td>
         <td><%= display_rentabilidade posicao_ativo %></td>
-        <td><%= display_moeda posicao_ativo.valor, moeda: posicao_ativo.ativo.moeda, cores: true %>
+        <td><%= display_moeda posicao_ativo.valor, moeda: posicao_ativo.ativo.moeda_negociacao, cores: true %>
           (<%= display_porcentagem @posicao.porcentagem_ativo(posicao_ativo.ativo) %>)
         </td>
         <td><%= display_numero posicao_ativo.quantidade %></td>

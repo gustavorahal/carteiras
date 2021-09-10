@@ -7,7 +7,8 @@
     <th scope="col">Nome</th>
     <th scope="col">Descrição</th>
     <th scope="col">Tipo</th>
-    <th scope="col">Moeda</th>
+    <th scope="col">Moeda Negociação</th>
+    <th scope="col">Moeda Exposição</th>
     <th scope="col">Data adição</th>
     <th></th>
   </tr>
@@ -18,7 +19,8 @@
       <td><%= link_to ativo.nome_amigavel, ativo_cotacoes_path(ativo) %></td>
       <td><%= ativo.descricao %></td>
       <td><%= ativo.tipo %></td>
-      <td><%= ativo.moeda %></td>
+      <td><%= ativo.moeda_negociacao %></td>
+      <td><%= ativo.moeda_exposicao %></td>
       <td><%= display_data ativo.created_at %></td>
       <td><%= link_to 'Editar', edit_ativo_path(ativo) %></td>
     </tr>

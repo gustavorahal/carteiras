@@ -1,10 +1,9 @@
 class Operacao < ApplicationRecord
+  attr_accessor :valor
+
   belongs_to :corretora
   belongs_to :ativo
   belongs_to :carteira
-
-  validates_presence_of :valor_unit
-  validates_presence_of :quantidade
 
   before_save :ajusta_quantidade, :ajusta_dolar, :ajusta_mon_ou_des
   after_save :insere_extrato_entrada_tmp
@@ -30,7 +29,7 @@ class Operacao < ApplicationRecord
   end
 
   def valor
-    valor_unit * quantidade
+    (valor_unit.present? && quantidade.present?) ? (valor_unit * quantidade) : nil
   end
 
   # Saldo financeiro da operação

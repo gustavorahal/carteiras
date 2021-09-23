@@ -18,11 +18,17 @@ class OperacoesController < ApplicationController
     @operacao = Operacao.new secure_params
     authorize @operacao
 
-    if @operacao.save
-      redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
+    if on_create_valores_ok?
+      if @operacao.save
+        redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
+      else
+        render 'new'
+      end
     else
       render 'new'
     end
+
+
   end
 
   def edit
@@ -44,6 +50,26 @@ class OperacoesController < ApplicationController
 
   private
 
+  def on_create_valores_ok?
+    if secure_params[:quantidade].blank? && secure_params[:valor_unit].blank?
+      flash.alert = "Quantidade OU valor unitario precisam ser especificados"
+
+      false
+    elsif secure_params[:valor].present?
+      valor_unit = secure_params[:valor_unit]
+      quantidade = secure_params[:quantidade]
+      valor = secure_params[:valor]
+
+      if valor_unit.present? && quantidade.blank?
+        @operacao.quantidade = valor.to_f / valor_unit.to_f
+      elsif quantidade.present? && valor_unit.blank?
+        @operacao.valor_unit = valor.to_f / quantidade.to_f
+      end
+
+      true
+    end
+  end
+
   def set_vars
     @carteira = Carteira.find params[:carteira_id]
     @ativos = Ativo.all.order(:nome)
@@ -52,7 +78,7 @@ class OperacoesController < ApplicationController
 
   def secure_params
     params.require(:operacao).permit(:ativo_id, :corretora_id, :carteira_id,
-                                     :data, :valor_unit, :quantidade,
+                                     :data, :valor_unit, :quantidade, :valor,
                                      :operacao, :usdbrl, :observacao, :operacao_sys, :co_corretagem, :co_taxa,
                                      :co_emolumentos, :co_iss_iof, :co_irrf, :co_outros)
   end

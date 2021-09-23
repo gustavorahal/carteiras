@@ -14,6 +14,18 @@ class OperacaoTest < ActiveSupport::TestCase
     "Operação ID##{operacao.id}"
   end
 
+  test "nova operação com quantidade e valor unitário" do
+    op = Operacao.create(data: Date.today,
+                         operacao: 'C',
+                         quantidade: 134, valor_unit: 11,
+                         ativo: @ativo,
+                         carteira: @carteira,
+                         corretora: @corretora)
+
+    assert Operacao.last.quantidade == 134
+    assert Operacao.last.valor_unit == 11
+  end
+
   test "entrada temporária do extrato adicionada se data da operação é posterior a última entrada de extrato" do
     op = Operacao.create(data: @ultimo_extrato.movimentacao + 1.day,
                     operacao: 'C',

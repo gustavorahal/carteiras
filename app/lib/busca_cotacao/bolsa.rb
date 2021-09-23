@@ -76,17 +76,17 @@ module BuscaCotacao
       ticker_str = ticker_str.gsub('.', '-')
       ticker_str += '.SA' if bolsa == 'BVMF'
 
-      api_host = 'apidojo-yahoo-finance-v1.p.rapidapi.com'
+      api_host = 'yh-finance.p.rapidapi.com'
 
       if data == Date.today || data.nil?
-        url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes?region=US&lang=en&symbols=#{ticker_str}"
+        url = "https://#{api_host}/market/v2/get-quotes?region=US&lang=en&symbols=#{ticker_str}"
         json_response = Utils.fetch_rapidapi_json(url, api_host)
         result = json_response['quoteResponse']['result']
         return result[0]['regularMarketPrice'].to_f unless result.empty?
       else
         from_data = data.to_time.to_i
         to_data = (data + 1.day).to_time.to_i
-        url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
+        url = "https://#{api_host}/stock/get-histories?region=US&symbol=#{ticker_str}&from=#{from_data}&to=#{to_data}&events=div&interval=1d"
         Rails.logger.info "BuscaBolsa: Chamando #{url}"
         json_response = Utils.fetch_rapidapi_json(url, api_host)
         if json_response['chart']['result'].nil?

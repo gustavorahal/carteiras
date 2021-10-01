@@ -18,12 +18,23 @@ class OperacoesController < ApplicationController
     @operacao = Operacao.new secure_params
     authorize @operacao
 
-    if on_create_valores_ok?
-      if @operacao.save
-        redirect_to carteira_operacoes_path carteira_id: params[:carteira_id]
-      else
-        render 'new'
+    if secure_params[:quantidade].blank? && secure_params[:valor_unit].blank?
+      flash.alert = "Quantidade OU valor unitario precisam ser especificados"
+      render 'new' and return
+    elsif secure_params[:valor].present?
+      valor_unit = secure_params[:valor_unit]
+      quantidade = secure_params[:quantidade]
+      valor = secure_params[:valor]
+
+      if valor_unit.present? && quantidade.blank?
+        @operacao.quantidade = valor.to_f / valor_unit.to_f
+      elsif quantidade.present? && valor_unit.blank?
+        @operacao.valor_unit = valor.to_f / quantidade.to_f
       end
+    end
+
+    if @operacao.save
+      redirect_to carteira_operacoes_path(carteira_id: params[:carteira_id]), notice: "Operação criada com sucesso!"
     else
       render 'new'
     end
@@ -41,7 +52,7 @@ class OperacoesController < ApplicationController
     authorize @operacao
 
     if @operacao.update(secure_params)
-      redirect_to carteira_operacoes_path carteira_id: params[:carteira_id],
+      redirect_to carteira_operacoes_path(carteira_id: params[:carteira_id]),
                                           notice: "Operação atualizada com sucesso!"
     else
       render 'edit'
@@ -49,26 +60,6 @@ class OperacoesController < ApplicationController
   end
 
   private
-
-  def on_create_valores_ok?
-    if secure_params[:quantidade].blank? && secure_params[:valor_unit].blank?
-      flash.alert = "Quantidade OU valor unitario precisam ser especificados"
-
-      false
-    elsif secure_params[:valor].present?
-      valor_unit = secure_params[:valor_unit]
-      quantidade = secure_params[:quantidade]
-      valor = secure_params[:valor]
-
-      if valor_unit.present? && quantidade.blank?
-        @operacao.quantidade = valor.to_f / valor_unit.to_f
-      elsif quantidade.present? && valor_unit.blank?
-        @operacao.valor_unit = valor.to_f / quantidade.to_f
-      end
-
-      true
-    end
-  end
 
   def set_vars
     @carteira = Carteira.find params[:carteira_id]

@@ -1,9 +1,9 @@
 
 <% flash2type = { 'alert' => 'danger', 'notice' => 'success' } %>
 
-<% flash.map do |name, msg| %>
-  <div class="alert alert-<%= flash2type[name] %> alert-dismissable">
-    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+<% flash.each do |name, msg| %>
+  <div class="alert alert-<%= flash2type[name] %> alert-dismissable fade show" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <%= msg %>
   </div>
 <% end %>

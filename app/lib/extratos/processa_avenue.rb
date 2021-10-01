@@ -21,7 +21,10 @@ module Extratos
     end
 
     def self.resgate?(texto)
-      nil
+      # Exemplo: Retirada de c/c - Ted
+      regex_resgate = %r{Retirada de c/c - Ted}
+      match = regex_resgate.match(texto)
+      match ? true : false
     end
 
     def self.aporte?(texto)

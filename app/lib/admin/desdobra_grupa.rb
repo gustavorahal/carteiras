@@ -41,7 +41,7 @@ module Admin
       #
       # É necessário marcar como montagem e desmontagem senão o valor de calculo do preço_medio
       # pós desdobramento não ficaria correto. Precisamos de fato recomeçar
-      posicao_ativo = PosicaoAtivo.new(carteira, ativo, Date.today)
+      posicao_ativo = PosicaoAtivo.new(carteira, ativo, data)
       preco_medio = posicao_ativo.preco_medio
       quantidade = posicao_ativo.quantidade
       if quantidade.zero?

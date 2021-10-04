@@ -28,15 +28,10 @@
         </td>
       </tr>
 
-      <% if corretora_nome == 'XP' %>
-        <!-- Sort por tamanho de posição é o padrão de display na XP -->
-        <% posicao_ativos_sorted = posicao_ativos.sort_by { |pa| pa.valor_em_brl }.reverse %>
-      <% elsif corretora_nome == 'Vitreo' || corretora_nome == 'Avenue' %>
-        <!-- Sort alfabetico é o padrão de display na Vitreo, Avenue tanto faz então deixamos alfabetico tb -->
-        <% posicao_ativos_sorted = posicao_ativos.sort_by { |pa| pa.ativo.nome } %>
-      <% else %>
-        <% posicao_ativos_sorted = posicao_ativos %>
-      <% end %>
+      <!-- Sort alfabetico é o padrão de display na Vitreo, Avenue tanto faz então deixamos alfabetico tb.
+      Na XP na tela da Carteira e' por tamanho de posicao porem na planilha de Historico da carteira que usamos
+      para bater os valores, e por ordem alfabetica portanto vamos deixar tudo por ordem alfabetica -->
+      <% posicao_ativos_sorted = posicao_ativos.sort_by { |pa| pa.ativo.nome } %>
 
       <% posicao_ativos_sorted.each do |posicao_ativo| %>
         <% ativo = posicao_ativo.ativo %>

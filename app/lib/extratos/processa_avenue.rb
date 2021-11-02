@@ -24,7 +24,7 @@ module Extratos
       # Exemplos:
       # Retirada de c/c - Ted
       # Transferência para conta Bancária
-      regex_resgate = %r{[Retirada de c/c - Ted|Transferência para conta Bancária]}
+      regex_resgate = %r{(Retirada de c/c - Ted)|(Transferência para conta Bancária)}
       match = regex_resgate.match(texto)
       match ? true : false
     end
@@ -36,7 +36,6 @@ module Extratos
       match = regex_aporte.match(texto)
       match ? true : false
     end
-
 
   end
 end

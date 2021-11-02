@@ -2,26 +2,34 @@ require 'test_helper'
 
 class ProcessaResgateTest < ActiveSupport::TestCase
   test "avenue: processa resgate da conta BRL" do
-    _test_processa_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2021,9,14),-15804.73
+    _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2021,9,14),-15804.73
+    _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2021,6,24),30.28, false
   end
 
   test "avenue: processa transferencia da conta inventimento para banking" do
-    _test_processa_retirada :avenue_usd, file_path('extrato_avenue_usd.csv'), Date.new(2021,11,2), -14.69
+    _test_retirada :avenue_usd, file_path('extrato_avenue_usd.csv'), Date.new(2021,11,2), -14.69
+    # testa se nao estamos processando mais do que deveriamos (greedy match)
+    _test_retirada :avenue_usd, file_path('extrato_avenue_usd.csv'), Date.new(2021,8,13), 3.10, false
   end
 
   #
   # Private
   #
 
-  def _test_processa_retirada(cc_symbol, arquivo_import, data, valor)
+  def _test_retirada(cc_symbol, arquivo_import, data, valor, match = true)
     cc = conta_correntes cc_symbol
     Extratos::Importa.importar cc, arquivo_import
     Extratos::Processa.processar cc
 
-    assert Movimentacao.find_by(carteira: cc.carteira,
-                                corretora: cc.corretora,
-                                data: data,
-                                valor: valor).present?
+    result = Movimentacao.find_by(carteira: cc.carteira,
+                                  corretora: cc.corretora,
+                                  data: data,
+                                  valor: valor).present?
+    if match
+      assert result.present?
+    else
+      assert result.blank?
+    end
   end
 
 end

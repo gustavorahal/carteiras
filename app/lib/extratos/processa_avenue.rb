@@ -21,8 +21,10 @@ module Extratos
     end
 
     def self.resgate?(texto)
-      # Exemplo: Retirada de c/c - Ted
-      regex_resgate = %r{Retirada de c/c - Ted}
+      # Exemplos:
+      # Retirada de c/c - Ted
+      # Transferência para conta Bancária
+      regex_resgate = %r{[Retirada de c/c - Ted|Transferência para conta Bancária]}
       match = regex_resgate.match(texto)
       match ? true : false
     end

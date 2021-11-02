@@ -6,7 +6,7 @@ class ProcessaAporteTest < ActiveSupport::TestCase
   end
 
   test "vitreo: processa aporte" do
-    _test_processa_aporte :vitreo_brl, file_path('extrato_vitreo.xlsx'), 110_000.00
+    _test_processa_aporte :vitreo_brl, file_path('extrato_vitreo.xlsx'), 25000.00
   end
 
   test "xp: processa aporte" do

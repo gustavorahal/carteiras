@@ -21,9 +21,10 @@ module Extratos
     end
 
     def self._corrige_valor(valor)
+      return valor if valor.is_a? Float
       # O valor no CSV vem no formato pt_BR e com prefixo da moeda
       # Remover moeda e converter para en_US
-      return valor.gsub('U$ ', '').gsub('R$ ', '').gsub('.', '').gsub(',', '.').to_f
+      valor.gsub('U$ ', '').gsub('R$ ', '').gsub('.', '').gsub(',', '.').to_f
     end
 
     def self.formato_correto?(hr)

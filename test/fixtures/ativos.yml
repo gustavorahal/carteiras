@@ -27,11 +27,23 @@ bpan4:
   moeda_negociacao: BRL
   descricao: Banco PAN
 
+bpac11:
+  nome: BPAC11
+  tipo: 1
+  moeda_negociacao: BRL
+  descricao: Banco BTG Pactual
+
 vale3:
   nome: VALE3
   tipo: acao
   moeda_negociacao: BRL
   descricao: Vale do Rio Doce
+
+petr4:
+  nome: PETR4
+  tipo: 1
+  moeda_negociacao: BRL
+  descricao: Petrobras
 
 gndi3:
   nome: GNDI3
@@ -44,6 +56,12 @@ rbrf11:
   tipo: fii
   moeda_negociacao: BRL
   descricao: RBRF11
+
+rbrr11:
+  nome: RBRR11
+  tipo: fii
+  moeda_negociacao: BRL
+  descricao: RBRR11
 
 dis:
   nome: DIS

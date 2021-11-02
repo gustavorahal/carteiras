@@ -1,4 +1,4 @@
-<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.corretora.nome} (#{@conta_corrente.moeda}) de carteira #{@carteira.nome} em #{display_data @data}" %>
+<%= render 'common/titulo_pagina', titulo: "Conta Corrente #{@conta_corrente.nome} de carteira #{@carteira.nome} em #{display_data @data}" %>
 
 <h6>Saldo <%= display_moeda @conta_corrente.saldo(@data), moeda: @conta_corrente.moeda %></h6>
 

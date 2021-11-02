@@ -9,18 +9,19 @@
     <th>Data</th>
     <th>Valor</th>
     <th>Acumulado</th>
-    <th>Corretora</th>
+    <th>Conta Corrente</th>
   </tr>
   </thead>
   <tbody>
   <% acumulado = 0 %>
   <% @movimentacoes.each do |movimentacao| %>
     <% acumulado += movimentacao.valor %>
+    <% cc = movimentacao.extrato.conta_corrente %>
     <tr>
       <td><%= display_data movimentacao.data %></td>
       <td><%= display_moeda movimentacao.valor, moeda: movimentacao.moeda %></td>
       <td><%= display_moeda acumulado, moeda: movimentacao.moeda %></td>
-      <td><%= movimentacao.corretora.nome %></td>
+      <td><%= link_to cc.nome, carteira_conta_corrente_path(@carteira, cc) %></td>
     </tr>
   <% end %>
   </tbody>

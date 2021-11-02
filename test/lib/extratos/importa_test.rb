@@ -5,27 +5,14 @@ class ImportaTest < ActiveSupport::TestCase
     cc = conta_correntes :avenue_brl
     Extratos::Importa.importar cc, file_path('extrato_avenue_brl.csv')
 
-    assert Extrato.find_by(conta_corrente: cc,
-                           movimentacao: "2021-06-24",
-                           liquidacao: "2021-06-25",
-                           descricao: 'IOF sob remessa R$7969.72 a R$ 5.0058',
-                           valor: -30.28).present?
-    assert Extrato.find_by(conta_corrente: cc,
-                           movimentacao: "2021-06-24",
-                           liquidacao: "2021-06-25",
-                           descricao: 'Remessa de Câmbio Padrão: $1592.1',
-                           valor: -7969.72).present?
+    assert cc.saldo(Date.today) == 0.00
   end
 
   test 'importa extrato avenue USD' do
     cc = conta_correntes :avenue_usd
     Extratos::Importa.importar cc, file_path('extrato_avenue_usd.csv')
 
-    assert Extrato.find_by(conta_corrente: cc,
-                           movimentacao: "2021-08-13",
-                           liquidacao: "2021-08-13",
-                           descricao: 'Retenção Impostos sobre Dividendos AAPL. APPLE INC',
-                           valor: -0.93).present?
+    assert cc.saldo(Date.today) == 0.00
   end
 
   test 'importa extrato XP' do

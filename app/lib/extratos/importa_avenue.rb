@@ -2,7 +2,7 @@ module Extratos
   class ImportaAvenue < ImportaBase
 
     def self.importar(conta_corrente, file_path)
-      sheet = CSV.table(file_path, headers: true, liberal_parsing: true)
+      sheet = CSV.table(file_path, headers: true, col_sep: ';')
       raise StandardError, 'Extrato em formato inválido' unless formato_correto?(sheet.headers)
 
       i = 0

@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ProcessaAporteTest < ActiveSupport::TestCase
   test "avenue: processa aporte" do
-    _test_processa_aporte :avenue_brl, file_path('extrato_avenue_brl.csv'), 8000
+    _test_processa_aporte :avenue_brl, file_path('extrato_avenue_brl.csv'), 2000
   end
 
   test "vitreo: processa aporte" do

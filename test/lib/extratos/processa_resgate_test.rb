@@ -2,8 +2,7 @@ require 'test_helper'
 
 class ProcessaResgateTest < ActiveSupport::TestCase
   test "avenue: processa resgate da conta BRL" do
-    _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2021,9,14),-15804.73
-    _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2021,6,24),30.28, false
+    _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2020,9,14),-20000
   end
 
   test "avenue: processa transferencia da conta inventimento para banking" do

@@ -29,7 +29,8 @@ class Movimentacao < ApplicationRecord
   end
 
   def self.total
-    sum :valor
+    # aproveitamos o mtodo mes_a_mes porque o mesmo ja leva em consideracao diferentes moedas
+    self.mes_a_mes.values.sum
   end
 
 end

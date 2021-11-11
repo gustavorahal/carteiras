@@ -12,7 +12,7 @@ class Movimentacao < ApplicationRecord
     resultado = {}
     query.each do |row|
       if row.moeda == 'USD'
-        valor = row.valor * CotacaoService.moedas('USDBRL', row.data)
+        valor = row.valor * CotacaoService.moedas('USDBRL', row.data).valor_unit
       else
         valor = row.valor
       end

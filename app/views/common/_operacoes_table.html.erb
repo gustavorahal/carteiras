@@ -34,7 +34,7 @@
       <td><%= oper.operacao.capitalize %></td>
       <td><%= oper.mon_ou_des %></td>
       <td><%= display_numero oper.quantidade %></td>
-      <td><%= display_moeda oper.valor_unit, moeda: moeda_negociacao %></td>
+      <td><%= display_moeda oper.valor_unit, moeda: moeda_negociacao, max_precision: true %></td>
       <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: moeda_negociacao, cores: true %></td>
       <td><%= display_moeda oper.usdbrl %></td>
       <td>

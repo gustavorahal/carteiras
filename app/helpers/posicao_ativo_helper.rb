@@ -12,7 +12,7 @@ module PosicaoAtivoHelper
   def display_preco_atual(posicao_ativo)
     cotacao = posicao_ativo.cotacao
     ativo = posicao_ativo.ativo
-    html_str = display_moeda cotacao.valor_unit, moeda: ativo.moeda_negociacao
+    html_str = display_moeda cotacao.valor_unit, moeda: ativo.moeda_negociacao, max_precision: true
     html_str += " <small>(#{display_data cotacao.data})</small>".html_safe unless cotacao.data == Date.today
 
     html_str

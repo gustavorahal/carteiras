@@ -31,6 +31,7 @@ module BuscaCotacao
         'Tesouro IPCA+ com Juros Semestrais 2050' => { tipo: 'NTN-B', codigo: 'NTN-B 150850' },
         'Tesouro IPCA+ com Juros Semestrais 2055' => { tipo: 'NTN-B', codigo: 'NTN-B 150555' },
         'Tesouro Prefixado 2023' => { tipo: 'LTN', codigo: 'LTN 010123' },
+        'Tesouro Prefixado 2024' => { tipo: 'LTN', codigo: 'LTN 010724' },
         'Tesouro Prefixado 2025' => { tipo: 'LTN', codigo: 'LTN 010125' },
         'Tesouro Prefixado com Juros Semestrais 2029' => { tipo: 'NTN-F', codigo: 'NTN-F 010129' },
         'Tesouro Selic 2023' => { tipo: 'LFT', codigo: 'LFT 010323' },

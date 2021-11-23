@@ -45,6 +45,7 @@ class Operacao < ApplicationRecord
 
     def ajusta_quantidade
       if (V? && quantidade.positive?) ||
+         (S? && quantidade.positive?) ||
          (C? && quantidade.negative?)
         self.quantidade *= -1
       end
@@ -64,7 +65,7 @@ class Operacao < ApplicationRecord
     def ajusta_mon_ou_des
       quant_total = self.class.quantidade_total(carteira, ativo, data)
 
-      if C? && quant_total.zero?
+      if (C? || S?) && quant_total.zero?
         self.mon_ou_des = 'M'
       elsif V? && quant_total == (quantidade * -1)
         self.mon_ou_des = 'D'

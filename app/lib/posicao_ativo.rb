@@ -102,7 +102,7 @@ class PosicaoAtivo
   # Q & A
   # -----
   #
-  # 1. Porque pegar apenas operações de compra? não teria que incluir pequenas vendas desde a data
+  # 1. Porque pegar apenas operações de compra (ou short)? não teria que incluir pequenas vendas desde a data
   # de montagem?
   #  R. se desejo auferir os ganhos, o fato de ter vendido por 12 quando paguei 10, por exemplo,
   #  não deveria aumentar o preço médio para 11. O preço médio de compra continuaria 10 enquanto

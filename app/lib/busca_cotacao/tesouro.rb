@@ -3,7 +3,13 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 module BuscaCotacao
   class Tesouro
     def self.urls
-      { '2021': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/462:100856',
+      { '2022': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/484:19177',
+                  'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/483:103948',
+                  'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/481:84520',
+                  'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/485:804808',
+                  'NTN-B Princ' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/486:137779',
+                  'NTN-F' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/482:39392' },
+        '2021': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/462:100856',
                   'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/461:83786',
                   'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/463:41358',
                   'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/466:75189',

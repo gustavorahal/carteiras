@@ -32,6 +32,7 @@ module BuscaCotacao
 
     def self.titulos
       { 'Tesouro IPCA+ 2024' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150824' },
+        'Tesouro IPCA+ 2026' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150826' },
         'Tesouro IPCA+ 2035' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150535' },
         'Tesouro IPCA+ com Juros Semestrais 2026' => { tipo: 'NTN-B', codigo: 'NTN-B 150826' },
         'Tesouro IPCA+ com Juros Semestrais 2050' => { tipo: 'NTN-B', codigo: 'NTN-B 150850' },

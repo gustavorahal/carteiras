@@ -65,9 +65,17 @@ class Operacao < ApplicationRecord
     def ajusta_mon_ou_des
       quant_total = self.class.quantidade_total(carteira, ativo, data)
 
-      if (C? || S?) && quant_total.zero?
+      if C? && quant_total.negative? && quant_total == (quantidade * -1)
+        # se estamos comprando uma quantidade equivalente ao que
+        # temos de negativo, e porque estamos desmontando uma operacao de short
+        self.mon_ou_des = 'D'
+      elsif (C? || S?) && quant_total.zero?
+        # se estamos vendendo ou fazendo um short, e nao temos nada do ativo
+        # estamos certamente montando uma posicao
         self.mon_ou_des = 'M'
       elsif V? && quant_total == (quantidade * -1)
+        # se estamos vendendo uma quantidade equivalente ao que
+        # temos, e porque estamos desmontando uma operacao
         self.mon_ou_des = 'D'
       end
 

@@ -71,4 +71,38 @@ class OperacaoTest < ActiveSupport::TestCase
     assert Extrato.find_by(descricao: descricao_operacao(op),
                                temporario: true, valor: valor_novo)
   end
+
+  test "operacao de Short, verificar montagem" do
+    op = Operacao.create(data: Date.today - 1,
+                         operacao: 'S',
+                         quantidade: -100, valor_unit: 10,
+                         ativo: @ativo,
+                         carteira: @carteira,
+                         corretora: @corretora)
+
+    assert op.mon_ou_des == 'M'
+  end
+
+  test "operacao de desmontagem de Short" do
+    # montagem
+    op = Operacao.create(data: Date.today - 1,
+                         operacao: 'S',
+                         quantidade: -100, valor_unit: 10,
+                         ativo: @ativo,
+                         carteira: @carteira,
+                         corretora: @corretora)
+
+    assert op.mon_ou_des == 'M'
+
+    # desmontagem
+    op = Operacao.create(data: Date.today,
+                         operacao: 'C',
+                         quantidade: 100, valor_unit: 10,
+                         ativo: @ativo,
+                         carteira: @carteira,
+                         corretora: @corretora)
+
+    assert op.mon_ou_des == 'D'
+  end
+
 end

@@ -1,4 +1,5 @@
 require 'open-uri' # para 'open' não conflitar com Kernel.open
+require 'net/http'
 
 module BuscaCotacao
   class Moeda

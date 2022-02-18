@@ -70,7 +70,7 @@ class CotacaoServiceTest < ActiveSupport::TestCase
   end
 
   test 'ativo_suportado?: ativo que existe' do
-    suportado = CotacaoService.ativo_suportado?('ITSA4', 'BRL', 'acao')
+    suportado = CotacaoService.ativo_suportado?('AAPL', 'USD', 'acao')
 
     assert suportado, true
   end

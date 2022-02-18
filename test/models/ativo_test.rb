@@ -11,7 +11,7 @@ class AtivoTest < ActiveSupport::TestCase
   end
 
   test "ativo suportado" do
-    ativo = Ativo.new(nome: 'ITSA4', tipo: 'acao', moeda_negociacao: 'BRL')
+    ativo = Ativo.new(nome: 'AAPL', tipo: 'acao', moeda_negociacao: 'USD')
     ativo.save!
   end
 

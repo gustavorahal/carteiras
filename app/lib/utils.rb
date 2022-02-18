@@ -36,8 +36,8 @@ class Utils
   end
 
 
-  def self.fetch_rapidapi_json(service_url, rapidapi_host)
-    uri = URI(service_url)
+  def self.fetch_rapidapi_json(url, rapidapi_host)
+    uri = URI(url)
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -48,7 +48,9 @@ class Utils
     request['x-rapidapi-key'] = 'ENV.fetch("RAPIDAPI_KEY")'
 
     response = http.request(request)
-    JSON.parse(response.read_body)
+    if response.read_body.present?
+      return JSON.parse(response.read_body)
+    end
   end
 
 end

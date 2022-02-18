@@ -1,19 +1,15 @@
 require 'test_helper'
 
 class BuscaBolsaTest < ActiveSupport::TestCase
-  test "busca cotacao BPAN4 marketstack" do
-    ticker = 'BPAN4'
-    data = Date.new(2020,4,22)
 
-    preco = BuscaCotacao::Bolsa._api_marketstack(ticker, data,'BVMF')
-    assert_equal 5.61, preco
+  test 'busca cotacao APPL hoje' do
+    preco = BuscaCotacao::Bolsa.busca("AAPL", nil, Date.today)
+    assert_kind_of Float, preco[0]
   end
 
-  test "busca cotacao BPAN4 yahoo finance" do
-    ticker = 'BPAN4'
-    data = Date.new(2020,4,22)
-
-    preco = BuscaCotacao::Bolsa._api_yahoo_finance(ticker, data,'BVMF')
-    assert_equal 5.61, preco
+  test 'busca cotacao APPL em data passada' do
+    preco = BuscaCotacao::Bolsa.busca("AAPL", nil, Date.new(2022,2,15))
+    assert_equal 172.79, preco[0]
   end
+
 end

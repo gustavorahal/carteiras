@@ -2,38 +2,15 @@ require 'open-uri' # para 'open' não conflitar com Kernel.open
 
 module BuscaCotacao
   class Tesouro
-    def self.urls
-      { '2022': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/484:19177',
-                  'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/483:103948',
-                  'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/481:84520',
-                  'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/485:804808',
-                  'NTN-B Princ' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/486:137779',
-                  'NTN-F' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/482:39392' },
-        '2021': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/462:100856',
-                  'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/461:83786',
-                  'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/463:41358',
-                  'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/466:75189',
-                  'NTN-B Princ' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/465:866272',
-                  'NTN-F' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/464:18443' },
-        '2020': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/444:79907',
-                  'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/446:74455',
-                  'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/442:38266',
-                  'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/445:803682',
-                  'NTN-B Princ' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/443:40624',
-                  'NTN-F' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/441:145250' },
-        '2019': { 'LFT' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/421:82660',
-                  'LTN' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/402:98996',
-                  'NTN-C' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/403:39498',
-                  'NTN-B' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/404:16583',
-                  'NTN-B Princ' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/405:864412',
-                  'NTN-F' => 'https://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo/406:73329' }
-      }
+
+    def self.get_url(ano, titulo_tipo)
+      "https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/sistd/#{ano}/#{titulo_tipo}_#{ano}.xls"
     end
 
     def self.titulos
-      { 'Tesouro IPCA+ 2024' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150824' },
-        'Tesouro IPCA+ 2026' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150826' },
-        'Tesouro IPCA+ 2035' => { tipo: 'NTN-B Princ', codigo: 'NTN-B Princ 150535' },
+      { 'Tesouro IPCA+ 2024' => { tipo: 'NTN-B_Principal', codigo: 'NTN-B Princ 150824' },
+        'Tesouro IPCA+ 2026' => { tipo: 'NTN-B_Principal', codigo: 'NTN-B Princ 150826' },
+        'Tesouro IPCA+ 2035' => { tipo: 'NTN-B_Principal', codigo: 'NTN-B Princ 150535' },
         'Tesouro IPCA+ com Juros Semestrais 2026' => { tipo: 'NTN-B', codigo: 'NTN-B 150826' },
         'Tesouro IPCA+ com Juros Semestrais 2050' => { tipo: 'NTN-B', codigo: 'NTN-B 150850' },
         'Tesouro IPCA+ com Juros Semestrais 2055' => { tipo: 'NTN-B', codigo: 'NTN-B 150555' },
@@ -57,9 +34,9 @@ module BuscaCotacao
 
       titulo_codigo = titulos[titulo][:codigo]
       titulo_tipo = titulos[titulo][:tipo]
-      ano_sym = data.year.to_s.to_sym
+      ano = data.year.to_s
 
-      arquivo_excel = _busca_arquivo_tesouro(urls[ano_sym][titulo_tipo], titulo_codigo, data.year)
+      arquivo_excel = _busca_arquivo_tesouro(get_url(ano, titulo_tipo), titulo_codigo, data.year)
       return nil unless arquivo_excel
 
       abre_xls = Roo::Spreadsheet.open(arquivo_excel, extension: :xls)
@@ -73,17 +50,17 @@ module BuscaCotacao
       loop do
         row = sheet.row(i)
         begin
-          data = row[0].to_date
+          row_data = row[0].to_date
         rescue Date::Error, NoMethodError
           # fim de arquivo
           break
         end
         valor = row[5] # PU Base Manhã -> é o que a XP usa
-        dados[data] = valor
+        dados[row_data] = valor
         i += 1
       end
 
-      dados
+      data.in?(dados.keys) ? dados : nil
     end
 
 
@@ -98,6 +75,8 @@ module BuscaCotacao
       nome_arquivo = "#{codigo.gsub(' ', '_')}_#{ano}.xls"
       Rails.logger.info "Baixando arquivo Tesouro para #{codigo} #{ano} em #{url}"
 
+      # Apesar de tentador, fazer o cache desse arquivo tem alcance limitado porque o mesmo
+      # e atualizado diariamente e nosso backend tb faz buscas diarios, tornando sem eficacia esse cache
       begin
         download = URI.parse(url).open
         IO.copy_stream(download, nome_arquivo)

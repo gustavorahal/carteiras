@@ -4,20 +4,6 @@ module BuscaCotacao
 
     # @return [Resultado]
     def self.tesouro(nome, data)
-      # DESABILITANDO, DEIXANDO COMO REFERÊNCIA CASO QUEIRA RETOMAR NUM FUTURO PROXIMO
-      # VAMOS DEIXAR MAIS BUSCAS ACONTECENDO NO BACKEND MESMO, PACIÊNCIA POR ORA
-      #
-      # Pela maneira como o Backend funciona, esta função faz algo
-      # atipico. Aproveitando que a busca é custosa (download de arquivo como dados de todo ano)
-      # e retorna informações de todos data, vamos aproveitar e atualizar
-      # informações para várias data
-      #
-      # dados = BuscaCotacao::Tesouro.busca ativo.nome, data
-      # dados.each do |data_api, preco|
-      #   cotacao = Cotacao.find_by(ativo_id: ativo.id, valor_unit: preco, data: data_api)
-      #   Cotacao.create!(ativo_id: ativo.id, valor_unit: preco, data: data_api, fonte: 'tesouro_gov') if cotacao.blank?
-      # end
-
       dados = BuscaCotacao::Tesouro.busca nome, data
       return if dados.nil?
 

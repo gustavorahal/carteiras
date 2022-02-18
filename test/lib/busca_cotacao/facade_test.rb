@@ -35,7 +35,7 @@ class FacadeTest < ActiveSupport::TestCase
     ativo = ativos(:itsa4)
     resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
 
-    assert_equal 10.19, resultado.preco
+    assert_kind_of Float, resultado.preco
     assert_equal data, resultado.data
     assert_equal ativo.nome, resultado.nome
   end

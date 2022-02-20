@@ -47,7 +47,9 @@
       <td><%= display_moeda extrato.valor, moeda: @conta_corrente.moeda, cores: true %></td>
       <td><%= display_moeda(extrato.saldo, moeda: @conta_corrente.moeda, cores: true) if extrato.saldo %></td>
       <td>
-        <% unless extrato.processado %>
+        <% if extrato.processado %>
+          ID <%= extrato.id %>
+        <% else %>
           <%= link_to 'Editar', edit_carteira_conta_corrente_extrato_path(@carteira, @conta_corrente, extrato) %>
           <%= render 'common/btn_delete', url: carteira_conta_corrente_extrato_path(@carteira, @conta_corrente, extrato), resource: extrato %>
         <% end %>

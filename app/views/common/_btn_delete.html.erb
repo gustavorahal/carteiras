@@ -4,7 +4,11 @@
 <% label = show_label ? 'Deletar' : '' %>
 <% url = local_assigns.fetch :url, false %>
 
-<%= link_to bootstrap_icon("x-square-fill") + " #{label}",
-            url, class: "btn btn-link #{size} text-danger", method: :delete,
-            data: { confirm: "Você tem certeza que deseja deletar \"#{resource.to_s}\"?" },
-            disabled: disabled %>
+<%= button_to bootstrap_icon("x-square-fill") + " #{label}",
+              url,
+              class: "btn btn-link #{size} text-danger",
+              method: :delete,
+              data: { "turbo-confirm": "Você tem certeza que deseja deletar \"#{resource.to_s}\"?",
+                      "confirm": "Você tem certeza que deseja deletar \"#{resource.to_s}\"?"},
+              disabled: disabled
+%>

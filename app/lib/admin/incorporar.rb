@@ -23,6 +23,8 @@ module Admin
         # Passo 1
         obs = "Incorporado a #{ativo_incorporadora.nome} à taxa #{taxa}"
         oper_desmontagem = Utils.desmonta_ativo(ativo_incorporado, carteira, obs, data)
+        # nesse caso nao 'e possivel fazer incorporacao se nao temos sucesso em desmontar
+        return nil if oper_desmontagem.blank?
 
         # Passo 2
         pa_incorporadora = PosicaoAtivo.new(carteira, ativo_incorporadora, data)

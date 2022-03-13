@@ -18,6 +18,9 @@ class IncorporarTest < ActiveSupport::TestCase
     Cotacao.create!(ativo: @ativo_incorporado,
                     valor_unit: 10,
                     data: @data1 - 10.days)
+    Cotacao.create!(ativo: @ativo_incorporado,
+                    valor_unit: 11,
+                    data: @data_incorporacao)
     Cotacao.create!(ativo: @ativo_incorporadora,
                     valor_unit: 100,
                     data: @data1 - 10.days)
@@ -28,7 +31,7 @@ class IncorporarTest < ActiveSupport::TestCase
   end
 
   test 'incorporar ativo A em B sendo que B ja existe na carteira' do
-    taxa = 5.26
+    taxa = 5.2436
     # Monta ativo_incorporado
     Operacao.create!(ativo: @ativo_incorporado, carteira: @carteira, corretora: @corretora, data: @data1,
                      valor_unit: 10, operacao: 'C', quantidade: 100, mon_ou_des: 'M')
@@ -45,16 +48,13 @@ class IncorporarTest < ActiveSupport::TestCase
     # Verificar
     ult_oper_ativo_incorporado = Operacao.where(ativo: @ativo_incorporado, carteira: @carteira).order(data: :desc).first
     assert_equal 'D', ult_oper_ativo_incorporado.mon_ou_des
-    # o preco medio na desmontagem deveria ser 15, conforme operacoes de compra acima
-    assert_equal 15, ult_oper_ativo_incorporado.valor_unit
     assert_equal 0, PosicaoAtivo.new(@carteira, @ativo_incorporado, @data_incorporacao).quantidade
 
     ult_oper_ativo_incorporadora = Operacao.where(ativo: @ativo_incorporadora, carteira: @carteira).order(data: :desc).first
     # como ja tinhamos ativo_incorporado na carteira, nao deveria ser uma operacao de montagem
     assert_not_equal 'M', ult_oper_ativo_incorporadora.mon_ou_des
-    # o preco medio na desmontagem deveria ser 15, conforme operacoes de compra acima
-    assert_equal 1052, ult_oper_ativo_incorporadora.quantidade
-    assert_equal 2052, PosicaoAtivo.new(@carteira, @ativo_incorporadora, @data_incorporacao).quantidade
+    assert_equal 1048, ult_oper_ativo_incorporadora.quantidade
+    assert_equal 2048, PosicaoAtivo.new(@carteira, @ativo_incorporadora, @data_incorporacao).quantidade
   end
 
   test 'incorporar ativo A em B sendo que B NAO existe na carteira' do
@@ -72,10 +72,8 @@ class IncorporarTest < ActiveSupport::TestCase
     ult_oper_ativo_incorporadora = Operacao.where(ativo: @ativo_incorporadora, carteira: @carteira).order(data: :desc).first
     # como ja tinhamos ativo_incorporado na carteira, nao deveria ser uma operacao de montagem
     assert_equal 'M', ult_oper_ativo_incorporadora.mon_ou_des
-    # o preco medio na desmontagem deveria ser 15, conforme operacoes de compra acima
     assert_equal 1000, ult_oper_ativo_incorporadora.quantidade
     assert_equal 1000, PosicaoAtivo.new(@carteira, @ativo_incorporadora, @data_incorporacao).quantidade
-
   end
 
 end

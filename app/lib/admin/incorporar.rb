@@ -22,17 +22,19 @@ module Admin
       Operacao.transaction do
         # Passo 1
         obs = "Incorporado a #{ativo_incorporadora.nome} à taxa #{taxa}"
-        oper_desmontagem = Utils.desmonta_ativo(ativo_incorporado, carteira, obs, data)
+        cotacao_hoje = CotacaoService.cotacao(ativo_incorporado, data)
+        oper_desmontagem = Utils.desmonta_ativo(ativo_incorporado, carteira, obs, data, valor_unit: cotacao_hoje.valor_unit)
         # nesse caso nao 'e possivel fazer incorporacao se nao temos sucesso em desmontar
         return nil if oper_desmontagem.blank?
 
         # Passo 2
         pa_incorporadora = PosicaoAtivo.new(carteira, ativo_incorporadora, data)
         quant = oper_desmontagem.quantidade * taxa
-        corretora = oper_desmontagem.corretora
-        # arredondar para baixo, visto que nao teria sentido "ganhar" mais acoes.
+        # Arredondar para baixo, visto que nao teria sentido "ganhar" mais acoes com o arredondamento pora cima
         # Em geral, o restante volta em forma de dinheiro na CC da corretora
-        quant = quant.floor
+        # Como op de desmontagem 'e quant negativo, tornar positivo antes de floor usando 'abs'
+        quant = quant.abs.floor
+        corretora = oper_desmontagem.corretora
         obs = "Incorporação de #{ativo_incorporado.nome} à taxa #{taxa}"
         cotacao_hoje = CotacaoService.cotacao(ativo_incorporadora, data)
         Utils.compra_ativo(ativo_incorporadora, carteira, corretora, cotacao_hoje.valor_unit, quant, obs, data, montagem: pa_incorporadora.quantidade.zero?)

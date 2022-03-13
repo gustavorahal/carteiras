@@ -3,18 +3,18 @@ module Admin
     # Desmonta, ou seja, zera posicoes no ativo dado
     #
     # @return [Operacao]: operacao de desmontagem
-    def self.desmonta_ativo(ativo, carteira, observacao, data)
+    def self.desmonta_ativo(ativo, carteira, observacao, data, valor_unit: false)
       posicao_ativo = PosicaoAtivo.new(carteira, ativo, data)
       if posicao_ativo.quantidade.zero?
         Rails.logger.info "Quantidade de #{ativo.nome} é ZERO. Não há o que desmontar"
         return nil
       end
-      preco_medio = posicao_ativo.preco_medio
+      valor_unit = posicao_ativo.preco_medio unless valor_unit.present?
       quantidade = posicao_ativo.quantidade
       corretora = _ultima_oper_corretora(ativo, carteira)
 
       Operacao.create!(ativo: ativo, carteira: carteira, corretora: corretora, data: data,
-                       valor_unit: preco_medio, operacao: 'V', quantidade: quantidade, mon_ou_des: 'D',
+                       valor_unit: valor_unit, operacao: 'V', quantidade: quantidade, mon_ou_des: 'D',
                        observacao: observacao, operacao_sys: true)
     end
 

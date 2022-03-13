@@ -15,3 +15,9 @@ two_processado:
   processado: true
   valor: 2.0
 
+vitreo_usd_one:
+  conta_corrente: vitreo_usd
+  liquidacao: 2020-07-13
+  movimentacao: 2020-07-13
+  descricao: Dividendos de AAPL
+  valor: 1.5

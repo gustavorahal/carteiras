@@ -51,6 +51,7 @@ class Ativo < ApplicationRecord
 
     unless CotacaoService.ativo_suportado?(nome, moeda_negociacao, tipo)
       errors.add(:base, "Ativo não é suportado porque não conseguimos obter cotações")
+      Rails.logger.error "Ativo não é suportado porque não conseguimos obter cotações"
       throw :abort
     end
   end

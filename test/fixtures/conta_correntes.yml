@@ -3,6 +3,11 @@ vitreo_brl:
   moeda: 'BRL'
   carteira: example_growth
 
+vitreo_usd:
+  corretora: vitreo
+  moeda: 'USD'
+  carteira: example_growth
+
 xp_brl:
   corretora: xp
   moeda: 'BRL'

@@ -1,11 +1,7 @@
 <div class="row">
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <% Utils.meses_passados_ano(@carteira.operacoes.limit(1).take.data).each do |ultimo_dia| %>
-        <li class="breadcrumb-item">
-          <%= link_to l(ultimo_dia, format: '%b'), request.params.merge(data: ultimo_dia.strftime('%Y-%m-%d')) %>
-        </li>
-      <% end %>
-    </ol>
-  </nav>
+  <div class="btn-group" role="group" aria-label="Ultimos meses">
+    <% Utils.meses_passados_ano(Date.today).each do |ultimo_dia| %>
+      <%= link_to l(ultimo_dia, format: '%b'), request.params.merge(data: ultimo_dia.strftime('%Y-%m-%d')), class: "btn btn-outline-primary" %>
+    <% end %>
+  </div>
 </div>

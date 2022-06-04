@@ -1,7 +1,7 @@
 module ApplicationHelper
 
   def display_numero(numero)
-    number_to_human numero, precision: 10
+    number_with_delimiter numero
   end
 
   def display_data(data)

@@ -62,7 +62,16 @@ class Rentabilidade
       query = query.where(corretora: corretora)
     end
 
-    query.sum(:valor)
+    total_mes = 0
+    query.each do |mov|
+      if mov.moeda == 'USD'
+        total_mes += mov.valor * CotacaoService.moedas('USDBRL', mov.data).valor_unit
+      else
+        total_mes += mov.valor
+      end
+    end
+
+    total_mes
   end
 
   def _rentabilidade(posicao, corretora)

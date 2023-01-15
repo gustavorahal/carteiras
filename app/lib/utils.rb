@@ -23,16 +23,17 @@ class Utils
   end
 
   # Retorna uma lista com as datas do ultimo dia dos ultimos meses
-  # do ano especificado
   #
   # @param data: uma data qualquer a partir da qual será calculado a lista
-  def self.meses_passados_ano(data)
-    lista = []
-    (1..data.month - 1).each do |mes_num|
-      lista.push Date.new(data.year, mes_num).end_of_month
+  def self.ultimos_meses(data)
+    current_date = data.months_ago(1).end_of_month
+    date_range = []
+    6.times do
+      date_range.push current_date
+      current_date = current_date.months_ago(1).end_of_month
     end
 
-    lista
+    date_range.reverse
   end
 
 

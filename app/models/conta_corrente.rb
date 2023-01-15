@@ -14,7 +14,7 @@ class ContaCorrente < ApplicationRecord
   end
 
   def extratos_data(data)
-    extratos.where("movimentacao::date <= '#{data}'").order(movimentacao: :desc, created_at: :desc)
+    extratos.where("movimentacao::date <= '#{data}'").order(movimentacao: :desc)
   end
 
   def self.saldo_cc_brl(carteira, data, corretora = nil)

@@ -19,8 +19,8 @@ class ImportaTest < ActiveSupport::TestCase
     cc = conta_correntes :xp_brl
     Extratos::Importa.importar cc, file_path('extrato_xp.xlsx')
 
-    assert Extrato.find_by(conta_corrente: cc, descricao: 'TED BCO 341 AGE 8294 CTA 44634 - RETIRADA EM C/C', valor: -3029.50).present?
-    assert Extrato.find_by(conta_corrente: cc, descricao: 'RENDIMENTOS DE CLIENTES VILG11 S/ 27', valor: 16.20).present?
+    assert Extrato.find_by(conta_corrente: cc, descricao: 'DEBITO REF.TAXA DE REMUNERAÇÃO-BTC BRIVVBCTF001', valor: -226.51).present?
+    assert Extrato.find_by(conta_corrente: cc, descricao: 'RENDIMENTOS DE CLIENTES HGCR11 S/            190', valor: 228.00).present?
   end
 
   test 'importa extrato Vitreo' do

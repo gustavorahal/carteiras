@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class ImportaTest < ActiveSupport::TestCase
+  setup do
+    skip "Os fixtures privados de extratos de corretoras foram removidos do repositorio publico."
+  end
+
   test "importa extrato avenue BRL" do
     cc = conta_correntes :avenue_brl
     Extratos::Importa.importar cc, file_path('extrato_avenue_brl.csv')

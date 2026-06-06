@@ -1,6 +1,10 @@
 require 'application_system_test_case'
 
 class ImportaExtratosTest < ApplicationSystemTestCase
+  setup do
+    skip "Os fixtures privados de extratos de corretoras foram removidos do repositorio publico."
+  end
+
   test 'importa extrato Vitreo' do
     _test_importa_extrato(:vitreo_brl, 'extrato_vitreo.xslx',
                           ['Pagamento de Frações CSAN3',

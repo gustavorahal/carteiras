@@ -46,7 +46,7 @@ class Utils
 
     request = Net::HTTP::Get.new(uri)
     request['x-rapidapi-host'] = rapidapi_host
-    request['x-rapidapi-key'] = 'ENV.fetch("RAPIDAPI_KEY")'
+    request['x-rapidapi-key'] = ENV.fetch("RAPIDAPI_KEY")
 
     response = http.request(request)
     if response.read_body.present?

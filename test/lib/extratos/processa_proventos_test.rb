@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class ProcessaProventosTest < ActiveSupport::TestCase
+  setup do
+    skip "Os fixtures privados de extratos de corretoras foram removidos do repositorio publico."
+  end
+
   test "vitreo: processa dividendo" do
     proventos = _test_processa_proventos :vitreo_brl, file_path('extrato_vitreo.xlsx')
     assert proventos.find_by(ativo: ativos(:petr4), evento: 'dividendo', valor_liquido: 321.98).present?

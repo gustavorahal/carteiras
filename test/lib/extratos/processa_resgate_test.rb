@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class ProcessaResgateTest < ActiveSupport::TestCase
+  setup do
+    skip "Os fixtures privados de extratos de corretoras foram removidos do repositorio publico."
+  end
+
   test "avenue: processa resgate da conta BRL" do
     _test_retirada :avenue_brl, file_path('extrato_avenue_brl.csv'), Date.new(2020,9,14),-20000
   end

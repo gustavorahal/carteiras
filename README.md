@@ -1,5 +1,19 @@
 # Carteiras
 
+## About This Project
+
+Carteiras is a personal Rails application I built and used between 2020 and 2023 to track investment portfolios for myself and close family members. It was created as a practical tool for consolidating brokerage activity, cash balances, portfolio positions, dividends, taxes, and performance across different accounts and asset classes.
+
+This was not built as a commercial product or professional financial platform. It was a long-running personal software project: useful enough to support real financial tracking workflows, but developed primarily for my own needs, with the tradeoffs and rough edges that come from a tool built incrementally over several years.
+
+The application includes features for registering assets, brokers, portfolios, operations, cash movements, dividends and other proceeds; importing brokerage statements; calculating current positions and historical profitability; comparing portfolio allocation against reference targets; fetching market prices from external sources; and supporting tax-related views for investment operations.
+
+The public version of this repository has been sanitized to remove private financial data, credentials, and personal statement fixtures.
+
+## Historical Project Notes
+
+The notes below are preserved from the original personal project documentation.
+
 Guia incompleto, mas quase
 
 ## Sugestão de setup em produção para Ubuntu 20.04
@@ -109,11 +123,11 @@ DATABASE_URL=postgresql://carteiras:PASSWORD@127.0.0.1/carteiras_production
 SMTP_USERNAME=XXX
 SMTP_PASSWORD=XXX
 
-RAILS_MASTER_KEY=ohai
-SECRET_KEY_BASE=1234567890
+RAILS_MASTER_KEY=<rails-master-key>
+SECRET_KEY_BASE=<secret-key-base>
 
-YAHOO_FINANCE_ACCESS_KEY=XXX
-MARKETSTACK_ACCESS_KEY=XXXX
+RAPIDAPI_KEY=<rapidapi-key>
+MARKETSTACK_ACCESS_KEY=<marketstack-key>
 
 ```
 
@@ -141,4 +155,3 @@ um servidor SMTP, seja em servidor próprio ou usando um serviço em Cloud. Reco
 Sidekiq é uma biblioteca para Ruby/Rails que permite a execução de jobs de maneira asyncrona em segundo plano
 e para funcionar usa o [redis](http://redis.io) como "backend". No momento o sidekiq é usado para interagir com a API do
 MailChimp para adição/remoção de emails da lista de divulgação.
-

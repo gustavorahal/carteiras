@@ -43,7 +43,7 @@ module BuscaCotacao
         raise StandardError, "Erro buscando ticker #{ticker} em #{data}: #{erro}"
       end
 
-      api_response['close']
+      Utils.decimal(api_response['close'])
     end
 
   end

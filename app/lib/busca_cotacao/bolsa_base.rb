@@ -6,7 +6,7 @@ module BuscaCotacao
     #
     # @param ticker: [String] nome do ativo
     # @param data: [Date] ou nil caso seja a cotacao atual
-    # @return [Float] valor do ativo na data especificada
+    # @return [BigDecimal] valor do ativo na data especificada
     def self.busca(ticker, bolsa, data)
       throw NotImplementedError
     end

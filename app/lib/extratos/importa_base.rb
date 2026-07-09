@@ -12,6 +12,9 @@ module Extratos
     end
 
     def self._insere_linha_extrato(conta_corrente, liquidacao, movimentacao, descricao, valor, saldo)
+      valor = Utils.decimal(valor)
+      saldo = Utils.decimal(saldo)
+
       extrato_atual = conta_corrente.extratos
       return unless extrato_atual.find_by(liquidacao: liquidacao,
                                           movimentacao: movimentacao,

@@ -26,9 +26,9 @@ class OperacoesController < ApplicationController
       valor = secure_params[:valor]
 
       if valor_unit.present? && quantidade.blank?
-        @operacao.quantidade = valor.to_f / valor_unit.to_f
+        @operacao.quantidade = Utils.decimal(valor) / Utils.decimal(valor_unit)
       elsif quantidade.present? && valor_unit.blank?
-        @operacao.valor_unit = valor.to_f / quantidade.to_f
+        @operacao.valor_unit = Utils.decimal(valor) / Utils.decimal(quantidade)
       end
     end
 

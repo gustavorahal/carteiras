@@ -5,7 +5,7 @@ module BuscaCotacao
 
     def initialize(nome, preco, data, fonte)
       @nome = nome
-      @preco = preco
+      @preco = Utils.decimal(preco)
       @data = data
       @fonte = fonte
     end

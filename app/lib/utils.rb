@@ -1,5 +1,28 @@
 class Utils
 
+  def self.decimal(value)
+    return value if value.is_a?(BigDecimal)
+    return nil if value.nil?
+
+    string_value = value.to_s.strip
+    return nil if string_value.empty?
+
+    BigDecimal(string_value)
+  end
+
+  def self.decimal_from_br_number(value)
+    return value if value.is_a?(BigDecimal)
+    return nil if value.nil?
+
+    string_value = value.to_s.strip
+    return nil if string_value.empty?
+
+    normalized = string_value.gsub(/[^\d,.-]/, '')
+    normalized = normalized.gsub('.', '').tr(',', '.') if normalized.include?(',')
+
+    decimal(normalized)
+  end
+
   def self.transferencia_de_custodia(carteira, ativo, nova_corretora)
     Operacao.create!(carteira: carteira, ativo: ativo, data: Date.today, quantidade: 0,
                      valor_unit: 0, operacao: 'C',

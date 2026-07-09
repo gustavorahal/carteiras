@@ -17,7 +17,7 @@ module BuscaCotacao
       # Headers arquivo CSV: CNPJ_FUNDO;DT_COMPTC;VL_TOTAL;VL_QUOTA;VL_PATRIM_LIQ;CAPTC_DIA;RESG_DIA;NR_COTST
       CSV.foreach(arquivo_csv, headers: true, col_sep: ';') do |row|
         if row['CNPJ_FUNDO'] == cnpj && row['DT_COMPTC'].to_date == data
-          valor_cota = row['VL_QUOTA'].to_f
+          valor_cota = Utils.decimal(row['VL_QUOTA'])
         end
       end
 

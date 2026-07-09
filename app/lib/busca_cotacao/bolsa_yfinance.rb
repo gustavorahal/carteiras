@@ -34,7 +34,7 @@ module BuscaCotacao
       Rails.logger.info "BuscaBolsa: Chamando #{url}"
       json_response = Utils.fetch_rapidapi_json(url, @@api_host)
       result = json_response['quoteResponse']['result']
-      return result[0]['regularMarketPrice'].to_f unless result.empty?
+      return Utils.decimal(result[0]['regularMarketPrice']) unless result.empty?
     end
 
     def self._get_historical_data(ticker, data)
@@ -46,7 +46,7 @@ module BuscaCotacao
       json_response["prices"].each do |price|
         data_price = Time.at(price["date"]).to_date
         if data_price == data
-          return price["close"]
+          return Utils.decimal(price["close"])
         end
       end
 

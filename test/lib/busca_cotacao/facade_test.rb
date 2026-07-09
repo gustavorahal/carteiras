@@ -39,7 +39,7 @@ class FacadeTest < ActiveSupport::TestCase
     BuscaCotacao::Bolsa.stub(:busca, [10.0, "marketstack"]) do
       resultado = BuscaCotacao::Facade.bolsa(ativo.nome, ativo.moeda_negociacao, data)
 
-      assert_kind_of Float, resultado.preco
+      assert_kind_of BigDecimal, resultado.preco
       assert_equal data, resultado.data
       assert_equal ativo.nome, resultado.nome
     end
@@ -105,6 +105,7 @@ class FacadeTest < ActiveSupport::TestCase
     BuscaCotacao::Moeda.stub(:busca, [5.5744, "bcb_gov"]) do
       resultado = BuscaCotacao::Facade.moeda('USDBRL', data)
 
+      assert_kind_of BigDecimal, resultado.preco
       assert_equal 5.5744, resultado.preco
       assert_equal "bcb_gov", resultado.fonte
       assert_equal data, resultado.data

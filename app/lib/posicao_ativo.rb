@@ -68,14 +68,14 @@ class PosicaoAtivo
   end
 
   def valor
-    @cotacao.valor_unit * quantidade.to_f
+    @cotacao.valor_unit * quantidade
   end
 
   def valor_em_brl
     if @ativo.moeda_negociacao == 'BRL'
       valor
     elsif @ativo.moeda_negociacao == 'USD'
-      _valor_unit_brl * quantidade.to_f
+      _valor_unit_brl * quantidade
     end
   end
 

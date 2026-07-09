@@ -13,7 +13,7 @@ module ApplicationHelper
   end
 
   def display_porcentagem(valor, cores: false)
-    valor_per = number_to_percentage(valor.to_f, precision: 2)
+    valor_per = number_to_percentage(valor, precision: 2)
     css_color = ""
     if cores
       if valor > 0

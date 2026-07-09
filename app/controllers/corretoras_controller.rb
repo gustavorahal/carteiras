@@ -1,3 +1,0 @@
-class CorretorasController < ApplicationController
-
-end

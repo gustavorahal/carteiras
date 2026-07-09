@@ -4,6 +4,8 @@ class CotacaoService
   # param @data: irá tentar buscar cotacao para data dada. Se não for possivel, retornar
   #              ultimo dia antes da data com uma cotacao disponivel
   def self.cotacao(ativo, data)
+    return if ativo.blank? || data.blank?
+
     CacheService.fetch_cotacao(ativo, data) do
       _resolve_cotacao(ativo, data)
     end

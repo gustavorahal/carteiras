@@ -1,7 +1,12 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
+[
+  ["USDBRL", "BRL"],
+  ["BRLUSD", "USD"],
+  ["BTCBRL", "BRL"]
+].each do |nome, moeda_negociacao|
+  Ativo.find_or_create_by!(nome: nome) do |ativo|
+    ativo.tipo = "moeda"
+    ativo.moeda_negociacao = moeda_negociacao
+    ativo.moeda_exposicao = moeda_negociacao
+    ativo.descricao = "Par de moedas #{nome}"
+  end
+end

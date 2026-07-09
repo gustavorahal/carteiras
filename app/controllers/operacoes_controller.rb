@@ -1,6 +1,6 @@
 class OperacoesController < ApplicationController
 
-  before_action :set_vars, only: [:index, :new, :create, :edit]
+  before_action :set_vars, only: [:index, :new, :create, :edit, :update]
 
   def index
     @operacoes = policy_scope(@carteira.operacoes)
@@ -47,7 +47,6 @@ class OperacoesController < ApplicationController
   end
 
   def update
-    @carteira = policy_scope(Carteira).find params[:carteira_id]
     @operacao = policy_scope(@carteira.operacoes).find params[:id]
     authorize @operacao
 

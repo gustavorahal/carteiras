@@ -45,7 +45,6 @@
             <% ap = @posicao.busca_posicao_ativo(ativo) %>
             <% operacao = (diff_valor_brl.negative? || percent_ativo.zero?) ? 'C' : 'V' %>
 
-            <!-- Agora mostra conteúdo -->
             <%= render 'common/btn_oper_corretora', corretora: ap ? ap.corretora : nil,
                                                       ativo: ativo, operacao: operacao, disabled: ap.nil?  %>
             <%= quant.round(4).abs %>

@@ -13,7 +13,9 @@ class ApplicationController < ActionController::Base
             end
     return unless user_signed_in?
 
-    ativo_usdbrl = Ativo.find_by(nome: "USDBRL")
-    @cotacao_usdbrl = CotacaoService.cotacao(ativo_usdbrl, @data) if ativo_usdbrl
+    @cotacao_usdbrl = CotacaoService.moedas("USDBRL", @data)
+  rescue StandardError => e
+    Rails.logger.warn "Não foi possível carregar cotação USDBRL para o menu: #{e.message}"
+    @cotacao_usdbrl = nil
   end
 end

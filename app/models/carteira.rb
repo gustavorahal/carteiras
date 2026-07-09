@@ -4,6 +4,6 @@ class Carteira < ApplicationRecord
   has_many :proventos
   has_many :conta_correntes, -> { includes(:corretora) }
   belongs_to :investidor
-  belongs_to :referencia
+  belongs_to :referencia, optional: true
 
 end

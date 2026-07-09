@@ -8,6 +8,7 @@ echo "Preparing databases..."
 bin/rails db:create
 bin/rails db:environment:set RAILS_ENV=development
 bin/rails db:schema:load
+bin/rails db:seed
 RAILS_ENV=test bin/rails db:environment:set
 RAILS_ENV=test bin/rails db:schema:load
 

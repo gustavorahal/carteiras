@@ -22,8 +22,10 @@
   <dt class="col-sm-3">Porcentagem na carteira</dt>
   <dd class="col-sm-9"><%= display_porcentagem @posicao.porcentagem_ativo @ativo %></dd>
 
-  <dt class="col-sm-3">Porcentagem teórica</dt>
-  <dd class="col-sm-9"><%= display_porcentagem @carteira.referencia.porcentagem(@ativo) %></dd>
+  <% if @carteira.referencia.present? %>
+    <dt class="col-sm-3">Porcentagem teórica</dt>
+    <dd class="col-sm-9"><%= display_porcentagem @carteira.referencia.porcentagem(@ativo) %></dd>
+  <% end %>
 
   <dt class="col-sm-3">Corretora</dt>
   <dd class="col-sm-9"><%= @posicao_ativo.corretora.nome %></dd>

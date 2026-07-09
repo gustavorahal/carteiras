@@ -44,7 +44,9 @@
         <% end %>
       </td>
       <td><%= display_moeda oper.custos_operacionais, moeda: moeda_negociacao %></td>
-      <td><%= link_to 'Editar', edit_carteira_operacao_path(params[:carteira_id], oper) %></td>
+      <td>
+        <%= link_to 'Editar', edit_carteira_operacao_path(oper.carteira, oper) if policy(oper).edit? %>
+      </td>
     </tr>
   <% end %>
   </tbody>

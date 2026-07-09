@@ -7,7 +7,7 @@ class OperacaoTest < ActiveSupport::TestCase
     @carteira = @cc.carteira
     @corretora = @cc.corretora
     @ativo = ativos(:bpan4)
-    @ultimo_extrato = @cc.extratos.last
+    @ultimo_extrato = @cc.extratos.where(temporario: false).order(:movimentacao).last
   end
 
   def descricao_operacao(operacao)
@@ -70,6 +70,38 @@ class OperacaoTest < ActiveSupport::TestCase
                            temporario: true, valor: valor_antigo)
     assert Extrato.find_by(descricao: descricao_operacao(op),
                                temporario: true, valor: valor_novo)
+  end
+
+  test "operacao sem conta corrente correspondente nao quebra" do
+    corretora_sem_cc = Corretora.create!(nome: "Sem CC")
+
+    op = Operacao.create!(data: Date.today,
+                          operacao: 'C',
+                          quantidade: 100, valor_unit: 11,
+                          ativo: @ativo,
+                          carteira: @carteira,
+                          corretora: corretora_sem_cc)
+
+    assert_nil Extrato.find_by(descricao: descricao_operacao(op),
+                               temporario: true)
+  end
+
+  test "entrada temporaria e adicionada quando conta corrente ainda nao tem extrato real" do
+    corretora_sem_extrato = Corretora.create!(nome: "Sem Extrato")
+    ContaCorrente.create!(corretora: corretora_sem_extrato,
+                          carteira: @carteira,
+                          moeda: @ativo.moeda_negociacao)
+
+    op = Operacao.create!(data: Date.today,
+                          operacao: 'C',
+                          quantidade: 100, valor_unit: 11,
+                          ativo: @ativo,
+                          carteira: @carteira,
+                          corretora: corretora_sem_extrato)
+
+    assert Extrato.find_by(descricao: descricao_operacao(op),
+                           temporario: true,
+                           valor: op.saldo_financeiro)
   end
 
   test "operacao de Short, verificar montagem" do

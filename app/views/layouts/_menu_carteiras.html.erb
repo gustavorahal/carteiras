@@ -5,7 +5,9 @@
   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
     <li><%= link_to 'Por book', posicao_path(@carteira, view: 'book', data: @data), class: "dropdown-item"  %></li>
     <li><%= link_to 'Por corretoras', posicao_path(@carteira, view: 'corretoras', data: @data), class: "dropdown-item"  %></li>
-    <li><%= link_to 'Atual vs. Referência', posicao_path(@carteira, view: 'atual_vs_ref'), class: "dropdown-item"  %></li>
+    <% if @carteira.referencia.present? %>
+      <li><%= link_to 'Atual vs. Referência', posicao_path(@carteira, view: 'atual_vs_ref'), class: "dropdown-item"  %></li>
+    <% end %>
   </ul>
 </li>
 

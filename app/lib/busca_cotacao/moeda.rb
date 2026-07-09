@@ -6,11 +6,11 @@ module BuscaCotacao
 
     # @return tupla [preco, fonte]. Exemplo: [5.5744, "bcb_gov"]
     def self.busca(de_para, data)
-      if de_para == Ativo.find_by_nome('BRLUSD').nome
+      if de_para == 'BRLUSD'
         _brl_usd
-      elsif de_para == Ativo.find_by_nome('USDBRL').nome
+      elsif de_para == 'USDBRL'
         _usd_brl(data)
-      elsif de_para == Ativo.find_by_nome('BTCBRL').nome
+      elsif de_para == 'BTCBRL'
         _btc_brl
       else
         raise "Conversão de #{de_para} não suportado para busca de cotação"

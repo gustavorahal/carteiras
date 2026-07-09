@@ -44,7 +44,12 @@ class ContaCorrente < ApplicationRecord
   def self.saldo_cc_total(carteira, data, corretora = nil)
     total_brl = saldo_cc_brl(carteira, data, corretora)
     total_usd = saldo_cc_usd(carteira, data, corretora)
-    total_usdbrl = total_usd * CotacaoService.moedas('USDBRL', data).valor_unit
+    return total_brl if total_usd.zero?
+
+    cotacao_usdbrl = CotacaoService.moedas('USDBRL', data)
+    raise StandardError, "Não foi possível obter cotação USDBRL para calcular saldo em USD" unless cotacao_usdbrl
+
+    total_usdbrl = total_usd * cotacao_usdbrl.valor_unit
 
     total_brl + total_usdbrl
   end

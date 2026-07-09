@@ -93,4 +93,8 @@ class CotacaoServiceTest < ActiveSupport::TestCase
     end
   end
 
+  test 'cotacao: retorna nil quando ativo não existe' do
+    assert_nil CotacaoService.cotacao(nil, Date.new(2021, 4, 19))
+  end
+
 end

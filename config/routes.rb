@@ -10,9 +10,6 @@ Rails.application.routes.draw do
 
   get '/cotacoes', to: 'cotacoes#index_all'
 
-  resources :corretoras
-  resources :investidores
-
   resources :carteiras do
     resources :operacoes
     get 'ganho_de_capital', to: 'impostos#ganho_de_capital'

@@ -1,5 +1,7 @@
 
-<%= render 'common/btn_new', resource: Ativo.new, btn_label: 'Novo Ativo' %>
+<% if policy(Ativo).create? %>
+  <%= render 'common/btn_new', resource: Ativo.new, label: 'Novo Ativo' %>
+<% end %>
 
 <table class="table table-striped table-sm">
   <thead class="thead-light">
@@ -22,7 +24,9 @@
       <td><%= ativo.moeda_negociacao %></td>
       <td><%= ativo.moeda_exposicao %></td>
       <td><%= display_data ativo.created_at %></td>
-      <td><%= link_to 'Editar', edit_ativo_path(ativo) %></td>
+      <td>
+        <%= link_to 'Editar', edit_ativo_path(ativo) if policy(ativo).edit? %>
+      </td>
     </tr>
   <% end %>
 </tbody>

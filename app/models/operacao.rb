@@ -84,9 +84,12 @@ class Operacao < ApplicationRecord
     def insere_extrato_entrada_tmp
       cc = ContaCorrente.find_by(corretora_id: corretora.id, carteira_id: carteira.id,
                                  moeda: ativo.moeda_negociacao)
+      return unless cc
+
       # Só faz sentido adicionar uma entrada temporária, se a operação é posterior
       # a ultima entrada "real" (não temporária) do extrato para dada CC.
-      return if data <= cc.extratos.where(temporario: false).last.movimentacao
+      ultimo_extrato_real = cc.extratos.where(temporario: false).order(movimentacao: :desc).first
+      return if ultimo_extrato_real && data <= ultimo_extrato_real.movimentacao
 
       # a descrição é pobre propositalmente para podermos encontra-la em caso de edições
       # subsequentes da operação e assim deleta-la para criação de outra entrada

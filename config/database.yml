@@ -30,8 +30,13 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
-  <<: *default
-  database: carteiras_development
+  primary: &primary_development
+    <<: *default
+    database: carteiras_development
+  queue:
+    <<: *primary_development
+    database: carteiras_development_queue
+    migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -64,8 +69,13 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
-  database: carteiras_test
+  primary: &primary_test
+    <<: *default
+    database: carteiras_test
+  queue:
+    <<: *primary_test
+    database: carteiras_test_queue
+    migrations_paths: db/queue_migrate
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -87,7 +97,12 @@ test:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
 production:
-  <<: *default
-  database: carteiras_production
-  username: carteiras
-  password: <%= ENV['CARTEIRAS_DATABASE_PASSWORD'] %>
+  primary: &primary_production
+    <<: *default
+    database: carteiras_production
+    username: carteiras
+    password: <%= ENV['CARTEIRAS_DATABASE_PASSWORD'] %>
+  queue:
+    <<: *primary_production
+    database: carteiras_production_queue
+    migrations_paths: db/queue_migrate

@@ -43,3 +43,6 @@ yarn-debug.log*
 *.xls
 inf_diario_fi_*.csv
 inf_diario_fi_*.csv*
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

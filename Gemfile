@@ -5,8 +5,8 @@ ruby "4.0.2"
 
 gem "rails", "~> 8.1", ">= 8.1.3"
 gem "rails-i18n", "~> 8.1"
-gem "sprockets-rails"
-gem "dartsass-sprockets"
+gem "propshaft"
+gem "dartsass-rails"
 gem "pg", "~> 1.6", force_ruby_platform: true
 gem "puma", ">= 6.0"
 gem "importmap-rails"
@@ -22,7 +22,7 @@ gem "holidays"
 gem "pundit"
 gem "roo"
 gem "roo-xls"
-gem "rufus-scheduler"
+gem "solid_queue"
 gem "rexml"
 
 group :development, :test do

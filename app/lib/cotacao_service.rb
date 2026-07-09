@@ -78,8 +78,12 @@ class CotacaoService
 
     # 3a tentativa: não encontrei na API, retornar a última cotação disponível
     unless cotacao
-      cotacao = Cotacao.where(ativo: ativo).where("data <= '#{data}'").order(data: :desc).first
-      Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma, pegando última cotação disponível no BD em #{cotacao.data}")
+      cotacao = Cotacao.where(ativo: ativo).where('data <= ?', data).order(data: :desc).first
+      if cotacao
+        Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma, pegando última cotação disponível no BD em #{cotacao.data}")
+      else
+        Rails.logger.info("Cotação para #{ativo.nome} em #{data_ajustada} NÃO disponível de nenhuma forma e sem cotação anterior no BD")
+      end
     end
 
     cotacao

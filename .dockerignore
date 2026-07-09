@@ -1,0 +1,10 @@
+.git
+log/*
+tmp/*
+storage/*
+vendor/bundle
+node_modules
+*.log
+*.zip
+inf_diario_fi_*.csv
+inf_diario_fi_*.csv*

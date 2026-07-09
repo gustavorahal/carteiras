@@ -4,7 +4,7 @@ class Provento < ApplicationRecord
   belongs_to :corretora
   belongs_to :extrato
 
-  enum evento: {
+  enum :evento, {
     dividendo: 1,
     jcp: 2,
     rendimento: 3

@@ -1,6 +1,26 @@
 # Classe de permissão base. A ideia é que ela seja super restritiva e seletivamente
 # as subclasses vão relaxando as permissões.
 class ApplicationPolicy < Struct.new(:user, :record)
+  class Scope < Struct.new(:user, :scope)
+    def resolve
+      return scope.all if user&.admin?
+      return scope.none unless user&.investidor? && user.investidor.present?
+
+      if scoped_model.column_names.include?('investidor_id')
+        scope.where(investidor: user.investidor)
+      elsif scoped_model.reflect_on_association(:carteira)
+        scope.joins(:carteira).where(carteiras: { investidor_id: user.investidor.id })
+      else
+        scope.none
+      end
+    end
+
+    private
+
+    def scoped_model
+      scope.respond_to?(:klass) ? scope.klass : scope
+    end
+  end
 
   def index?
     admin? || owner?

@@ -1,0 +1,11 @@
+{
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[erb]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  }
+}

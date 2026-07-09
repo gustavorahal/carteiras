@@ -38,7 +38,7 @@
       <td><%= display_moeda (oper.quantidade * oper.valor_unit), moeda: moeda_negociacao, cores: true %></td>
       <td><%= display_moeda oper.usdbrl %></td>
       <td>
-        <small><%= oper.observacao.nil? ? oper.observacao : oper.observacao.html_safe %></small>
+        <small><%= oper.observacao %></small>
         <% if oper.operacao_sys %>
           <span class="badge rounded-pill bg-info">Operação de sistema</span>
         <% end %>

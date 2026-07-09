@@ -13,7 +13,9 @@ class ExtratoSystemTest < ApplicationSystemTestCase
     @entrada_cc = extratos(:one)
     visit carteira_conta_corrente_path @carteira, @cc
     assert_text @entrada_cc.descricao
-    find(:xpath, "//form[@action='#{carteira_conta_corrente_extrato_path(@carteira, @cc, @entrada_cc)}']/button").click
+    accept_confirm do
+      find(:xpath, "//form[@action='#{carteira_conta_corrente_extrato_path(@carteira, @cc, @entrada_cc)}']/button").click
+    end
     assert_no_text @entrada_cc.descricao
   end
 

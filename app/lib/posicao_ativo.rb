@@ -13,9 +13,8 @@ class PosicaoAtivo
              else # passei um ID
                Ativo.find(ativo_ref)
              end
-    @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id).where('DATE(data) <= DATE(?)', data)
+    @operacoes_ativo = @carteira.operacoes.where(ativo_id: @ativo.id).where('data <= ?', data)
     @data = data
-    @data_str = @data.strftime '%F' # apropriado para SQL
     @quantidade = quantidade
     @cotacao = CotacaoService.cotacao(@ativo, @data)
 
@@ -108,19 +107,11 @@ class PosicaoAtivo
   #  não deveria aumentar o preço médio para 11. O preço médio de compra continuaria 10 enquanto
   #  referência para ganhos ou perdas de vendas futuras.
   def _preco_medio_sql(sum_str)
-    data_montagem_str = data_montagem.strftime '%F'
-    sql = <<~SQL
-      SELECT sum(#{sum_str})/sum(quantidade) AS preco_medio
-      FROM operacoes
-      WHERE 
-       carteira_id = #{@carteira.id} AND
-       ativo_id = #{@ativo.id} AND
-       operacao IN (1,4) AND
-       data::date >= '#{data_montagem_str}' AND
-       data::date <= '#{@data_str}'
-    SQL
+    operacoes = @operacoes_ativo
+                .where(operacao: %i[C S])
+                .where(data: data_montagem..@data)
 
-    ActiveRecord::Base.connection.execute(sql).values[0][0]
+    operacoes.sum(Arel.sql(sum_str)) / operacoes.sum(:quantidade)
   end
 
 end

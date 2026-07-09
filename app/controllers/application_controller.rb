@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  include Pundit
+  include Pundit::Authorization
   before_action :authenticate_user!
   before_action :set_data
 
@@ -11,6 +11,9 @@ class ApplicationController < ActionController::Base
             else
               Date.today
             end
-    @cotacao_usdbrl = CotacaoService.moedas('USDBRL', @data)
+    return unless user_signed_in?
+
+    ativo_usdbrl = Ativo.find_by(nome: "USDBRL")
+    @cotacao_usdbrl = CotacaoService.cotacao(ativo_usdbrl, @data) if ativo_usdbrl
   end
 end

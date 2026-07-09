@@ -37,4 +37,11 @@ class ContaCorrentePolicyTest < ActiveSupport::TestCase
     refute_permit @second_investor, @conta_corrente, :update
     refute_permit @second_investor, @conta_corrente, :destroy
   end
+
+  test 'scope limita contas por carteira do investidor' do
+    scope = Pundit.policy_scope!(@example_investor, ContaCorrente)
+
+    assert_includes scope, conta_correntes(:vitreo_brl)
+    refute_includes Pundit.policy_scope!(@second_investor, ContaCorrente), conta_correntes(:vitreo_brl)
+  end
 end

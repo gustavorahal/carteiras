@@ -37,4 +37,10 @@ class CarteiraPolicyTest < ActiveSupport::TestCase
     refute_permit @second_investor, @carteira, :update
     refute_permit @second_investor, @carteira, :destroy
   end
+
+  test 'scope limita carteiras por investidor' do
+    assert_equal Carteira.order(:id).to_a, Pundit.policy_scope!(@admin, Carteira).order(:id).to_a
+    assert_equal [carteiras(:example_growth)], Pundit.policy_scope!(@example_investor, Carteira).to_a
+    assert_equal [carteiras(:example_income)], Pundit.policy_scope!(@second_investor, Carteira).to_a
+  end
 end

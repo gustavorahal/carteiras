@@ -10,18 +10,18 @@ class ContaCorrente < ApplicationRecord
   end
 
   def saldo(data)
-    extratos.where("movimentacao <= '#{data}'::date").sum(:valor).round(4)
+    extratos.where('movimentacao <= ?', data).sum(:valor).round(4)
   end
 
   def extratos_data(data)
-    extratos.where("movimentacao::date <= '#{data}'").order(movimentacao: :desc)
+    extratos.where('movimentacao <= ?', data).order(movimentacao: :desc)
   end
 
   def self.saldo_cc_brl(carteira, data, corretora = nil)
     query = Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'BRL')
-           .where("movimentacao::date <= '#{data}'")
+           .where('movimentacao <= ?', data)
     if corretora
       query = query.where('conta_correntes.corretora_id': corretora.id)
     end
@@ -33,7 +33,7 @@ class ContaCorrente < ApplicationRecord
     query = Extrato.joins(:conta_corrente)
            .where('conta_correntes.carteira_id': carteira.id)
            .where('conta_correntes.moeda': 'USD')
-           .where("movimentacao::date <= '#{data}'")
+           .where('movimentacao <= ?', data)
     if corretora
       query = query.where('conta_correntes.corretora_id': corretora.id)
     end

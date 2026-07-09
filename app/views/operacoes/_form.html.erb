@@ -12,10 +12,11 @@
   <%= f.hidden_field :carteira_id, value: @carteira.id %>
   <%= f.select :operacao, Operacao.operacoes.keys.to_a %>
 
-  <%= f.number_field :quantidade, step: :any %>
-  <%= f.number_field :valor_unit, step: :any, help: "Para fundos, seria o valor da cota" %>
+  <%= f.number_field :quantidade, step: :any, required: false %>
+  <%= f.number_field :valor_unit, step: :any, required: false, help: "Para fundos, seria o valor da cota" %>
   <% if @operacao.new_record? %>
     <%= f.number_field :valor, step: :any,
+                     required: false,
                      help: "Valor total, CASO NÃO TENHA quantidade OU valor_unit. Útil para adicionar aportes ou retiradas de fundos em que não esta especificado a quantidade, apenas valor investido e valor cota. Em caso de Tesouro Direto, tem-se a quantidade e valor total, mas nao valor unitario" %>
   <% end  %>
 

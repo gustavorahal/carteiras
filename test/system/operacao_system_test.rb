@@ -25,8 +25,8 @@ class OperacaoSystemTest < ApplicationSystemTestCase
 
     click_on "Salvar"
 
-    assert Operacao.find_by(ativo: @ativo, quantidade: quant, valor_unit: valor_unit, corretora: @corretora)
     assert_text "Operação criada com sucesso!"
+    assert Operacao.find_by(ativo: @ativo, quantidade: quant, valor_unit: valor_unit, corretora: @corretora)
   end
 
   test 'nova operação especificando valor e quantidade sem valor_unit' do
@@ -44,8 +44,8 @@ class OperacaoSystemTest < ApplicationSystemTestCase
 
     click_on "Salvar"
 
-    assert Operacao.find_by(ativo: @ativo, quantidade: quant, valor_unit: valor_unit, corretora: @corretora)
     assert_text "Operação criada com sucesso!"
+    assert Operacao.find_by(ativo: @ativo, quantidade: quant, valor_unit: valor_unit, corretora: @corretora)
   end
 
   test 'nova operação sem especificar quantidade nem valor_unit' do

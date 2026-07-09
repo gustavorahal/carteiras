@@ -3,9 +3,8 @@ class OperacoesController < ApplicationController
   before_action :set_vars, only: [:index, :new, :create, :edit]
 
   def index
-    @operacoes = @carteira.operacoes
-    authorize @operacoes.take
-    @contas_correntes = ContaCorrente.includes(:corretora).where(carteira: @carteira)
+    @operacoes = policy_scope(@carteira.operacoes)
+    @contas_correntes = policy_scope(@carteira.conta_correntes).includes(:corretora)
   end
 
   def new
@@ -15,12 +14,12 @@ class OperacoesController < ApplicationController
   end
 
   def create
-    @operacao = Operacao.new secure_params
+    @operacao = @carteira.operacoes.new secure_params.except(:carteira_id)
     authorize @operacao
 
     if secure_params[:quantidade].blank? && secure_params[:valor_unit].blank?
-      flash.alert = "Quantidade OU valor unitario precisam ser especificados"
-      render 'new' and return
+      flash.now.alert = "Quantidade OU valor unitario precisam ser especificados"
+      render 'new', status: :unprocessable_entity and return
     elsif secure_params[:valor].present?
       valor_unit = secure_params[:valor_unit]
       quantidade = secure_params[:quantidade]
@@ -36,19 +35,20 @@ class OperacoesController < ApplicationController
     if @operacao.save
       redirect_to carteira_operacoes_path(carteira_id: params[:carteira_id]), notice: "Operação criada com sucesso!"
     else
-      render 'new'
+      render 'new', status: :unprocessable_entity
     end
 
 
   end
 
   def edit
-    @operacao = Operacao.find params[:id]
+    @operacao = policy_scope(@carteira.operacoes).find params[:id]
     authorize @operacao
   end
 
   def update
-    @operacao = Operacao.find params[:id]
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
+    @operacao = policy_scope(@carteira.operacoes).find params[:id]
     authorize @operacao
 
     if @operacao.update(secure_params)
@@ -62,8 +62,8 @@ class OperacoesController < ApplicationController
   private
 
   def set_vars
-    @carteira = Carteira.find params[:carteira_id]
-    @ativos = Ativo.all.order(:nome)
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
+    @ativos = policy_scope(Ativo).order(:nome)
     @corretoras = Corretora.all.order(:nome)
   end
 

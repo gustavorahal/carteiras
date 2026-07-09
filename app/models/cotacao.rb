@@ -3,7 +3,7 @@ class Cotacao < ApplicationRecord
 
   after_save :delete_cache
 
-  enum fonte: {
+  enum :fonte, {
     yahoo_finance_rapidapi: 1,
     marketstack: 2,
     cvm_gov: 3,

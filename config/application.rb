@@ -8,8 +8,8 @@ Bundler.require(*Rails.groups)
 
 module Carteiras
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    # Initialize configuration defaults for the current Rails version.
+    config.load_defaults 8.1
 
     config.i18n.default_locale = :"pt-BR"
 

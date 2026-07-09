@@ -1,8 +1,7 @@
 class AtivosController < ApplicationController
 
   def index
-    @ativos = Ativo.all.order(created_at: :desc)
-    authorize @ativos.take
+    @ativos = policy_scope(Ativo).order(created_at: :desc)
   end
 
   def new
@@ -22,12 +21,12 @@ class AtivosController < ApplicationController
   end
 
   def edit
-    @ativo = Ativo.find params[:id]
+    @ativo = policy_scope(Ativo).find params[:id]
     authorize @ativo
   end
 
   def update
-    @ativo = Ativo.find params[:id]
+    @ativo = policy_scope(Ativo).find params[:id]
     authorize @ativo
 
     if @ativo.update(secure_params)

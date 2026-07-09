@@ -8,14 +8,14 @@ class Operacao < ApplicationRecord
   before_save :ajusta_quantidade, :ajusta_dolar, :ajusta_mon_ou_des
   after_save :insere_extrato_entrada_tmp
 
-  enum operacao: {
+  enum :operacao, {
     C: 1,
     V: 2,
     IR: 3,
     S: 4
   }
 
-  enum mon_ou_des: {
+  enum :mon_ou_des, {
     M: 1,
     D: 2
   }

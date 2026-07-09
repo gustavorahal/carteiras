@@ -165,22 +165,17 @@ class Posicao
   #
   # @return: lista de tuplas [ativo_id, quantidade]
   def _ativos_quantidade(carteira, data)
-    data_str = data.strftime '%F'
     # Para isso somamos a quantidade que temos de cada ativo
     # e o que for diferente de zero significa que temos o ativo na carteira.
     # Quantidade pode ser negativo, por exemplo, operação de short
-    sql = <<~SQL
-        SELECT ativos.id, ROUND(SUM(quantidade)::numeric, 10)
-        FROM ativos
-        JOIN operacoes ON operacoes.ativo_id = ativos.id
-        WHERE
-            operacoes.carteira_id = #{carteira.id} AND
-            operacoes.data::date <= '#{data_str}'
-        GROUP BY ativos.id, ativos.nome
-        HAVING ROUND(SUM(quantidade)::numeric, 10) <> 0
-        ORDER BY ativos.nome ASC;
-    SQL
+    quantidade_total = Arel.sql('ROUND(SUM(operacoes.quantidade)::numeric, 10)')
 
-    ActiveRecord::Base.connection.execute(sql).values
+    Operacao.joins(:ativo)
+            .where(carteira: carteira)
+            .where('operacoes.data <= ?', data)
+            .group('ativos.id', 'ativos.nome')
+            .having('ROUND(SUM(operacoes.quantidade)::numeric, 10) <> 0')
+            .order(Arel.sql('ativos.nome ASC'))
+            .pluck('ativos.id', quantidade_total)
   end
 end

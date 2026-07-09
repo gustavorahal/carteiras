@@ -4,7 +4,7 @@ class Ativo < ApplicationRecord
 
   before_save :checa_cnpj, :ativo_suportado?
 
-  enum tipo: {
+  enum :tipo, {
       acao: 1,
       fii: 2,
       moeda: 3,

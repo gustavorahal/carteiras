@@ -1,7 +1,7 @@
 class RentabilidadeController < ApplicationController
 
   def index
-    @carteira = Carteira.find params[:carteira_id]
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
     authorize @carteira
 
     # ultimos 7 meses para não pesar

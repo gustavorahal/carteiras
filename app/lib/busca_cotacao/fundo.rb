@@ -1,5 +1,6 @@
 require 'open-uri' # para 'open' não conflitar com Kernel.open
 require 'csv'
+require 'zip'
 
 module BuscaCotacao
   #
@@ -59,8 +60,12 @@ module BuscaCotacao
       download = URI.parse(url_arquivo).open
       IO.copy_stream(download, nome_arquivo_cvm)
 
-      # Descomprimir
-      `unzip -o #{nome_arquivo_cvm}`
+      Zip::File.open(nome_arquivo_cvm) do |zip_file|
+        entry = zip_file.find_entry(nome_arquivo_cvm_unzipped)
+        raise StandardError, "Arquivo #{nome_arquivo_cvm_unzipped} não encontrado em #{nome_arquivo_cvm}" unless entry
+
+        entry.extract(nome_arquivo_cvm_unzipped) { true }
+      end
 
       nome_arquivo_cvm_unzipped
     end

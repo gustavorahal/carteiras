@@ -56,7 +56,7 @@ module Admin
         end
 
         observacao = "Desdobramento/Grupamento por #{n_vezes}x. Montando"
-        Utils.compra_ativo(ativo, carteira, valor_unit, quant, observacao, data, montagem: true)
+        Utils.compra_ativo(ativo, carteira, oper_desmontagem.corretora, valor_unit, quant, observacao, data, montagem: true)
       end
     end
 

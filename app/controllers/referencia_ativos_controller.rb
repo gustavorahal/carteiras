@@ -3,17 +3,18 @@ class ReferenciaAtivosController < ApplicationController
   before_action :set_vars, only: [:index, :new, :create, :edit, :update]
 
   def index
+    @referencia_ativos = policy_scope(@referencia.referencia_ativos)
   end
 
   def new
-    @ativos = @referencia.ativos_disponiveis
+    @ativos = policy_scope(Ativo).order(:nome) - @referencia.ativos.where.not('referencia_ativos.porcentagem': 0)
     @referencia_ativo = ReferenciaAtivo.new
     authorize @referencia_ativo
   end
 
   def create
-    @ativos = @referencia.ativos_disponiveis
-    @referencia_ativo = ReferenciaAtivo.new secure_params
+    @ativos = policy_scope(Ativo).order(:nome) - @referencia.ativos.where.not('referencia_ativos.porcentagem': 0)
+    @referencia_ativo = @referencia.referencia_ativos.new secure_params.except(:referencia_id)
     authorize @referencia_ativo
 
     if @referencia_ativo.porcentagem.zero?
@@ -30,12 +31,12 @@ class ReferenciaAtivosController < ApplicationController
   end
 
   def edit
-    @referencia_ativo = ReferenciaAtivo.find params[:id]
+    @referencia_ativo = policy_scope(@referencia.referencia_ativos).find params[:id]
     authorize @referencia_ativo
   end
 
   def update
-    @referencia_ativo = ReferenciaAtivo.find params[:id]
+    @referencia_ativo = policy_scope(@referencia.referencia_ativos).find params[:id]
     authorize @referencia_ativo
 
     if @referencia_ativo.update(secure_params)
@@ -56,7 +57,7 @@ class ReferenciaAtivosController < ApplicationController
   end
 
   def set_vars
-    @referencia = Referencia.find params[:referencia_id]
+    @referencia = policy_scope(Referencia).find params[:referencia_id]
   end
 
 end

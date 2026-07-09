@@ -3,21 +3,24 @@ class ContaCorrentesController < ApplicationController
   before_action :set_vars, only: [:index, :new, :create, :edit, :update]
 
   def index
-    @conta_correntes = ContaCorrente.includes(:corretora).where(carteira: @carteira)
+    @conta_correntes = policy_scope(@carteira.conta_correntes).includes(:corretora)
   end
 
   def show
-    @conta_corrente = ContaCorrente.find params[:id]
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
+    @conta_corrente = policy_scope(@carteira.conta_correntes).find params[:id]
+    authorize @conta_corrente
     @extratos = @conta_corrente.extratos_data(@data)
-    @carteira = @conta_corrente.carteira
   end
 
   def new
     @conta_corrente = ContaCorrente.new
+    authorize @carteira
   end
 
   def create
-    @conta_corrente = ContaCorrente.new secure_params
+    @conta_corrente = @carteira.conta_correntes.new secure_params.except(:carteira_id)
+    authorize @conta_corrente
 
     if @conta_corrente.save
       redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente)
@@ -27,11 +30,13 @@ class ContaCorrentesController < ApplicationController
   end
 
   def edit
-    @conta_corrente = ContaCorrente.find params[:id]
+    @conta_corrente = policy_scope(@carteira.conta_correntes).find params[:id]
+    authorize @conta_corrente
   end
 
   def update
-    @conta_corrente = ContaCorrente.find params[:id]
+    @conta_corrente = policy_scope(@carteira.conta_correntes).find params[:id]
+    authorize @conta_corrente
     if @conta_corrente.update(secure_params)
       redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente),
                                           notice: "Conta Corrente atualizada com sucesso!"
@@ -44,7 +49,7 @@ class ContaCorrentesController < ApplicationController
 
   def set_vars
     @corretoras = Corretora.all.order(:nome)
-    @carteira = Carteira.find params[:carteira_id]
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
   end
 
   def secure_params

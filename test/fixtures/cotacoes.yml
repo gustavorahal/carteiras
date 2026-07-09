@@ -15,3 +15,17 @@ itsa4:
   valor_unit: 1.5
   data: 2020-07-11
 
+USDBRL_2021_04_16:
+  ativo: USDBRL
+  valor_unit: 5.5
+  data: 2021-04-16
+
+gndi3_2021_04_16:
+  ativo: gndi3
+  valor_unit: 80.0
+  data: 2021-04-16
+
+dis_2021_04_16:
+  ativo: dis
+  valor_unit: 185.0
+  data: 2021-04-16

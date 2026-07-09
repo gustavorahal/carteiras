@@ -41,17 +41,20 @@ class Utils
     uri = URI(url)
 
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    http.use_ssl = uri.scheme == 'https'
+    http.open_timeout = 5
+    http.read_timeout = 10
 
     request = Net::HTTP::Get.new(uri)
     request['x-rapidapi-host'] = rapidapi_host
     request['x-rapidapi-key'] = ENV.fetch("RAPIDAPI_KEY")
 
     response = http.request(request)
-    if response.read_body.present?
-      return JSON.parse(response.read_body)
+    unless response.code.to_i.between?(200, 299)
+      raise StandardError, "RapidAPI request failed with HTTP #{response.code}: #{response.message}"
     end
+
+    JSON.parse(response.body) if response.body.present?
   end
 
 end

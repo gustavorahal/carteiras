@@ -1,4 +1,9 @@
 class CotacaoPolicy < ApplicationPolicy
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      (user&.admin? || user&.investidor?) ? scope.all : scope.none
+    end
+  end
 
   def index?
     true

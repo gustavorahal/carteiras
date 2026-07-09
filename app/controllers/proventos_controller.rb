@@ -1,9 +1,8 @@
 class ProventosController < ApplicationController
 
   def index
-    @carteira = Carteira.find params[:carteira_id]
-    @proventos = @carteira.proventos.includes(:corretora, :ativo).order(data: :asc)
-    authorize @proventos.take
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
+    @proventos = policy_scope(@carteira.proventos).includes(:corretora, :ativo).order(data: :asc)
     @total = @carteira.proventos.sum :valor_liquido
     @mes_a_mes_total = @carteira.proventos.mes_a_mes
     @mes_a_mes_dividendo = @carteira.proventos.mes_a_mes('dividendo')

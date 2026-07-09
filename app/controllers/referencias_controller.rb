@@ -1,11 +1,13 @@
 class ReferenciasController < ApplicationController
 
   def index
-    @referencias = Referencia.all.order(:nome)
+    @referencias = policy_scope(Referencia).order(:nome)
+    authorize Referencia, :index?
   end
 
   def show
-    @referencia = Referencia.find params[:id]
+    @referencia = policy_scope(Referencia).find params[:id]
+    authorize @referencia
     @porcentagens_por_book_ref = @referencia.porcentagens_por_book
   end
 

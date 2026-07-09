@@ -23,7 +23,7 @@ module ApplicationHelper
       end
     end
 
-    "<span class=\"#{css_color}\">#{valor_per}</span>".html_safe
+    content_tag(:span, valor_per, class: css_color)
   end
 
   # @param max_precision: mostra o número sem qualquer arredondamento, mostrando
@@ -48,7 +48,7 @@ module ApplicationHelper
       end
     end
 
-    "<span class=\"#{css_color}\">#{valor_currency}</span>".html_safe
+    content_tag(:span, valor_currency, class: css_color)
   end
 
   # https://stackoverflow.com/questions/3320051/using-a-dynamic-precision-value-in-number-to-currency-based-on-the-decimal-value

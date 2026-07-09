@@ -56,8 +56,7 @@ class Rentabilidade
     beginning_of_month = posicao.data.beginning_of_month
     end_of_month = posicao.data.end_of_month
     query = posicao.carteira.movimentacoes
-                   .where("data >= '#{beginning_of_month}'")
-                   .where("data <= '#{end_of_month}'")
+                   .where(data: beginning_of_month..end_of_month)
     if corretora
       query = query.where(corretora: corretora)
     end

@@ -1,8 +1,7 @@
 class CarteirasController < ApplicationController
 
   def index
-    @carteiras = Carteira.all
-    @carteiras.each { |carteira| authorize carteira }
+    @carteiras = policy_scope(Carteira)
   end
 
 end

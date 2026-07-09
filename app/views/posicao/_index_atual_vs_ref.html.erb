@@ -1,5 +1,6 @@
 
-<%= render 'common/titulo_pagina', titulo: "Posição atual vs. referencia #{link_to @carteira.referencia.nome, referencia_path(@carteira.referencia)}" %>
+<%= render 'common/titulo_pagina',
+           titulo: ['Posição atual vs. referencia ', link_to(@carteira.referencia.nome, referencia_path(@carteira.referencia))] %>
 
 <div class="container">
   <table class="table table-sm">

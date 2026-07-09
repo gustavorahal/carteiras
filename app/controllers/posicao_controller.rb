@@ -19,7 +19,7 @@ class PosicaoController < ApplicationController
   private
 
   def set_vars
-    @carteira = Carteira.find params[:carteira_id]
+    @carteira = policy_scope(Carteira).find params[:carteira_id]
     @posicao = Posicao.new(@carteira, @data)
     @posicao_referencia = PosicaoReferencia.new(@posicao)
     @porcentagens_por_book_carteira = @posicao_referencia.porcentagens_por_book

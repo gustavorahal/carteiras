@@ -3,6 +3,7 @@ require 'test_helper'
 class IncorporarTest < ActiveSupport::TestCase
 
   def setup
+    Config.create!(nome: "busca_cotacao_bolsa", valor: "false")
     @ativo_incorporado = Ativo.create!(nome: 'AAPL', tipo: 1, moeda_negociacao: 'USD')
     @ativo_incorporadora = Ativo.create!(nome: 'MSFT', tipo: 1, moeda_negociacao: 'USD')
     @carteira = carteiras(:example_growth)

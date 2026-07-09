@@ -70,15 +70,27 @@ class CotacaoServiceTest < ActiveSupport::TestCase
   end
 
   test 'ativo_suportado?: ativo que existe' do
-    suportado = CotacaoService.ativo_suportado?('AAPL', 'USD', 'acao')
+    BuscaCotacao::Facade.stub(:bolsa, BuscaCotacao::Resultado.new('AAPL', 100.0, Date.new(2021, 4, 16), 'test')) do
+      suportado = CotacaoService.ativo_suportado?('AAPL', 'USD', 'acao')
 
-    assert suportado, true
+      assert suportado, true
+    end
   end
 
   test 'ativo_suportado?: ativo que NÃO existe' do
-    suportado = CotacaoService.ativo_suportado?('NAOEXISTE', 'BRL', 'acao')
+    BuscaCotacao::Facade.stub(:bolsa, nil) do
+      suportado = CotacaoService.ativo_suportado?('NAOEXISTE', 'BRL', 'acao')
 
-    assert_not suportado, true
+      assert_not suportado, true
+    end
+  end
+
+  test 'cotacao: retorna nil quando não encontra cotação nem fallback no banco' do
+    ativo = Ativo.new(nome: 'SEM_COTACAO', tipo: 'moeda', moeda_negociacao: 'BRL')
+
+    BuscaCotacao::Facade.stub(:moeda, nil) do
+      assert_nil CotacaoService.cotacao(ativo, Date.new(2021, 4, 19))
+    end
   end
 
 end

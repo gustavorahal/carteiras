@@ -3,7 +3,7 @@ class ExtratosController < ApplicationController
   before_action :set_vars, only: [:new, :create, :edit, :update, :destroy]
 
   def import
-    cc = ContaCorrente.find params[:conta_corrente_id]
+    cc = policy_scope(ContaCorrente).find params[:conta_corrente_id]
     authorize cc
     carteira = cc.carteira
     extrato_file = params[:file]
@@ -31,11 +31,11 @@ class ExtratosController < ApplicationController
   end
 
   def edit
-    @extrato = Extrato.find params[:id]
+    @extrato = @conta_corrente.extratos.find params[:id]
   end
 
   def update
-    @extrato = Extrato.find params[:id]
+    @extrato = @conta_corrente.extratos.find params[:id]
 
     if @extrato.update(secure_params)
       redirect_to carteira_conta_corrente_path(@carteira, @conta_corrente)
@@ -45,7 +45,7 @@ class ExtratosController < ApplicationController
   end
 
   def destroy
-    @extrato = Extrato.find params[:id]
+    @extrato = @conta_corrente.extratos.find params[:id]
     @extrato.destroy
     redirect_to request.referrer || carteira_conta_corrente_path(@carteira, @conta_corrente)
   end
@@ -57,7 +57,7 @@ class ExtratosController < ApplicationController
   end
 
   def set_vars
-    @conta_corrente = ContaCorrente.find params[:conta_corrente_id]
+    @conta_corrente = policy_scope(ContaCorrente).find params[:conta_corrente_id]
     authorize @conta_corrente
     @carteira = @conta_corrente.carteira
   end

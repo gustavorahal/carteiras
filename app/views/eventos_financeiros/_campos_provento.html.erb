@@ -1,0 +1,14 @@
+<div class="row g-3">
+  <div class="col-md-6"><%= d.label :conta_investimento_id, "Conta" %><%= d.collection_select :conta_investimento_id, @contas, :id, :nome, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :ativo_id, "Ativo" %><%= d.collection_select :ativo_id, @ativos, :id, :codigo, {}, class: "form-select" %></div>
+  <div class="col-md-3"><%= d.label :tipo %><%= d.select :tipo, Provento.tipos.keys.map { |t| [t.humanize, t] }, {}, class: "form-select" %></div>
+  <div class="col-md-3"><%= d.label :quantidade_referencia %><%= d.number_field :quantidade_referencia, value: 0, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :valor_bruto %><%= d.number_field :valor_bruto, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :tributos %><%= d.number_field :tributos, value: 0, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :valor_liquido %><%= d.number_field :valor_liquido, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :moeda_id, "Moeda" %><%= d.collection_select :moeda_id, @moedas, :id, :codigo, {}, class: "form-select" %></div>
+  <div class="col-md-3"><%= d.label :data_base %><%= d.date_field :data_base, value: Date.current, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :data_pagamento %><%= d.date_field :data_pagamento, value: Date.current, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :taxa_conversao_base %><%= d.number_field :taxa_conversao_base, value: 1, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :taxa_conversao_fiscal %><%= d.number_field :taxa_conversao_fiscal, value: 1, step: :any, min: 0, class: "form-control" %></div>
+</div>

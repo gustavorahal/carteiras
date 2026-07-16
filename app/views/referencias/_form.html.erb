@@ -1,15 +1,1 @@
-
-<% if @posicao_ativo.errors[:base].present? %>
-  <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo. ' + @posicao_ativo.errors[:base][0] %>
-<% else %>
-  <%= f.alert_message 'Favor corrigir o(s) erro(s) abaixo.' %>
-<% end %>
-
-<%= f.collection_select :ativo_id, @ativos, :id, :nome_amigavel %>
-<%= f.collection_select :corretora_id, @corretoras, :id, :nome %>
-<%= f.text_field :book %>
-<%= f.number_field :porcentagem, step: :any %>
-
-<%= f.submit "Salvar" %>
-
-
+<%= form_with model: @referencia do |f| %><div class="mb-3"><%= f.label :nome %><%= f.text_field :nome, class: "form-control" %></div><div class="mb-3"><%= f.label :descricao %><%= f.text_area :descricao, class: "form-control" %></div><%= f.submit class: "btn btn-primary" %><% end %>

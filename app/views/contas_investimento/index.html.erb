@@ -1,0 +1,4 @@
+<div class="d-flex justify-content-between"><h1>Contas de investimento</h1><%= link_to "Nova conta", new_carteira_contas_investimento_path(@carteira), class: "btn btn-primary" %></div>
+<table class="table"><thead><tr><th>Nome</th><th>Corretora</th><th>Identificador</th><th>Caixas</th><th></th></tr></thead><tbody>
+<% @contas.each do |conta| %><tr><td><%= conta.nome %></td><td><%= conta.corretora.nome %></td><td><%= conta.identificador_externo %></td><td><%= conta.contas_caixa.map { |c| c.moeda.codigo }.join(", ") %></td><td><%= link_to "Editar", edit_carteira_contas_investimento_path(@carteira, conta) %></td></tr><% end %>
+</tbody></table>

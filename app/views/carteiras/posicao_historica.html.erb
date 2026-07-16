@@ -1,0 +1,4 @@
+<h1>Posição histórica — <%= @carteira.nome %></h1>
+<p>Replay até <%= l @data %>.</p>
+<table class="table"><thead><tr><th>Conta</th><th>Ativo</th><th>Quantidade</th><th>Custo base</th></tr></thead>
+<tbody><% @estado.each do |(conta_id, ativo_id), posicao| %><tr><td><%= conta_id %></td><td><%= ativo_id %></td><td><%= posicao[:quantidade] %></td><td><%= posicao[:custo_total_base] %></td></tr><% end %></tbody></table>

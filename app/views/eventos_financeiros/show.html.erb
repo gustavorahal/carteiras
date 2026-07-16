@@ -1,0 +1,5 @@
+<h1>Evento #<%= @evento.id %></h1>
+<dl class="row"><dt class="col-sm-3">Tipo</dt><dd class="col-sm-9"><%= @evento.tipo %></dd><dt class="col-sm-3">Competência</dt><dd class="col-sm-9"><%= l @evento.data_competencia %></dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><%= @evento.revertido? ? "revertido" : @evento.estado %></dd><dt class="col-sm-3">Observação</dt><dd class="col-sm-9"><%= @evento.observacao %></dd></dl>
+<% if @evento.detalhe %><h2>Detalhe</h2><pre><%= JSON.pretty_generate(@evento.detalhe.attributes.except("created_at", "updated_at")) %></pre><% end %>
+<% if policy(@evento).confirmar? %><%= button_to "Confirmar", confirmar_carteira_eventos_financeiro_path(@carteira, @evento), class: "btn btn-primary" %><%= button_to "Excluir rascunho", carteira_eventos_financeiro_path(@carteira, @evento), method: :delete, class: "btn btn-outline-danger mt-2" %><% end %>
+<% if policy(@evento).reverter? %><%= button_to "Reverter", reverter_carteira_eventos_financeiro_path(@carteira, @evento), class: "btn btn-danger" %><% end %>

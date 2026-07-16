@@ -1,9 +1,0 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-example_growth:
-  nome: Example Growth
-  investidor: example_investor
-
-example_income:
-  nome: Example Income
-  investidor: second_investor

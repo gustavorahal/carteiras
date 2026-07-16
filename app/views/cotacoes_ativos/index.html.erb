@@ -1,0 +1,2 @@
+<div class="d-flex justify-content-between"><h1>Cotações canônicas</h1><%= link_to "Nova correção manual", new_cotacoes_ativo_path, class: "btn btn-primary" if current_user.admin? %></div>
+<table class="table"><thead><tr><th>Ativo</th><th>Data</th><th>Preço</th><th>Moeda</th><th>Fonte</th><th>Manual</th></tr></thead><tbody><% @cotacoes.each do |c| %><tr><td><%= c.ativo.codigo %></td><td><%= l c.data %></td><td><%= c.preco %></td><td><%= c.moeda.codigo %></td><td><%= c.fonte_cotacao.nome %></td><td><%= c.manual? ? "sim" : "não" %></td></tr><% end %></tbody></table>

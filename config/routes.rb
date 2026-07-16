@@ -1,34 +1,34 @@
 Rails.application.routes.draw do
-
   devise_for :users
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
-  root to: 'application#index'
+  root to: "carteiras#index"
 
-  resources :ativos do
-    resources :cotacoes
-  end
-
-  get '/cotacoes', to: 'cotacoes#index_all'
-
-  resources :carteiras do
-    resources :operacoes
-    get 'ganho_de_capital', to: 'impostos#ganho_de_capital'
-    get 'posicao_ano_anterior', to: 'impostos#posicao_ano_anterior'
-    get 'movimentacoes', to: 'movimentacoes#index'
-    get 'proventos', to: 'proventos#index'
-    get 'rentabilidade', to: 'rentabilidade#index'
-    resources :conta_correntes do
-      resources :extratos do
-        collection { post 'import' }
+  resources :carteiras, only: %i[index show] do
+    resources :eventos_financeiros, only: %i[index show new create destroy] do
+      member do
+        post :confirmar
+        post :reverter
       end
     end
+    resources :contas_investimento, except: :destroy
+    resources :importacoes_extrato, only: %i[new create show] do
+      member do
+        post :processar
+        post :resolver_item
+      end
+    end
+    get :posicao_historica
+    get :rentabilidade
+    get :comparacao_referencia
+    get :ganho_de_capital, to: "relatorios#resultados_economicos"
+    get :posicao_ano_anterior, to: "relatorios#posicao_ano_anterior"
   end
 
-  get '/posicao/:carteira_id', to: 'posicao#index', as: 'posicao'
-  get '/posicao/:carteira_id/ativos/:ativo_id', to: 'posicao#show', as: 'posicao_ativo'
-
+  resources :ativos
   resources :referencias do
-    resources :referencia_ativos
+    resources :versoes_referencia, only: %i[new create show] do
+      member { post :publicar }
+    end
   end
-
+  resources :cotacoes_ativos, only: %i[index new create]
+  resources :cotacoes_cambio, only: %i[index new create]
 end

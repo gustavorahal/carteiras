@@ -1,2 +1,0 @@
-class PosicaoPolicy < ApplicationPolicy
-end

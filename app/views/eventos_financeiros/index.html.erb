@@ -1,0 +1,3 @@
+<div class="d-flex justify-content-between"><h1>Eventos financeiros</h1><%= link_to "Novo evento", new_carteira_eventos_financeiro_path(@carteira), class: "btn btn-primary" %></div>
+<table class="table table-striped"><thead><tr><th>Competência</th><th>Sequência</th><th>Tipo</th><th>Origem</th><th>Estado</th><th></th></tr></thead>
+<tbody><% @eventos.each do |evento| %><tr><td><%= l evento.data_competencia %></td><td><%= evento.sequencia_na_data %></td><td><%= evento.tipo.humanize %></td><td><%= evento.origem %></td><td><%= evento.revertido? ? "revertido" : evento.estado %></td><td><%= link_to "Detalhe", carteira_eventos_financeiro_path(@carteira, evento) %></td></tr><% end %></tbody></table>

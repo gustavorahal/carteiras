@@ -1,0 +1,13 @@
+<div class="row g-3">
+  <div class="col-md-6"><%= d.label :conta_investimento_id, "Conta" %><%= d.collection_select :conta_investimento_id, @contas, :id, :nome, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :tipo %><%= d.select :tipo, EventoCorporativo.tipos.keys.map { |t| [t.humanize, t] }, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :ativo_origem_id, "Ativo de origem" %><%= d.collection_select :ativo_origem_id, @ativos, :id, :codigo, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :ativo_destino_id, "Ativo de destino (incorporação)" %><%= d.collection_select :ativo_destino_id, @ativos, :id, :codigo, { include_blank: true }, class: "form-select" %></div>
+  <div class="col-md-3"><%= d.label :fator %><%= d.number_field :fator, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :quantidade_final %><%= d.number_field :quantidade_final, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-3"><%= d.label :regra_alocacao_custo %><%= d.select :regra_alocacao_custo, EventoCorporativo.regra_alocacao_custos.keys.map { |r| [r.humanize, r] }, {}, class: "form-select" %></div>
+  <div class="col-md-3"><%= d.label :percentual_custo_fracao %><%= d.number_field :percentual_custo_fracao, step: :any, min: 0, max: 100, class: "form-control" %></div>
+  <div class="col-md-4"><%= d.label :valor_fracao %><%= d.number_field :valor_fracao, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-4"><%= d.label :moeda_id, "Moeda da fração" %><%= d.collection_select :moeda_id, @moedas, :id, :codigo, { include_blank: true }, class: "form-select" %></div>
+  <div class="col-md-4"><%= d.label :taxa_conversao_base %><%= d.number_field :taxa_conversao_base, value: 1, step: :any, min: 0, class: "form-control" %></div>
+</div>

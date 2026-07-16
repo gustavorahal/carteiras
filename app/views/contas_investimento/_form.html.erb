@@ -1,0 +1,15 @@
+<%= form_with model: @conta, url: (@conta.persisted? ? carteira_contas_investimento_path(@carteira, @conta) : carteira_contas_investimento_index_path(@carteira)) do |f| %>
+  <% @conta.errors.full_messages.each do |erro| %><div class="alert alert-danger"><%= erro %></div><% end %>
+  <div class="mb-3"><%= f.label :nome %><%= f.text_field :nome, class: "form-control" %></div>
+  <div class="mb-3"><%= f.label :corretora_id %><%= f.collection_select :corretora_id, @corretoras, :id, :nome, {}, class: "form-select" %></div>
+  <div class="mb-3"><%= f.label :identificador_externo %><%= f.text_field :identificador_externo, class: "form-control" %></div>
+  <fieldset class="mb-3">
+    <legend class="h6">Caixas por moeda</legend>
+    <p class="text-muted">Marque moedas para adicionar. Caixas existentes não são apagados por este formulário.</p>
+    <%= f.collection_check_boxes :moeda_ids, @moedas, :id, :codigo,
+      checked: @conta.contas_caixa.map(&:moeda_id) do |caixa| %>
+      <div class="form-check"><%= caixa.check_box class: "form-check-input" %><%= caixa.label class: "form-check-label" %></div>
+    <% end %>
+  </fieldset>
+  <%= f.submit class: "btn btn-primary" %>
+<% end %>

@@ -1,0 +1,24 @@
+<h1>Novo evento financeiro</h1>
+<p>O evento será criado como rascunho. Revise o detalhe antes de confirmar.</p>
+
+<nav class="nav nav-pills mb-4" aria-label="Tipo de evento">
+  <% EventosFinanceirosController::TIPOS_CADASTRAVEIS.each do |tipo| %>
+    <%= link_to tipo.humanize, new_carteira_eventos_financeiro_path(@carteira, tipo:),
+      class: "nav-link #{'active' if tipo == @tipo}" %>
+  <% end %>
+</nav>
+
+<%= form_with url: carteira_eventos_financeiros_path(@carteira), scope: :evento_financeiro do |f| %>
+  <%= f.hidden_field :tipo, value: @tipo %>
+  <div class="row g-3">
+    <div class="col-md-6"><%= f.label :data_competencia %><%= f.date_field :data_competencia, value: params.dig(:evento_financeiro, :data_competencia) || Date.current, class: "form-control" %></div>
+    <div class="col-md-6"><%= f.label :chave_idempotencia %><%= f.text_field :chave_idempotencia, class: "form-control" %></div>
+    <div class="col-12"><%= f.label :observacao %><%= f.text_area :observacao, class: "form-control" %></div>
+  </div>
+
+  <hr><h2><%= @tipo.humanize %></h2>
+  <%= fields_for :detalhe do |d| %>
+    <%= render "campos_#{@tipo}", d: %>
+  <% end %>
+  <%= f.submit "Criar rascunho", class: "btn btn-primary mt-3" %>
+<% end %>

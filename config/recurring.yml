@@ -11,7 +11,7 @@
 
 production:
   fetch_daily_quotes:
-    class: FetchQuotesJob
+    class: BuscarCotacoesFechamentoJob
     queue: default
     schedule: "30 1 * * *"
   clear_solid_queue_finished_jobs:

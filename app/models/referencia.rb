@@ -1,47 +1,9 @@
 class Referencia < ApplicationRecord
-  has_many :carteiras
-  has_many :referencia_ativos, -> { includes :ativo }
-  has_many :ativos, through: :referencia_ativos
+  has_many :versoes, class_name: "VersaoReferencia", inverse_of: :referencia
 
-  # Quais ativos ainda NÃO tenho na referencia?
-  def ativos_disponiveis
-    Ativo.all.order(:nome) - ativos.where.not('referencia_ativos.porcentagem': 0)
+  validates :nome, presence: true, uniqueness: true
+
+  def versao_vigente_em(data)
+    versoes.historicas.where(vigencia_inicial: ..data).order(vigencia_inicial: :desc).first
   end
-
-  # Dicionario de Book e objetos ReferenciaAtivo
-  def referencia_ativos_por_book
-    lista = {}
-    referencia_ativos.where.not(porcentagem: 0).order(:book).each do |referencia_ativo|
-      lista[referencia_ativo.book] = [] unless referencia_ativo.book.in? lista
-      lista[referencia_ativo.book].push referencia_ativo
-    end
-
-    lista
-  end
-
-  def porcentagens_por_book
-    referencia_ativos
-        .where.not(porcentagem: 0)
-        .group(:book)
-        .order(:book)
-        .sum(:porcentagem)
-  end
-
-  def porcentagem_por_moeda
-    referencia_ativos.includes(:ativo).where.not(porcentagem: 0).group('ativos.moeda_exposicao').sum(:porcentagem)
-  end
-
-  def sum_porcentagem_ativos
-    referencia_ativos
-        .where.not(porcentagem: 0)
-        .sum(:porcentagem)
-  end
-
-  def porcentagem(ativo)
-    ra = referencia_ativos.find_by(ativo: ativo)
-    return 0 if ra.nil?
-
-    ra.porcentagem
-  end
-
 end

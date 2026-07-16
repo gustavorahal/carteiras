@@ -1,2 +1,0 @@
-class ProventoPolicy < ApplicationPolicy
-end

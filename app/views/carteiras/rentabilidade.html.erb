@@ -1,0 +1,8 @@
+<h1>Rentabilidade — <%= @carteira.nome %></h1>
+<% if @rentabilidade[:completo] %>
+  <p>Retorno encadeado: <%= number_to_percentage(@rentabilidade[:retorno] * 100, precision: 4) %></p>
+<% else %>
+  <p class="alert alert-warning">Período incompleto: faltam resumos ou cotações. O retorno não foi encadeado parcialmente.</p>
+<% end %>
+<table class="table"><thead><tr><th>Data</th><th>Patrimônio</th><th>Fluxo</th><th>TWR</th></tr></thead>
+<tbody><% @rentabilidade[:resumos].each do |r| %><tr><td><%= l r.data %></td><td><%= r.patrimonio_final %></td><td><%= r.fluxo_externo_liquido %></td><td><%= r.twr_diario %></td></tr><% end %></tbody></table>

@@ -23,13 +23,6 @@ class Utils
     decimal(normalized)
   end
 
-  def self.transferencia_de_custodia(carteira, ativo, nova_corretora)
-    Operacao.create!(carteira: carteira, ativo: ativo, data: Date.today, quantidade: 0,
-                     valor_unit: 0, operacao: 'C',
-                     corretora: nova_corretora, operacao_sys: true,
-                     observacao: "Transferência de custódia para #{nova_corretora.nome}")
-  end
-
   def self.dia_util?(data)
     !data.on_weekend? && !Holidays.on(data, :br).present?
   end

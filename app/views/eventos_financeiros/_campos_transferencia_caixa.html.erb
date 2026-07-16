@@ -1,0 +1,6 @@
+<div class="row g-3">
+  <div class="col-md-6"><%= d.label :conta_caixa_origem_id, "Conta de origem" %><%= d.collection_select :conta_caixa_origem_id, @contas_caixa, :id, :nome_completo, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :conta_caixa_destino_id, "Conta de destino" %><%= d.collection_select :conta_caixa_destino_id, @contas_caixa, :id, :nome_completo, {}, class: "form-select" %></div>
+  <div class="col-md-6"><%= d.label :valor %><%= d.number_field :valor, step: :any, min: 0, class: "form-control" %></div>
+  <div class="col-md-6"><%= d.label :data_efetiva %><%= d.date_field :data_efetiva, value: Date.current, class: "form-control" %></div>
+</div>

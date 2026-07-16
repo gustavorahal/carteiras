@@ -1,9 +1,0 @@
-<%= render 'common/back_link', nome: 'Ativos', url: ativos_path %>
-
-<%= render 'common/titulo_pagina', titulo: "Cotações #{@ativo.nome_amigavel}" %>
-<br>
-<% if policy(Cotacao).create? %>
-  <%= render 'common/btn_new', label:'Nova cotação', url: new_ativo_cotacao_path %>
-<% end %>
-
-<%= render 'cotacoes_table' %>

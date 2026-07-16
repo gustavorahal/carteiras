@@ -1,0 +1,12 @@
+<div class="d-flex justify-content-between">
+  <h1>Cotações de câmbio</h1>
+  <%= link_to "Correção manual", new_cotacoes_cambio_path, class: "btn btn-primary" %>
+</div>
+<table class="table">
+  <thead><tr><th>Par</th><th>Data</th><th>Taxa</th><th>Fonte</th><th>Manual</th></tr></thead>
+  <tbody>
+    <% @cotacoes.each do |cotacao| %>
+      <tr><td><%= cotacao.moeda_origem.codigo %>/<%= cotacao.moeda_destino.codigo %></td><td><%= l cotacao.data %></td><td><%= cotacao.taxa %></td><td><%= cotacao.fonte_cotacao.nome %></td><td><%= cotacao.manual? ? "sim" : "não" %></td></tr>
+    <% end %>
+  </tbody>
+</table>

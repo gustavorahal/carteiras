@@ -1,28 +1,23 @@
 class Provento < ApplicationRecord
+  self.table_name = "proventos"
+  include ConfirmadoImutavel
+
+  belongs_to :evento_financeiro, inverse_of: :provento
+  belongs_to :conta_investimento
   belongs_to :ativo
-  belongs_to :carteira
-  belongs_to :corretora
-  belongs_to :extrato
+  belongs_to :moeda
 
-  enum :evento, {
-    dividendo: 1,
-    jcp: 2,
-    rendimento: 3
-  }
+  enum :tipo, { dividendo: "dividendo", jcp: "jcp", rendimento: "rendimento" }, validate: true
 
-  def self.mes_a_mes(evento = nil)
-    query = group(Arel.sql("DATE_TRUNC('month', data)")).order(Arel.sql("DATE_TRUNC('month', data)"))
-    query = query.where(evento: evento) if evento
+  validates :quantidade_referencia, :valor_bruto, :tributos, :valor_liquido,
+    numericality: { greater_than_or_equal_to: 0 }
+  validates :taxa_conversao_base, :taxa_conversao_fiscal, numericality: { greater_than: 0 }
+  validate :valor_liquido_coerente
 
-    resultado = query.sum(:valor_liquido)
-    # DATE_TRUNC retorna inicio do mês quando na realidade a somatorio representa o final,
-    # Além disso só queremos a data, remover hora... corrigir
-    resultado_fix = {}
-    resultado.each do |data, valor|
-      resultado_fix[data.end_of_month.to_date] = valor
-    end
+  private
 
-    resultado_fix
+  def valor_liquido_coerente
+    return if valor_bruto.nil? || tributos.nil? || valor_liquido.nil?
+    errors.add(:valor_liquido, "deve ser igual ao bruto menos tributos") unless valor_liquido == valor_bruto - tributos
   end
-
 end

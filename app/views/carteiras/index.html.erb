@@ -1,4 +1,6 @@
-
-<% @carteiras.each do |carteira| %>
-  <h5><%= link_to carteira.nome, posicao_path(carteira) %> </h5>
-<% end %>
+<h1>Carteiras</h1>
+<div class="list-group">
+  <% @carteiras.each do |carteira| %>
+    <%= link_to carteira.nome, carteira_path(carteira), class: "list-group-item list-group-item-action" %>
+  <% end %>
+</div>

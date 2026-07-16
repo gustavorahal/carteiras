@@ -1,0 +1,11 @@
+<h1>Resultados econômicos — <%= @ano %></h1>
+<p class="alert alert-warning"><%= @relatorio[:aviso] %></p>
+<table class="table">
+  <thead><tr><th>Data</th><th>Ativo</th><th>Categoria</th><th>Quantidade encerrada</th><th>Alienação</th><th>Custo</th><th>Resultado</th><th>Não suportado</th></tr></thead>
+  <tbody>
+    <% @relatorio[:linhas].each do |linha| %>
+      <tr><td><%= l linha.operacao.data_negociacao %></td><td><%= linha.ativo.codigo %></td><td><%= linha.categoria %></td><td><%= linha.resultado.quantidade_encerrada %></td><td><%= linha.resultado.valor_alienacao %></td><td><%= linha.resultado.custo_alocado %></td><td><%= linha.resultado.resultado_realizado %></td><td><%= linha.casos_nao_suportados.join(", ").presence || "—" %></td></tr>
+    <% end %>
+  </tbody>
+  <tfoot><tr><th colspan="6">Total econômico</th><th><%= @relatorio[:total_resultado] %></th><th></th></tr></tfoot>
+</table>

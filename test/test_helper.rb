@@ -1,49 +1,35 @@
-ENV['RAILS_ENV'] ||= 'test'
-require_relative '../config/environment'
-require 'rails/test_help'
-require 'minitest/mock'
+ENV["RAILS_ENV"] ||= "test"
+require_relative "../config/environment"
+require "rails/test_help"
 
 class ActiveSupport::TestCase
-  # Run tests in parallel with specified workers
-  #parallelize(workers: :number_of_processors)
+  include ActiveJob::TestHelper
 
-  # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-  fixtures :all
-
-  # Add more helper methods to be used by all tests here...
-
-  def file_path(name)
-    Rails.root.to_s + "/test/fixtures/files/#{name}"
+  setup do
+    @brl = Moeda.create!(codigo: "BRL", nome: "Real", tipo: :fiduciaria, casas_decimais: 2)
+    @usd = Moeda.create!(codigo: "USD", nome: "Dólar", tipo: :fiduciaria, casas_decimais: 2)
+    @usuario = User.create!(email: "pessoa-#{SecureRandom.hex(4)}@example.com", password: "segredo123", role: :investidor)
+    @investidor = Investidor.create!(user: @usuario, nome: "Pessoa", moeda_fiscal: @brl)
+    @carteira = Carteira.create!(investidor: @investidor, nome: "Principal", moeda_base: @brl)
+    @corretora = Corretora.create!(nome: "Corretora", pais: "BR")
+    @conta = ContaInvestimento.create!(carteira: @carteira, corretora: @corretora, nome: "Conta 1")
+    @caixa_brl = ContaCaixa.create!(conta_investimento: @conta, moeda: @brl)
+    @ativo = Ativo.create!(codigo: "PETR4", mercado: "B3", descricao: "Petrobras", tipo: :acao,
+      moeda_negociacao: @brl, moeda_exposicao: @brl)
   end
 
-  def with_env(vars)
-    old_values = vars.keys.index_with { |key| ENV[key] }
-
-    vars.each do |key, value|
-      value.nil? ? ENV.delete(key) : ENV[key] = value
-    end
-
-    yield
-  ensure
-    old_values&.each do |key, value|
-      value.nil? ? ENV.delete(key) : ENV[key] = value
-    end
+  def atributos_operacao(natureza:, quantidade:, preco:, data: Date.new(2026, 1, 10), custos: 0, conta: @conta, ativo: @ativo)
+    {
+      conta_investimento: conta, ativo:, natureza:, quantidade:, preco_unitario: preco,
+      moeda: ativo.moeda_negociacao, data_negociacao: data, data_liquidacao: data + 2,
+      taxa: custos, emolumentos: 0, corretagem: 0, iss_iof: 0, irrf: 0, outros: 0,
+      taxa_conversao_base: 1, taxa_conversao_fiscal: 1
+    }
   end
 
-  # Source: https://github.com/varvet/pundit/issues/204
-  def assert_permit(user, record, action)
-    msg = "User #{user.inspect} should be permitted to #{action} #{record}, but isn't permitted"
-    assert permit(user, record, action), msg
-  end
-
-  def refute_permit(user, record, action)
-    msg = "User #{user.inspect} should NOT be permitted to #{action} #{record}, but is permitted"
-    refute permit(user, record, action), msg
-  end
-
-  def permit(user, record, action)
-    cls = self.class.to_s.gsub(/Test/, '')
-    cls.constantize.new(user, record).public_send("#{action.to_s}?")
+  def registrar_operacao(**opcoes)
+    RegistrarOperacao.call(carteira: @carteira, usuario: @usuario,
+      atributos: atributos_operacao(**opcoes))
   end
 end
 

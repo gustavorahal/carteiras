@@ -1,0 +1,21 @@
+<h1>Comparação de referência — <%= @carteira.nome %></h1>
+<%= form_with url: carteira_comparacao_referencia_path(@carteira), method: :get do |f| %>
+  <div class="row g-3 align-items-end">
+    <div class="col-md-5"><%= f.label :referencia_id, "Referência" %><%= f.collection_select :referencia_id, @referencias, :id, :nome, { selected: @referencia&.id }, class: "form-select" %></div>
+    <div class="col-md-4"><%= f.label :data %><%= f.date_field :data, value: @data, class: "form-control" %></div>
+    <div class="col-md-3"><%= f.submit "Comparar", class: "btn btn-primary" %></div>
+  </div>
+<% end %>
+
+<% if @comparacao %>
+  <% if @comparacao[:versao].nil? %>
+    <p class="alert alert-warning mt-3">Não existe versão publicada vigente nessa data.</p>
+  <% elsif !@comparacao[:completa] %>
+    <p class="alert alert-warning mt-3">Comparação incompleta por ausência de cotação ou câmbio.</p>
+  <% end %>
+  <table class="table mt-3"><thead><tr><th>Ativo</th><th>Categoria</th><th>Meta</th><th>Atual</th><th>Diferença</th></tr></thead><tbody>
+    <% @comparacao[:comparacoes].each do |item| %>
+      <tr><td><%= item[:alocacao].ativo.codigo %></td><td><%= item[:alocacao].categoria %></td><td><%= item[:alocacao].percentual %>%</td><td><%= item[:percentual_atual]&.then { |p| number_to_percentage(p, precision: 2) } || "incompleto" %></td><td><%= item[:diferenca]&.then { |p| number_to_percentage(p, precision: 2) } || "—" %></td></tr>
+    <% end %>
+  </tbody></table>
+<% end %>

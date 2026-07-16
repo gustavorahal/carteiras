@@ -1,9 +1,0 @@
-<% size = local_assigns.fetch :size, '' %>
-<% disabled = local_assigns.fetch :disabled, false %>
-<% label = local_assigns.fetch :label, 'Novo' %>
-<% url = local_assigns.fetch :url, false %>
-<% url = polymorphic_path(resource, action: :new) unless url %>
-
-
-<%= link_to bootstrap_icon("plus-circle") + " #{label}",
-            url, class: "btn #{size} btn-success", disabled: disabled %>

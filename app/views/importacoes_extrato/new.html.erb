@@ -1,0 +1,7 @@
+<h1>Importar extrato</h1>
+<%= form_with url: carteira_importacoes_extrato_index_path(@carteira), multipart: true do |f| %>
+  <div class="mb-3"><%= f.label :conta_caixa_id, "Conta caixa" %><%= f.collection_select :conta_caixa_id, @contas_caixa, :id, :nome_completo, {}, class: "form-select" %></div>
+  <div class="mb-3"><%= f.label :formato %><%= f.select :formato, NormalizarImportacaoExtrato::FORMATOS, {}, class: "form-select" %></div>
+  <div class="mb-3"><%= f.label :arquivo %><%= f.file_field :arquivo, class: "form-control" %></div>
+  <%= f.submit "Normalizar", class: "btn btn-primary" %>
+<% end %>

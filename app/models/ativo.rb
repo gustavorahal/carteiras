@@ -1,68 +1,36 @@
 class Ativo < ApplicationRecord
-  has_many :cotacoes
-  has_many :referencia_ativos
-
-  before_save :checa_cnpj, :ativo_suportado?
+  belongs_to :moeda_negociacao, class_name: "Moeda"
+  belongs_to :moeda_exposicao, class_name: "Moeda"
+  has_many :cotacoes, class_name: "CotacaoAtivo", inverse_of: :ativo
 
   enum :tipo, {
-      acao: 1,
-      fii: 2,
-      moeda: 3,
-      fundo: 4,
-      criptomoeda: 5,
-      tesouro: 6,
-      etf: 7,
-      debenture: 8,
-      cra: 9,
-      cdb: 10
-  }
+    acao: "acao", fii: "fii", fundo: "fundo", criptomoeda: "criptomoeda",
+    tesouro: "tesouro", etf: "etf", debenture: "debenture", cra: "cra", cdb: "cdb"
+  }, validate: true
+
+  before_validation :normalizar_codigo_e_cnpj
+
+  validates :codigo, :mercado, presence: true
+  validates :codigo, uniqueness: { scope: :mercado }
+  validates :cnpj, presence: true, if: :fundo?
+
+  scope :ativos, -> { where(arquivado_em: nil) }
 
   def nome_amigavel
-    if tipo == 'fundo'
-      "#{nome} (#{cnpj})"
-    elsif descricao.blank?
-      nome
-    else
-      "#{nome} (#{descricao})"
-    end
+    return "#{codigo} (#{cnpj})" if fundo?
+    descricao.blank? ? codigo : "#{codigo} (#{descricao})"
   end
 
-  def usd?
-    moeda_negociacao == 'USD'
-  end
+  def usd? = moeda_negociacao.codigo == "USD"
+  def brl? = moeda_negociacao.codigo == "BRL"
+  def na_bolsa? = tipo.in?(self.class.tipos_bolsa)
 
-  def brl?
-    moeda_negociacao == 'BRL'
-  end
-
-  def na_bolsa?
-    tipo.in? Ativo.tipos_bolsa
-  end
-
-  def self.tipos_bolsa
-    %w[acao fii etf]
-  end
-
+  def self.tipos_bolsa = %w[acao fii etf]
 
   private
 
-  def ativo_suportado?
-    return unless Config.busca_cotacao_enabled?(tipo)
-
-    unless CotacaoService.ativo_suportado?(nome, moeda_negociacao, tipo)
-      errors.add(:base, "Ativo não é suportado porque não conseguimos obter cotações")
-      Rails.logger.error "Ativo não é suportado porque não conseguimos obter cotações"
-      throw :abort
-    end
+  def normalizar_codigo_e_cnpj
+    self.codigo = codigo.to_s.strip.upcase
+    self.cnpj = cnpj.to_s.gsub(/\D/, "").presence
   end
-
-  # Se estamos manipulando um ativo tipo "fundo", é obrigatório
-  # especificar um CNPJ porque esta informação é usada para buscar valor de cotas
-  def checa_cnpj
-    if tipo == 'fundo' && cnpj.blank?
-      errors.add(:base, "Informação de CNPJ para fundo #{nome} faltando")
-      throw :abort
-    end
-  end
-
 end

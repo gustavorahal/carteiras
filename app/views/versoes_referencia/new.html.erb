@@ -1,0 +1,7 @@
+<h1>Nova versão de <%= @referencia.nome %></h1>
+<%= form_with model: @versao, url: referencia_versoes_referencia_index_path(@referencia) do |f| %>
+  <div class="mb-3"><%= f.label :vigencia_inicial %><%= f.date_field :vigencia_inicial, class: "form-control" %></div>
+  <h2>Alocações</h2><p>Informe até dez ativos; a soma deve ser exatamente 100% para publicar.</p>
+  <% 10.times do |i| %><%= fields_for "versao_referencia[alocacoes][#{i}]" do |a| %><div class="row g-2 mb-2"><div class="col"><%= a.collection_select :ativo_id, @ativos, :id, :codigo, { include_blank: true }, class: "form-select" %></div><div class="col"><%= a.text_field :categoria, placeholder: "Categoria", class: "form-control" %></div><div class="col"><%= a.number_field :percentual, step: :any, placeholder: "%", class: "form-control" %></div></div><% end %><% end %>
+  <%= f.submit class: "btn btn-primary" %>
+<% end %>

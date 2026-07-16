@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-center">
+  <h1><%= @carteira.nome %></h1>
+  <div>
+    <%= link_to "Eventos", carteira_eventos_financeiros_path(@carteira), class: "btn btn-outline-primary" %>
+    <%= link_to "Contas", carteira_contas_investimento_index_path(@carteira), class: "btn btn-outline-primary" %>
+    <%= link_to "Importar extrato", new_carteira_importacoes_extrato_path(@carteira), class: "btn btn-outline-primary" %>
+    <%= link_to "Comparar referência", carteira_comparacao_referencia_path(@carteira), class: "btn btn-outline-primary" %>
+    <%= link_to "Resultados econômicos", carteira_ganho_de_capital_path(@carteira), class: "btn btn-outline-primary" %>
+  </div>
+</div>
+
+<p>Posição em <%= l @posicao.data %>. Cotações defasadas são sinalizadas e valores incompletos não são estimados.</p>
+<table class="table table-striped">
+  <thead><tr><th>Conta</th><th>Ativo</th><th>Quantidade</th><th>Custo</th><th>Cotação</th><th>Câmbio</th><th>Valor base</th></tr></thead>
+  <tbody>
+    <% @posicao.itens.each do |item| %>
+      <tr>
+        <td><%= item.posicao.conta_investimento.nome %></td>
+        <td><%= item.posicao.ativo.codigo %></td>
+        <td><%= item.posicao.quantidade %></td>
+        <td><%= item.posicao.custo_total %></td>
+        <td><%= item.cotacao || "sem cotação" %><%= " (#{l item.data_cotacao}, defasada)" if item.cotacao_defasada %></td>
+        <td><%= item.data_cambio ? l(item.data_cambio) : (item.posicao.ativo.moeda_negociacao_id == @carteira.moeda_base_id ? "moeda-base" : "sem câmbio") %><%= " (defasado)" if item.cambio_defasado %></td>
+        <td><%= item.valor_base || "incompleto" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Caixa</h2>
+<ul><% @posicao.saldos_caixa.each do |conta_id, saldo| %><li>Conta #<%= conta_id %>: <%= saldo %></li><% end %></ul>

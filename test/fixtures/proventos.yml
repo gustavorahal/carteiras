@@ -1,9 +1,0 @@
-dividendo_itsa4:
-  carteira: example_growth
-  ativo: itsa4
-  corretora: xp
-  evento: dividendo
-  moeda: BRL
-  data: 2021-04-30
-  quantidade: 100
-  valor_liquido: 1000

@@ -1,0 +1,8 @@
+<h1>Posição em <%= l @data %></h1>
+<p class="alert alert-warning">Relatório patrimonial econômico. Revise classificação e exigências fiscais antes de usar em declaração.</p>
+<table class="table"><thead><tr><th>Corretora</th><th>Conta</th><th>Ativo</th><th>Quantidade</th><th>Custo base</th></tr></thead><tbody>
+  <% @estado.each do |(conta_id, ativo_id), posicao| %>
+    <% next if posicao[:quantidade].zero? %>
+    <tr><td><%= @contas.fetch(conta_id).corretora.nome %></td><td><%= @contas.fetch(conta_id).nome %></td><td><%= @ativos.fetch(ativo_id).codigo %></td><td><%= posicao[:quantidade] %></td><td><%= posicao[:custo_total_base] %></td></tr>
+  <% end %>
+</tbody></table>

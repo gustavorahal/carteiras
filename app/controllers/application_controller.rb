@@ -6,16 +6,8 @@ class ApplicationController < ActionController::Base
   private
 
   def set_data
-    @data = if params[:data].present?
-              params[:data].to_date
-            else
-              Date.today
-            end
-    return unless user_signed_in?
-
-    @cotacao_usdbrl = CotacaoService.moedas("USDBRL", @data)
-  rescue StandardError => e
-    Rails.logger.warn "Não foi possível carregar cotação USDBRL para o menu: #{e.message}"
-    @cotacao_usdbrl = nil
+    @data = params[:data].present? ? Date.parse(params[:data].to_s) : Date.current
+  rescue Date::Error
+    @data = Date.current
   end
 end

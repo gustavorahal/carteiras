@@ -1,0 +1,10 @@
+<h1>Cotação de câmbio manual</h1>
+<%= form_with model: @cotacao, url: cotacoes_cambio_index_path do |f| %>
+  <% @cotacao.errors.full_messages.each do |erro| %><div class="alert alert-danger"><%= erro %></div><% end %>
+  <div class="mb-3"><%= f.label :moeda_origem_id %><%= f.collection_select :moeda_origem_id, @moedas, :id, :codigo, {}, class: "form-select" %></div>
+  <div class="mb-3"><%= f.label :moeda_destino_id %><%= f.collection_select :moeda_destino_id, @moedas, :id, :codigo, {}, class: "form-select" %></div>
+  <div class="mb-3"><%= f.label :data %><%= f.date_field :data, class: "form-control" %></div>
+  <div class="mb-3"><%= f.label :taxa %><%= f.number_field :taxa, step: :any, min: 0, class: "form-control" %></div>
+  <div class="mb-3"><%= f.label :fonte_cotacao_id %><%= f.collection_select :fonte_cotacao_id, @fontes, :id, :nome, {}, class: "form-select" %></div>
+  <%= f.submit class: "btn btn-primary" %>
+<% end %>

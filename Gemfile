@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "4.0.2"
+ruby "4.0.5"
 
 gem "rails", "~> 8.1", ">= 8.1.3"
 gem "rails-i18n", "~> 8.1"
 gem "propshaft"
 gem "dartsass-rails"
-gem "pg", "~> 1.6", force_ruby_platform: true
+gem "pg", "~> 1.6"
 gem "puma", ">= 6.0"
 gem "importmap-rails"
 gem "turbo-rails"

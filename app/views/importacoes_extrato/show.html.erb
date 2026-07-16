@@ -1,0 +1,16 @@
+<div class="d-flex justify-content-between"><h1><%= @importacao.nome_original %></h1><%= button_to "Processar itens", processar_carteira_importacoes_extrato_path(@carteira, @importacao), class: "btn btn-primary" %></div>
+<p>Estado: <%= @importacao.estado %>. O arquivo original não foi armazenado.</p>
+<table class="table"><thead><tr><th>#</th><th>Data</th><th>Descrição</th><th>Valor</th><th>Saldo informado</th><th>Conciliação</th></tr></thead><tbody>
+<% @itens.each do |item| %><tr><td><%= item.ordem %></td><td><%= l item.data_movimentacao %></td><td><%= item.descricao %></td><td><%= item.valor %></td><td><%= item.saldo_informado %></td><td>
+  <%= item.estado_conciliacao %>
+  <% if item.ambiguo? || item.pendente? %>
+    <%= form_with url: resolver_item_carteira_importacoes_extrato_path(@carteira, @importacao), class: "mt-2" do |f| %>
+      <%= f.hidden_field :item_id, value: item.id %>
+      <%= f.select :decisao, [["Vincular lançamento", "vincular"], ["Criar novo evento", "criar_evento"], ["Ignorar", "ignorar"]], {}, class: "form-select form-select-sm" %>
+      <%= f.select :lancamento_caixa_id, @lancamentos.select { |l| l.valor == item.valor && l.data_efetiva.between?(item.data_liquidacao - 3.days, item.data_liquidacao + 3.days) }.map { |l| ["#{l.data_efetiva} — #{l.natureza} — #{l.valor}", l.id] }, { include_blank: true }, class: "form-select form-select-sm" %>
+      <%= f.select :classificacao, [["Aporte", "aporte"], ["Resgate", "resgate"]], { include_blank: true }, class: "form-select form-select-sm" %>
+      <%= f.submit "Resolver", class: "btn btn-sm btn-outline-primary" %>
+    <% end %>
+  <% end %>
+</td></tr><% end %>
+</tbody></table>

@@ -1,0 +1,2 @@
+class ContaInvestimentoPolicy < ApplicationPolicy
+end

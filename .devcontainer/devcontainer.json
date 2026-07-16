@@ -4,13 +4,13 @@
   "service": "app",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-  "forwardPorts": [3000, 5432],
+  "forwardPorts": [3000, "db:5432"],
   "portsAttributes": {
     "3000": {
       "label": "Rails",
       "onAutoForward": "notify"
     },
-    "5432": {
+    "db:5432": {
       "label": "PostgreSQL"
     }
   },

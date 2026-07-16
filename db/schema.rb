@@ -38,13 +38,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.bigint "moeda_negociacao_id", null: false
     t.string "tipo", null: false
     t.datetime "updated_at", null: false
-    t.index ["cnpj"], name: "idx_ativos_cnpj_unico_quando_aplicavel", unique: true, where: "((cnpj IS NOT NULL) AND ((tipo)::text = ANY ((ARRAY['fundo'::character varying, 'fii'::character varying])::text[])))"
+    t.index ["cnpj"], name: "idx_ativos_cnpj_unico_quando_aplicavel", unique: true, where: "((cnpj IS NOT NULL) AND ((tipo)::text = ANY (ARRAY[('fundo'::character varying)::text, ('fii'::character varying)::text])))"
     t.index ["cnpj"], name: "index_ativos_on_cnpj"
     t.index ["codigo", "mercado"], name: "index_ativos_on_codigo_and_mercado", unique: true
     t.index ["moeda_exposicao_id"], name: "index_ativos_on_moeda_exposicao_id"
     t.index ["moeda_negociacao_id"], name: "index_ativos_on_moeda_negociacao_id"
     t.check_constraint "codigo::text = upper(codigo::text)", name: "ativos_codigo_maiusculo"
-    t.check_constraint "tipo::text = ANY (ARRAY['acao'::character varying, 'fii'::character varying, 'fundo'::character varying, 'criptomoeda'::character varying, 'tesouro'::character varying, 'etf'::character varying, 'debenture'::character varying, 'cra'::character varying, 'cdb'::character varying]::text[])", name: "ativos_tipo_valido"
+    t.check_constraint "tipo::text = ANY (ARRAY['acao'::character varying::text, 'fii'::character varying::text, 'fundo'::character varying::text, 'criptomoeda'::character varying::text, 'tesouro'::character varying::text, 'etf'::character varying::text, 'debenture'::character varying::text, 'cra'::character varying::text, 'cdb'::character varying::text])", name: "ativos_tipo_valido"
   end
 
   create_table "carteiras", force: :cascade do |t|
@@ -149,14 +149,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["conta_investimento_id"], name: "index_eventos_corporativos_on_conta_investimento_id"
     t.index ["evento_financeiro_id"], name: "index_eventos_corporativos_on_evento_financeiro_id", unique: true
     t.index ["moeda_id"], name: "index_eventos_corporativos_on_moeda_id"
-    t.check_constraint "(tipo::text = ANY (ARRAY['desdobramento'::character varying, 'grupamento'::character varying]::text[])) AND (fator IS NOT NULL OR quantidade_final IS NOT NULL) OR tipo::text = 'incorporacao'::text AND ativo_destino_id IS NOT NULL AND (fator IS NOT NULL OR quantidade_final IS NOT NULL)", name: "eventos_corporativos_parametros_suficientes"
+    t.check_constraint "(tipo::text = ANY (ARRAY['desdobramento'::character varying::text, 'grupamento'::character varying::text])) AND (fator IS NOT NULL OR quantidade_final IS NOT NULL) OR tipo::text = 'incorporacao'::text AND ativo_destino_id IS NOT NULL AND (fator IS NOT NULL OR quantidade_final IS NOT NULL)", name: "eventos_corporativos_parametros_suficientes"
     t.check_constraint "ativo_destino_id IS NULL OR ativo_origem_id <> ativo_destino_id", name: "eventos_corporativos_ativos_distintos"
     t.check_constraint "fator IS NULL OR fator > 0::numeric", name: "eventos_corporativos_fator_positivo"
     t.check_constraint "quantidade_final IS NULL OR quantidade_final >= 0::numeric", name: "eventos_corporativos_quantidade_valida"
     t.check_constraint "regra_alocacao_custo::text <> 'realizar_fracao'::text OR valor_fracao > 0::numeric AND percentual_custo_fracao > 0::numeric AND percentual_custo_fracao <= 100::numeric", name: "eventos_corporativos_alocacao_fracao_explicita"
-    t.check_constraint "regra_alocacao_custo::text = ANY (ARRAY['preservar'::character varying, 'realizar_fracao'::character varying]::text[])", name: "eventos_corporativos_regra_valida"
+    t.check_constraint "regra_alocacao_custo::text = ANY (ARRAY['preservar'::character varying::text, 'realizar_fracao'::character varying::text])", name: "eventos_corporativos_regra_valida"
     t.check_constraint "taxa_conversao_base > 0::numeric", name: "eventos_corporativos_cambio_positivo"
-    t.check_constraint "tipo::text = ANY (ARRAY['desdobramento'::character varying, 'grupamento'::character varying, 'incorporacao'::character varying]::text[])", name: "eventos_corporativos_tipo_valido"
+    t.check_constraint "tipo::text = ANY (ARRAY['desdobramento'::character varying::text, 'grupamento'::character varying::text, 'incorporacao'::character varying::text])", name: "eventos_corporativos_tipo_valido"
     t.check_constraint "valor_fracao IS NULL OR valor_fracao = 0::numeric OR moeda_id IS NOT NULL", name: "eventos_corporativos_fracao_com_moeda"
     t.check_constraint "valor_fracao IS NULL OR valor_fracao = 0::numeric OR regra_alocacao_custo::text = 'realizar_fracao'::text", name: "eventos_corporativos_fracao_realizada"
     t.check_constraint "valor_fracao IS NULL OR valor_fracao >= 0::numeric", name: "eventos_corporativos_fracao_valida"
@@ -183,9 +183,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["evento_revertido_id"], name: "index_eventos_financeiros_on_evento_revertido_id"
     t.index ["usuario_responsavel_id"], name: "index_eventos_financeiros_on_usuario_responsavel_id"
     t.check_constraint "estado::text <> 'confirmado'::text OR sequencia_na_data IS NOT NULL AND sequencia_na_data > 0", name: "eventos_confirmados_com_sequencia"
-    t.check_constraint "estado::text = ANY (ARRAY['rascunho'::character varying, 'confirmado'::character varying]::text[])", name: "eventos_estado_valido"
-    t.check_constraint "origem::text = ANY (ARRAY['manual'::character varying, 'importacao'::character varying, 'sistema'::character varying]::text[])", name: "eventos_origem_valida"
-    t.check_constraint "tipo::text = ANY (ARRAY['operacao'::character varying, 'provento'::character varying, 'movimentacao_caixa'::character varying, 'transferencia_caixa'::character varying, 'transferencia_custodia'::character varying, 'evento_corporativo'::character varying, 'reversao'::character varying]::text[])", name: "eventos_tipo_valido"
+    t.check_constraint "estado::text = ANY (ARRAY['rascunho'::character varying::text, 'confirmado'::character varying::text])", name: "eventos_estado_valido"
+    t.check_constraint "origem::text = ANY (ARRAY['manual'::character varying::text, 'importacao'::character varying::text, 'sistema'::character varying::text])", name: "eventos_origem_valida"
+    t.check_constraint "tipo::text = ANY (ARRAY['operacao'::character varying::text, 'provento'::character varying::text, 'movimentacao_caixa'::character varying::text, 'transferencia_caixa'::character varying::text, 'transferencia_custodia'::character varying::text, 'evento_corporativo'::character varying::text, 'reversao'::character varying::text])", name: "eventos_tipo_valido"
   end
 
   create_table "fontes_cotacao", force: :cascade do |t|
@@ -217,7 +217,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["conta_caixa_id", "estado"], name: "index_importacoes_extrato_on_conta_caixa_id_and_estado"
     t.index ["conta_caixa_id"], name: "index_importacoes_extrato_on_conta_caixa_id"
     t.index ["corretora_id"], name: "index_importacoes_extrato_on_corretora_id"
-    t.check_constraint "estado::text = ANY (ARRAY['normalizada'::character varying, 'processando'::character varying, 'concluida'::character varying, 'falhou'::character varying]::text[])", name: "importacoes_estado_valido"
+    t.check_constraint "estado::text = ANY (ARRAY['normalizada'::character varying::text, 'processando'::character varying::text, 'concluida'::character varying::text, 'falhou'::character varying::text])", name: "importacoes_estado_valido"
   end
 
   create_table "investidores", force: :cascade do |t|
@@ -260,7 +260,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["moeda_id"], name: "index_itens_extrato_importado_on_moeda_id"
     t.index ["usuario_responsavel_id"], name: "index_itens_extrato_importado_on_usuario_responsavel_id"
     t.check_constraint "NOT (evento_financeiro_id IS NOT NULL AND lancamento_caixa_id IS NOT NULL)", name: "itens_conciliacao_exclusiva"
-    t.check_constraint "estado_conciliacao::text = ANY (ARRAY['pendente'::character varying, 'conciliado'::character varying, 'evento_criado'::character varying, 'ambiguo'::character varying, 'ignorado'::character varying]::text[])", name: "itens_estado_conciliacao_valido"
+    t.check_constraint "estado_conciliacao::text = ANY (ARRAY['pendente'::character varying::text, 'conciliado'::character varying::text, 'evento_criado'::character varying::text, 'ambiguo'::character varying::text, 'ignorado'::character varying::text])", name: "itens_estado_conciliacao_valido"
   end
 
   create_table "lancamentos_caixa", force: :cascade do |t|
@@ -289,7 +289,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["codigo"], name: "index_moedas_on_codigo", unique: true
     t.check_constraint "casas_decimais >= 0 AND casas_decimais <= 18", name: "moedas_casas_decimais_validas"
     t.check_constraint "codigo::text = upper(codigo::text)", name: "moedas_codigo_maiusculo"
-    t.check_constraint "tipo::text = ANY (ARRAY['fiduciaria'::character varying, 'criptoativo'::character varying]::text[])", name: "moedas_tipo_valido"
+    t.check_constraint "tipo::text = ANY (ARRAY['fiduciaria'::character varying::text, 'criptoativo'::character varying::text])", name: "moedas_tipo_valido"
   end
 
   create_table "movimentacoes_caixa", force: :cascade do |t|
@@ -303,9 +303,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.decimal "valor", precision: 30, scale: 12, null: false
     t.index ["conta_caixa_id"], name: "index_movimentacoes_caixa_on_conta_caixa_id"
     t.index ["evento_financeiro_id"], name: "index_movimentacoes_caixa_on_evento_financeiro_id", unique: true
-    t.check_constraint "direcao::text = ANY (ARRAY['entrada'::character varying, 'saida'::character varying]::text[])", name: "movimentacoes_direcao_valida"
+    t.check_constraint "direcao::text = ANY (ARRAY['entrada'::character varying::text, 'saida'::character varying::text])", name: "movimentacoes_direcao_valida"
     t.check_constraint "natureza::text = 'aporte'::text AND direcao::text = 'entrada'::text OR natureza::text = 'resgate'::text AND direcao::text = 'saida'::text OR natureza::text = 'ajuste'::text", name: "movimentacoes_natureza_direcao_coerentes"
-    t.check_constraint "natureza::text = ANY (ARRAY['aporte'::character varying, 'resgate'::character varying, 'ajuste'::character varying]::text[])", name: "movimentacoes_natureza_valida"
+    t.check_constraint "natureza::text = ANY (ARRAY['aporte'::character varying::text, 'resgate'::character varying::text, 'ajuste'::character varying::text])", name: "movimentacoes_natureza_valida"
     t.check_constraint "valor > 0::numeric", name: "movimentacoes_valor_positivo"
   end
 
@@ -334,7 +334,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["conta_investimento_id"], name: "index_operacoes_on_conta_investimento_id"
     t.index ["evento_financeiro_id"], name: "index_operacoes_on_evento_financeiro_id", unique: true
     t.index ["moeda_id"], name: "index_operacoes_on_moeda_id"
-    t.check_constraint "natureza::text = ANY (ARRAY['compra'::character varying, 'venda'::character varying]::text[])", name: "operacoes_natureza_valida"
+    t.check_constraint "natureza::text = ANY (ARRAY['compra'::character varying::text, 'venda'::character varying::text])", name: "operacoes_natureza_valida"
     t.check_constraint "quantidade > 0::numeric AND preco_unitario > 0::numeric", name: "operacoes_valores_positivos"
     t.check_constraint "taxa >= 0::numeric AND emolumentos >= 0::numeric AND corretagem >= 0::numeric AND iss_iof >= 0::numeric AND irrf >= 0::numeric AND outros >= 0::numeric", name: "operacoes_custos_nao_negativos"
     t.check_constraint "taxa_conversao_base > 0::numeric AND taxa_conversao_fiscal > 0::numeric", name: "operacoes_cambio_positivo"
@@ -380,7 +380,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.index ["moeda_id"], name: "index_proventos_on_moeda_id"
     t.check_constraint "quantidade_referencia >= 0::numeric AND valor_bruto >= 0::numeric AND tributos >= 0::numeric AND valor_liquido >= 0::numeric AND valor_liquido = (valor_bruto - tributos)", name: "proventos_valores_coerentes"
     t.check_constraint "taxa_conversao_base > 0::numeric AND taxa_conversao_fiscal > 0::numeric", name: "proventos_cambio_positivo"
-    t.check_constraint "tipo::text = ANY (ARRAY['dividendo'::character varying, 'jcp'::character varying, 'rendimento'::character varying]::text[])", name: "proventos_tipo_valido"
+    t.check_constraint "tipo::text = ANY (ARRAY['dividendo'::character varying::text, 'jcp'::character varying::text, 'rendimento'::character varying::text])", name: "proventos_tipo_valido"
   end
 
   create_table "referencias", force: :cascade do |t|
@@ -420,7 +420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.decimal "valor_caixa", precision: 30, scale: 12
     t.index ["carteira_id", "data"], name: "idx_resumos_diarios_unico", unique: true
     t.index ["carteira_id"], name: "index_resumos_diarios_carteira_on_carteira_id"
-    t.check_constraint "estado_completude::text = ANY (ARRAY['completo'::character varying, 'incompleto'::character varying, 'sem_patrimonio_inicial'::character varying]::text[])", name: "resumos_estado_valido"
+    t.check_constraint "estado_completude::text = ANY (ARRAY['completo'::character varying::text, 'incompleto'::character varying::text, 'sem_patrimonio_inicial'::character varying::text])", name: "resumos_estado_valido"
   end
 
   create_table "transferencias_caixa", force: :cascade do |t|
@@ -484,7 +484,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.date "vigencia_inicial", null: false
     t.index ["referencia_id", "vigencia_inicial"], name: "idx_versoes_referencia_vigencia", unique: true
     t.index ["referencia_id"], name: "index_versoes_referencia_on_referencia_id"
-    t.check_constraint "estado::text = ANY (ARRAY['rascunho'::character varying, 'publicada'::character varying, 'encerrada'::character varying]::text[])", name: "versoes_referencia_estado_valido"
+    t.check_constraint "estado::text = ANY (ARRAY['rascunho'::character varying::text, 'publicada'::character varying::text, 'encerrada'::character varying::text])", name: "versoes_referencia_estado_valido"
   end
 
   add_foreign_key "alocacoes_referencia", "ativos", on_delete: :restrict

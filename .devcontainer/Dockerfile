@@ -1,4 +1,4 @@
-FROM ruby:4.0.2-bookworm
+FROM ruby:4.0.5-bookworm
 
 ARG USERNAME=vscode
 ARG USER_UID=1000

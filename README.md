@@ -12,15 +12,15 @@ The public version of this repository has been sanitized to remove private finan
 
 ## Development Container
 
-This repository includes a Dev Container for the current Rails setup. It runs Ruby `4.0.2`, Rails `8.1.x`, PostgreSQL `18.4`, Chromium/Chromedriver for system tests, native build dependencies, and bundled gems inside a Docker volume.
+This repository includes a Dev Container for the current Rails setup. It runs Ruby `4.0.5`, Rails `8.1.x`, PostgreSQL `18.4`, Chromium/Chromedriver for system tests, native build dependencies, and bundled gems inside a Docker volume. The Dev Container is the canonical development and test environment; a host PostgreSQL installation is not required.
 
-Open the repository in a Dev Container-compatible editor and let the `postCreateCommand` run. The setup loads `db/schema.rb` directly instead of replaying the legacy migrations. Then start Rails from inside the container:
+Open the repository in a Dev Container-compatible editor and let the `postCreateCommand` run. The setup prepares the databases from the consolidated baseline schema. Then start Rails from inside the container:
 
 ```sh
 bin/rails server -b 0.0.0.0
 ```
 
-The app is forwarded on port `3000`. PostgreSQL runs as service `db` with user/password `carteiras`. The database is rebuilt from `db/schema.rb` inside the dev container.
+The app is forwarded on port `3000`. PostgreSQL runs only in the Compose service `db`, with user/password `carteiras`; Rails receives `DATABASE_HOST=db` automatically.
 
 Useful verification commands inside the container:
 
@@ -28,4 +28,12 @@ Useful verification commands inside the container:
 bin/rails zeitwerk:check
 bin/rails test
 bin/rails test:system
+```
+
+The same environment can be started without an editor:
+
+```sh
+docker compose -f .devcontainer/docker-compose.yml up -d --build
+docker compose -f .devcontainer/docker-compose.yml exec app bin/rails db:prepare
+docker compose -f .devcontainer/docker-compose.yml exec app bin/rails test
 ```

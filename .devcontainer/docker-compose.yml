@@ -16,7 +16,7 @@ services:
       SELENIUM_BROWSER: chrome
     volumes:
       - ..:/workspace:cached
-      - bundle-cache-ruby-4:/usr/local/bundle
+      - bundle-cache-ruby-4-0-5:/usr/local/bundle
     ports:
       - "3000:3000"
     depends_on:
@@ -39,5 +39,5 @@ services:
       retries: 12
 
 volumes:
-  bundle-cache-ruby-4:
+  bundle-cache-ruby-4-0-5:
   postgres-18-cluster:

@@ -5,6 +5,7 @@ class Investidor < ApplicationRecord
   belongs_to :espaco, inverse_of: :investidores
   has_many :carteiras, inverse_of: :investidor
   has_many :transacoes_financeiras, class_name: "TransacaoFinanceira", inverse_of: :investidor
+  has_many :importacoes_financeiras, class_name: "ImportacaoFinanceira", inverse_of: :investidor
 
   normaliza_texto :nome
   validates :nome, presence: true, uniqueness: { scope: :espaco_id, case_sensitive: false }

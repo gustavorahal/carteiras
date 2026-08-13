@@ -2,4 +2,5 @@
 <div class="col"><%= select_tag "atributos[negociacoes][][natureza]", options_for_select(%w[compra venda], linha[:natureza]), class: "form-select" %></div>
 <div class="col"><%= text_field_tag "atributos[negociacoes][][quantidade]", linha[:quantidade], class: "form-control", placeholder: "Quantidade" %></div>
 <div class="col"><%= text_field_tag "atributos[negociacoes][][preco_unitario]", linha[:preco_unitario], class: "form-control", placeholder: "Preço" %></div>
+<div class="col"><%= text_field_tag "atributos[negociacoes][][custo_alocado]", linha[:custo_alocado], class: "form-control", placeholder: "Custo opcional" %></div>
 <div class="col-auto"><button type="button" class="btn btn-outline-danger" data-action="negociacoes#remover">Remover</button></div></div>

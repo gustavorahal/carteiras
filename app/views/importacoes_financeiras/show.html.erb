@@ -1,0 +1,38 @@
+<h1><%= @importacao.nome_original %></h1>
+<dl class="row">
+  <dt class="col-sm-3">Conta</dt><dd class="col-sm-9"><%= @importacao.conta_investimento.nome %></dd>
+  <dt class="col-sm-3">Formato</dt><dd class="col-sm-9"><%= @importacao.formato %> · parser <%= @importacao.versao_parser %></dd>
+  <dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><%= @importacao.estado %></dd>
+</dl>
+<% if flash.now[:alert].present? %><div class="alert alert-danger"><%= flash.now[:alert] %></div><% end %>
+<% if @importacao.erro_resumido.present? %><div class="alert alert-danger"><%= @importacao.erro_resumido %></div><% end %>
+
+<% dados = @importacao.dados_extraidos %>
+<% if dados["tipo_documento"] == "notas_negociacao" %>
+  <%= form_with url: criar_rascunhos_espaco_importacoes_financeira_path(@espaco, @importacao), method: :post do %>
+    <% Array(dados["notas"]).each_with_index do |nota, ni| %>
+      <section class="card mb-3"><div class="card-body"><h2 class="h5">Nota <%= nota["numero"] %> · <%= nota["data_negociacao"] %></h2>
+        <p>Liquidação <%= nota["data_liquidacao"] %> · conta externa <%= nota["conta_externa"] %></p>
+        <% unless nota["taxa_conversao_base"].present? %><div class="mb-2"><%= label_tag nil, "Câmbio para a moeda-base", class: "form-label" %><%= text_field_tag "resolucoes[nota.#{ni}.taxa_conversao_base]", nil, class: "form-control" %></div><% end %>
+        <table class="table table-sm"><thead><tr><th>Ativo</th><th>Natureza</th><th>Quantidade</th><th>Preço</th><th>Custo alocado opcional</th></tr></thead><tbody>
+          <% Array(nota["negociacoes"]).each_with_index do |linha, li| %><tr>
+            <td><% if linha["ativo_id"] %><%= @ativos.find { |a| a.id == linha["ativo_id"] }&.codigo || linha["ticker"] %><% else %><%= select_tag "resolucoes[nota.#{ni}.negociacao.#{li}.ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo), include_blank: linha["ticker"].presence || linha["descricao"], class: "form-select" %><% end %></td>
+            <td><%= linha["natureza"] %></td><td><%= linha["quantidade"] %></td><td><%= linha["preco_unitario"] %></td>
+            <td><%= text_field_tag "resolucoes[nota.#{ni}.custo.#{li}]", linha["custo_alocado"], class: "form-control form-control-sm" %></td>
+          </tr><% end %>
+        </tbody></table>
+        <div class="row"><div class="col">Bruto: <%= nota["bruto"] %></div><div class="col">Custos: <%= nota["custo_operacional_total"] %></div><div class="col">Líquido calculado: <%= nota["liquido_calculado"] %></div><div class="col">Líquido da nota: <%= nota["liquido_informado"] %></div><div class="col">Diferença: <%= nota["diferenca"] %></div></div>
+      </div></section>
+    <% end %>
+    <% if @importacao.estado.in?(%w[pendente analisada]) %><%= submit_tag "Criar rascunhos", class: "btn btn-primary" %><% end %>
+  <% end %>
+<% elsif dados["tipo_documento"] == "extrato" %>
+  <h2>Conciliação de caixa</h2>
+  <table class="table table-sm"><thead><tr><th>Liquidação</th><th>Descrição</th><th>Valor</th><th>Saldo informado</th><th>Situação</th></tr></thead><tbody>
+    <% @itens_extrato.each do |item| %><tr><td><%= item["data_liquidacao"] %></td><td><%= item["descricao"] %></td><td><%= item["valor"] %> <%= item["moeda"] %></td><td><%= item["saldo_informado"] %></td><td><%= item["estado_conciliacao"] %></td></tr><% end %>
+  </tbody></table>
+  <% if @importacao.estado.in?(%w[pendente analisada]) %><%= button_to "Conciliar e criar somente rascunhos inequívocos", criar_rascunhos_espaco_importacoes_financeira_path(@espaco, @importacao), class: "btn btn-primary" %><% end %>
+  <h2 class="mt-4">Conciliação de saldos</h2><table class="table table-sm saldos-conciliados"><thead><tr><th>Moeda</th><th>Data do saldo</th><th>Informado</th><th>Calculado na data</th><th>Diferença</th></tr></thead><tbody><% @saldos_conciliados.each do |linha| %><tr><td><%= linha[:caixa].moeda.codigo %></td><td><%= linha[:data_saldo] || "—" %></td><td><%= linha[:informado] || "não informado" %></td><td><%= linha[:calculado] %></td><td><%= linha[:diferenca] || "—" %></td></tr><% end %></tbody></table>
+  <h2>Conciliação de quantidades</h2><table class="table table-sm"><thead><tr><th>Ativo</th><th>Informado</th><th>Calculado</th><th>Diferença</th></tr></thead><tbody><% @posicoes_calculadas.each do |posicao| %><% informada = @posicoes_informadas[posicao.ativo_id]&.dig("quantidade")&.then { |q| BigDecimal(q) } %><tr><td><%= posicao.ativo.codigo %></td><td><%= informada || "não informada pelo extrato" %></td><td><%= posicao.quantidade %></td><td><%= informada ? posicao.quantidade - informada : "—" %></td></tr><% end %></tbody></table>
+  <p class="form-text">Diferenças permanecem visíveis para decisão manual; não há ajuste automático.</p>
+<% end %>

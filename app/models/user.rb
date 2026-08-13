@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :espacos, through: :membros_espaco
   has_many :transacoes_criadas, class_name: "TransacaoFinanceira", foreign_key: :criado_por_id, inverse_of: :criado_por
   has_many :transacoes_confirmadas, class_name: "TransacaoFinanceira", foreign_key: :confirmado_por_id, inverse_of: :confirmado_por
+  has_many :importacoes_financeiras, class_name: "ImportacaoFinanceira", foreign_key: :autor_id, inverse_of: :autor
 
   def papel_no(espaco)
     return "administrador" if administrador_sistema?

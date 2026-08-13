@@ -26,6 +26,28 @@
     <%= select_tag "atributos[tipo_provento]", options_for_select(%w[dividendo jcp rendimento juros outro], dados[:tipo_provento]), class: "form-select" %>
     <div class="row"><div class="col"><%= date_field_tag "atributos[data_base]", dados[:data_base] || Date.current, class: "form-control" %></div><div class="col"><%= date_field_tag "atributos[data_pagamento]", dados[:data_pagamento] || Date.current, class: "form-control" %></div></div>
     <% { quantidade_referencia: "Quantidade", valor_bruto: "Bruto", retencoes: "Retenções", taxa_conversao_base: "Taxa base" }.each do |campo, rotulo| %><%= text_field_tag "atributos[#{campo}]", dados.fetch(campo, campo == :taxa_conversao_base ? "1" : "0"), class: "form-control", placeholder: rotulo %><% end %>
+  <% elsif @tipo == "saldo_inicial" %>
+    <%= select_tag "atributos[conta_investimento_id]", options_from_collection_for_select(@contas_investimento, :id, ->(c) { "#{c.carteira.nome} · #{c.nome}" }, dados[:conta_investimento_id]), class: "form-select" %>
+    <%= select_tag "atributos[ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_id]), class: "form-select" %>
+    <%= text_field_tag "atributos[quantidade]", dados[:quantidade], class: "form-control", placeholder: "Quantidade" %>
+    <%= text_field_tag "atributos[custo_total_local]", dados[:custo_total_local], class: "form-control", placeholder: "Custo total na moeda do ativo" %>
+    <%= text_field_tag "atributos[custo_total_base]", dados[:custo_total_base], class: "form-control", placeholder: "Custo total na moeda-base" %>
+    <%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %>
+    <p class="form-text">Use apenas para inaugurar uma posição documentada. Não gera caixa.</p>
+  <% elsif @tipo == "transferencia_custodia" %>
+    <%= select_tag "atributos[conta_origem_id]", options_from_collection_for_select(@contas_investimento, :id, ->(c) { "#{c.carteira.nome} · #{c.nome}" }, dados[:conta_origem_id]), class: "form-select" %>
+    <%= select_tag "atributos[conta_destino_id]", options_from_collection_for_select(@contas_investimento, :id, ->(c) { "#{c.carteira.nome} · #{c.nome}" }, dados[:conta_destino_id]), class: "form-select" %>
+    <%= select_tag "atributos[ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_id]), class: "form-select" %>
+    <%= text_field_tag "atributos[quantidade]", dados[:quantidade], class: "form-control", placeholder: "Quantidade" %>
+    <%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %>
+  <% elsif @tipo == "evento_corporativo" %>
+    <%= select_tag "atributos[tipo_evento]", options_for_select(EventoCorporativo::TIPOS, dados[:tipo_evento]), class: "form-select" %>
+    <%= select_tag "atributos[conta_investimento_id]", options_from_collection_for_select(@contas_investimento, :id, ->(c) { "#{c.carteira.nome} · #{c.nome}" }, dados[:conta_investimento_id]), class: "form-select" %>
+    <%= select_tag "atributos[ativo_origem_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_origem_id]), class: "form-select" %>
+    <%= select_tag "atributos[ativo_destino_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_destino_id]), include_blank: "Sem ativo de destino", class: "form-select" %>
+    <%= text_field_tag "atributos[quantidade_final]", dados[:quantidade_final], class: "form-control", placeholder: "Quantidade final" %>
+    <%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %>
+    <p class="form-text">Conversão e incorporação exigem ativo de destino; os demais eventos preservam o ativo.</p>
   <% else %>
     <% movimento = @movimento || params[:movimento].presence_in(%w[aporte resgate transferencia cambio]) || "aporte" %>
     <%= hidden_field_tag "atributos[tipo_movimentacao]", movimento %>

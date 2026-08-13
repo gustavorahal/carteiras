@@ -70,22 +70,36 @@ module ConsultasFinanceiras
       contas = carteira.contas_investimento.pluck(:id).to_set
       caixas = carteira.contas_caixa.includes(:moeda).to_a
       lancamentos = LancamentoCaixa.where(conta_caixa_id: caixas.map(&:id), data_efetiva: ..fim).to_a
-      ativo_ids = todos_eventos.filter_map { |e| e[:detalhe]&.dig(:negociacoes)&.map { |n| n[:ativo_id] } }.flatten.uniq
+      ativo_ids = ativos_dos_eventos(todos_eventos)
       ativos = Ativo.where(id: ativo_ids).index_by(&:id)
-      cotacoes = Cotacoes.new(ativo_ids, caixas.map(&:moeda_id).uniq, carteira.moeda_base_id, fim)
-      fluxos = fluxos_externos(carteira, inicio, fim, cotacoes)
+      moedas = caixas.map(&:moeda_id) + ativos.values.map(&:moeda_negociacao_id)
+      cotacoes = Cotacoes.new(ativo_ids, moedas.uniq, carteira.moeda_base_id, fim)
+      fluxos = fluxos_externos(carteira, inicio, fim, cotacoes, todos_eventos, ativos)
+      cortes_saldo_inicial = datas_saldo_inicial(carteira, inicio, fim, todos_eventos)
       patrimonios = patrimonios_por_data(carteira, (inicio - 1)..fim, todos_eventos, contas,
         caixas, lancamentos, cotacoes, ativos)
       acumulado = BigDecimal("1")
       cadeia_valida = true
+      reiniciar_cadeia = false
       motivos = []
       pontos = (inicio..fim).map do |dia|
+        if reiniciar_cadeia
+          acumulado = BigDecimal("1")
+          cadeia_valida = true
+          reiniciar_cadeia = false
+        end
         inicial = patrimonios.fetch(dia - 1)
         final = patrimonios.fetch(dia)
         fluxo_info = fluxos.fetch(dia, { valor: BigDecimal("0"), defasagem: nil })
         fluxo = fluxo_info[:valor]
         maior_defasagem = [inicial[:maior_defasagem], final[:maior_defasagem], fluxo_info[:defasagem]].compact.max
-        if !inicial[:completo] || !final[:completo] || fluxo.nil?
+        if cortes_saldo_inicial.include?(dia)
+          estado = "corte_saldo_inicial"
+          twr = nil
+          cadeia_valida = false
+          reiniciar_cadeia = true
+          motivos << "corte_saldo_inicial"
+        elsif !inicial[:completo] || !final[:completo] || fluxo.nil?
           estado = "incompleto"
           twr = nil
           cadeia_valida = false
@@ -182,33 +196,56 @@ module ConsultasFinanceiras
       { valor: valor.round(12), completo:, maior_defasagem: defasagens.max }
     end
 
-    def fluxos_externos(carteira, inicio, fim, cotacoes)
+    def fluxos_externos(carteira, inicio, fim, cotacoes, todos_eventos, ativos)
       revertidas = TransacaoFinanceira.confirmadas.where.not(transacao_revertida_id: nil).pluck(:transacao_revertida_id).to_set
       movimentos = MovimentacaoCaixa.joins(:transacao_financeira)
         .where(transacoes_financeiras: { investidor_id: carteira.investidor_id, estado: "confirmada", data_competencia: inicio..fim })
         .where.not(transacao_financeira_id: revertidas)
         .includes({ conta_caixa_origem: { conta_investimento: :carteira } },
           { conta_caixa_destino: { conta_investimento: :carteira } }, :transacao_financeira)
-      movimentos.each_with_object({}) do |m, fluxos|
+      fluxos = movimentos.each_with_object({}) do |m, acumulados|
         data = m.data_efetiva
         case m.tipo
         when "aporte"
           next unless m.conta_caixa_destino.carteira.id == carteira.id
           valor = converter_fluxo(m.valor_destino, m.conta_caixa_destino.moeda_id, carteira.moeda_base_id, data, cotacoes)
-          acumular_fluxo!(fluxos, data, valor)
+          acumular_fluxo!(acumulados, data, valor)
         when "resgate"
           next unless m.conta_caixa_origem.carteira.id == carteira.id
           valor = converter_fluxo(m.valor_origem, m.conta_caixa_origem.moeda_id, carteira.moeda_base_id, data, cotacoes)
-          acumular_fluxo!(fluxos, data, valor && valor.merge(valor: -valor[:valor]))
+          acumular_fluxo!(acumulados, data, valor && valor.merge(valor: -valor[:valor]))
         when "transferencia"
           origem_aqui = m.conta_caixa_origem.carteira.id == carteira.id
           destino_aqui = m.conta_caixa_destino.carteira.id == carteira.id
           next if origem_aqui == destino_aqui
           conta = origem_aqui ? m.conta_caixa_origem : m.conta_caixa_destino
           valor = converter_fluxo(origem_aqui ? m.valor_origem : m.valor_destino, conta.moeda_id, carteira.moeda_base_id, data, cotacoes)
-          acumular_fluxo!(fluxos, data, valor && valor.merge(valor: origem_aqui ? -valor[:valor] : valor[:valor]))
+          acumular_fluxo!(acumulados, data, valor && valor.merge(valor: origem_aqui ? -valor[:valor] : valor[:valor]))
         end
       end
+
+      contas_da_carteira = carteira.contas_investimento.pluck(:id).to_set
+      contas_por_id = ContaInvestimento.where(carteira_id: carteira.investidor.carteiras.select(:id)).pluck(:id, :carteira_id).to_h
+      TransacoesFinanceiras::Interno.eventos_efetivos(todos_eventos).each do |evento|
+        next unless evento[:data_competencia].between?(inicio, fim)
+        d = evento[:detalhe]
+        case evento[:tipo]
+        when "saldo_inicial"
+          next unless contas_da_carteira.include?(d[:conta_investimento_id])
+          valor = converter_fluxo_ativo(d[:quantidade], ativos.fetch(d[:ativo_id]), carteira.moeda_base_id,
+            evento[:data_competencia], cotacoes)
+          acumular_fluxo!(fluxos, evento[:data_competencia], valor)
+        when "transferencia_custodia"
+          origem_aqui = contas_por_id[d[:conta_origem_id]] == carteira.id
+          destino_aqui = contas_por_id[d[:conta_destino_id]] == carteira.id
+          next if origem_aqui == destino_aqui
+          valor = converter_fluxo_ativo(d[:quantidade], ativos.fetch(d[:ativo_id]), carteira.moeda_base_id,
+            evento[:data_competencia], cotacoes)
+          valor = valor.merge(valor: -valor[:valor]) if valor && origem_aqui
+          acumular_fluxo!(fluxos, evento[:data_competencia], valor)
+        end
+      end
+      fluxos
     end
 
     def acumular_fluxo!(fluxos, data, valor)
@@ -224,6 +261,31 @@ module ConsultasFinanceiras
     def converter_fluxo(valor, origem_id, destino_id, data, cotacoes)
       cambio = cotacoes.cambio(origem_id, destino_id, data)
       cambio && { valor: (valor * cambio[:taxa]).round(12), defasagem: (data - cambio[:data]).to_i }
+    end
+
+    def converter_fluxo_ativo(quantidade, ativo, moeda_base_id, data, cotacoes)
+      preco = cotacoes.preco(ativo.id, data)
+      cambio = cotacoes.cambio(ativo.moeda_negociacao_id, moeda_base_id, data)
+      return unless preco && cambio
+
+      { valor: (quantidade * preco[:preco] * cambio[:taxa]).round(12),
+        defasagem: [(data - preco[:data]).to_i, (data - cambio[:data]).to_i].max }
+    end
+
+    def ativos_dos_eventos(eventos)
+      eventos.flat_map do |evento|
+        d = evento[:detalhe] || {}
+        Array(d[:negociacoes]).map { |negociacao| negociacao[:ativo_id] } +
+          [d[:ativo_id], d[:ativo_origem_id], d[:ativo_destino_id]].compact
+      end.uniq
+    end
+
+    def datas_saldo_inicial(carteira, inicio, fim, eventos)
+      contas = carteira.contas_investimento.pluck(:id).to_set
+      TransacoesFinanceiras::Interno.eventos_efetivos(eventos).filter_map do |evento|
+        next unless evento[:tipo] == "saldo_inicial" && evento[:data_competencia].between?(inicio, fim)
+        evento[:data_competencia] if contas.include?(evento[:detalhe][:conta_investimento_id])
+      end.to_set
     end
 
     def eventos(investidor)

@@ -1,7 +1,10 @@
 <div class="d-flex justify-content-between"><h1>Transações</h1>
   <% if !@espaco.arquivado? && current_user.pode_editar?(@espaco) %><div><%= link_to "Novo aporte", new_espaco_transacao_path(@espaco, tipo: "movimentacao_caixa", movimento: "aporte"), class: "btn btn-primary" %>
   <%= link_to "Nova nota", new_espaco_transacao_path(@espaco, tipo: "nota_negociacao"), class: "btn btn-outline-primary" %>
-  <%= link_to "Novo provento", new_espaco_transacao_path(@espaco, tipo: "provento"), class: "btn btn-outline-primary" %></div><% end %>
+  <%= link_to "Novo provento", new_espaco_transacao_path(@espaco, tipo: "provento"), class: "btn btn-outline-primary" %>
+  <%= link_to "Saldo inicial", new_espaco_transacao_path(@espaco, tipo: "saldo_inicial"), class: "btn btn-outline-secondary" %>
+  <%= link_to "Transferir custódia", new_espaco_transacao_path(@espaco, tipo: "transferencia_custodia"), class: "btn btn-outline-secondary" %>
+  <%= link_to "Evento corporativo", new_espaco_transacao_path(@espaco, tipo: "evento_corporativo"), class: "btn btn-outline-secondary" %></div><% end %>
 </div>
 <%= form_with url: espaco_transacoes_path(@espaco), method: :get, class: "row g-2 my-3" do |f| %>
   <div class="col"><%= f.collection_select :investidor_id, @espaco.investidores.order(:nome), :id, :nome, { include_blank: "Todos os investidores", selected: params[:investidor_id] }, class: "form-select" %></div>

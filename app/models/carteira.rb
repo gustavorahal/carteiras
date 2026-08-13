@@ -21,7 +21,14 @@ class Carteira < ApplicationRecord
       TransacaoFinanceira.confirmadas.joins(movimentacao_caixa: [conta_caixa_origem: :conta_investimento])
         .where(contas_investimento: { carteira_id: id }).exists? ||
       TransacaoFinanceira.confirmadas.joins(movimentacao_caixa: [conta_caixa_destino: :conta_investimento])
-        .where(contas_investimento: { carteira_id: id }).exists?
+        .where(contas_investimento: { carteira_id: id }).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:saldo_inicial)
+        .where(saldos_iniciais: { conta_investimento_id: contas_investimento.select(:id) }).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:transferencia_custodia)
+        .where("transferencias_custodia.conta_origem_id IN (:ids) OR transferencias_custodia.conta_destino_id IN (:ids)",
+          ids: contas_investimento.select(:id)).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:evento_corporativo)
+        .where(eventos_corporativos: { conta_investimento_id: contas_investimento.select(:id) }).exists?
   end
 
   private

@@ -69,6 +69,64 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
     assert_equal BigDecimal("0"), rentabilidade.twr_acumulado
   end
 
+  test "TWR começa no dia seguinte ao saldo inicial" do
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-01", preco: "10",
+      fonte: @fonte_manual, usuario: @admin_sistema, manual: true)
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-02", preco: "10",
+      fonte: @fonte_manual, usuario: @admin_sistema, manual: true)
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "80", custo_total_base: "80", data_efetiva: "2026-01-01" })
+
+    no_corte = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 1), fim: Date.new(2026, 1, 1), usuario: @usuario)
+    assert_equal BigDecimal("100"), no_corte.pontos.first[:fluxo_externo_liquido]
+    assert_equal "corte_saldo_inicial", no_corte.pontos.first[:estado]
+
+    depois = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 2), fim: Date.new(2026, 1, 2), usuario: @usuario)
+    assert depois.completo
+    assert_equal BigDecimal("0"), depois.twr_acumulado
+  end
+
+  test "TWR reinicia no dia seguinte ao saldo inicial mesmo com patrimônio anterior" do
+    criar_e_confirmar("movimentacao_caixa", atributos_aporte(valor: "100", data: "2025-12-31"))
+    %w[2026-01-02 2026-01-03].each do |data|
+      Mercado.registrar_cotacao_ativo(ativo: @ativo, data:, preco: "10",
+        fonte: @fonte_manual, usuario: @admin_sistema, manual: true)
+    end
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "80", custo_total_base: "80", data_efetiva: "2026-01-02" })
+
+    rentabilidade = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 2), fim: Date.new(2026, 1, 3), usuario: @usuario)
+    assert_equal "corte_saldo_inicial", rentabilidade.pontos.first[:estado]
+    assert_nil rentabilidade.pontos.first[:twr_diario]
+    assert_equal "calculado", rentabilidade.pontos.last[:estado]
+    assert_equal BigDecimal("0"), rentabilidade.pontos.last[:twr_acumulado]
+  end
+
+  test "transferência de custódia interna não é fluxo e entre carteiras é externa" do
+    outra_conta = @carteira.contas_investimento.create!(nome: "Conta interna", instituicao: @instituicao)
+    outra_carteira = @investidor.carteiras.create!(nome: "Outra carteira", moeda_base: @brl)
+    conta_externa = outra_carteira.contas_investimento.create!(nome: "Conta externa", instituicao: @instituicao)
+    %w[2026-01-01 2026-01-02 2026-01-03].each do |data|
+      Mercado.registrar_cotacao_ativo(ativo: @ativo, data:, preco: "10",
+        fonte: @fonte_manual, usuario: @admin_sistema, manual: true)
+    end
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: outra_conta.id,
+      ativo_id: @ativo.id, quantidade: "4", data_efetiva: "2026-01-02" })
+    criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: conta_externa.id,
+      ativo_id: @ativo.id, quantidade: "3", data_efetiva: "2026-01-03" })
+
+    rentabilidade = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 2), fim: Date.new(2026, 1, 3), usuario: @usuario)
+    assert_equal BigDecimal("0"), rentabilidade.pontos.first[:fluxo_externo_liquido]
+    assert_equal BigDecimal("-30"), rentabilidade.pontos.last[:fluxo_externo_liquido]
+    assert_equal BigDecimal("0"), rentabilidade.twr_acumulado
+  end
+
   test "carteira vazia não reporta retorno zero" do
     rentabilidade = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
       inicio: Date.new(2026, 1, 2), fim: Date.new(2026, 1, 2), usuario: @usuario)

@@ -35,7 +35,7 @@ class TransacoesFinanceirasController < ApplicationController
   end
 
   def new
-    @tipo = params[:tipo].presence_in(%w[nota_negociacao provento movimentacao_caixa]) || "movimentacao_caixa"
+    @tipo = params[:tipo].presence_in(TransacaoFinanceira::TIPOS - ["reversao"]) || "movimentacao_caixa"
     @investidor = @espaco.investidores.ativos.find_by(id: params[:investidor_id]) || @espaco.investidores.ativos.first
     raise ActiveRecord::RecordNotFound unless @investidor
     authorize @investidor.transacoes_financeiras.new, :create?
@@ -126,6 +126,8 @@ class TransacoesFinanceirasController < ApplicationController
     @caixas = ContaCaixa.ativos.joins(conta_investimento: { carteira: :investidor })
       .where(investidores: { espaco_id: @espaco.id }).includes(:moeda, conta_investimento: :carteira)
     @ativos = Ativo.ativos.order(:codigo)
+    @contas_investimento = ContaInvestimento.ativos.joins(carteira: :investidor)
+      .where(investidores: { espaco_id: @espaco.id }).includes(:carteira).order(:nome)
   end
 
   def filtrar_por_carteira(relacao, carteira_id)
@@ -137,13 +139,20 @@ class TransacoesFinanceirasController < ApplicationController
     por_provento = relacao.where(id: Provento.where(conta_caixa_id: caixas).select(:transacao_financeira_id))
     movimentos = MovimentacaoCaixa.where(conta_caixa_origem_id: caixas)
       .or(MovimentacaoCaixa.where(conta_caixa_destino_id: caixas)).select(:transacao_financeira_id)
-    originais = por_nota.or(por_provento).or(relacao.where(id: movimentos))
+    contas = carteira.contas_investimento.select(:id)
+    saldos = SaldoInicial.where(conta_investimento_id: contas).select(:transacao_financeira_id)
+    custodias = TransferenciaCustodia.where(conta_origem_id: contas)
+      .or(TransferenciaCustodia.where(conta_destino_id: contas)).select(:transacao_financeira_id)
+    eventos = EventoCorporativo.where(conta_investimento_id: contas).select(:transacao_financeira_id)
+    originais = por_nota.or(por_provento).or(relacao.where(id: movimentos)).or(relacao.where(id: saldos))
+      .or(relacao.where(id: custodias)).or(relacao.where(id: eventos))
     originais.or(relacao.where(transacao_revertida_id: originais.select(:id)))
   end
 
   def atributos_traduzidos
     hash = params.require(:atributos).to_unsafe_h.deep_symbolize_keys
     traduzir_ids!(hash)
+    Array(hash[:negociacoes]).each { |linha| linha.delete(:custo_alocado) if linha[:custo_alocado].blank? }
     hash
   end
 
@@ -156,7 +165,8 @@ class TransacoesFinanceirasController < ApplicationController
         data_liquidacao: nota.data_liquidacao, custo_operacional_total: nota.custo_operacional_total.to_s("F"),
         taxa_conversao_base: nota.taxa_conversao_base.to_s("F"),
         negociacoes: nota.negociacoes.order(:ordem).map { |n| { ativo_id: n.ativo_id, natureza: n.natureza,
-          quantidade: n.quantidade.to_s("F"), preco_unitario: n.preco_unitario.to_s("F") } })
+          quantidade: n.quantidade.to_s("F"), preco_unitario: n.preco_unitario.to_s("F"),
+          custo_alocado: n.custo_alocado.to_s("F") } })
     when "provento"
       provento = transacao.provento
       comum.merge(conta_caixa_id: provento.conta_caixa_id, ativo_id: provento.ativo_id,
@@ -172,6 +182,21 @@ class TransacoesFinanceirasController < ApplicationController
       else
         dados.merge(valor: (movimento.valor_origem || movimento.valor_destino).to_s("F"))
       end
+    when "saldo_inicial"
+      saldo = transacao.saldo_inicial
+      comum.merge(conta_investimento_id: saldo.conta_investimento_id, ativo_id: saldo.ativo_id,
+        quantidade: saldo.quantidade.to_s("F"), custo_total_local: saldo.custo_total_local.to_s("F"),
+        custo_total_base: saldo.custo_total_base.to_s("F"), data_efetiva: transacao.data_competencia)
+    when "transferencia_custodia"
+      transferencia = transacao.transferencia_custodia
+      comum.merge(conta_origem_id: transferencia.conta_origem_id, conta_destino_id: transferencia.conta_destino_id,
+        ativo_id: transferencia.ativo_id, quantidade: transferencia.quantidade.to_s("F"),
+        data_efetiva: transacao.data_competencia)
+    when "evento_corporativo"
+      evento = transacao.evento_corporativo
+      comum.merge(tipo_evento: evento.tipo, conta_investimento_id: evento.conta_investimento_id,
+        ativo_origem_id: evento.ativo_origem_id, ativo_destino_id: evento.ativo_destino_id,
+        quantidade_final: evento.quantidade_final.to_s("F"), data_efetiva: transacao.data_competencia)
     end
   end
 
@@ -179,7 +204,7 @@ class TransacoesFinanceirasController < ApplicationController
     case objeto
     when Hash
       objeto.each do |chave, valor|
-        objeto[chave] = if chave == :ordem_na_data && valor.blank?
+        objeto[chave] = if (chave == :ordem_na_data || chave.to_s.end_with?("_id")) && valor.blank?
           nil
         elsif chave.to_s.end_with?("_id") && valor.present?
           Integer(valor, 10)

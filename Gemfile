@@ -20,6 +20,7 @@ gem "devise"
 gem "devise-i18n"
 gem "pundit"
 gem "solid_queue"
+gem "roo", "~> 3.0"
 
 group :development, :test do
   gem "debug"

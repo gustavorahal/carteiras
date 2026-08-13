@@ -1,4 +1,5 @@
 require "test_helper"
+require "tempfile"
 
 class FluxosHttpTest < ActionDispatch::IntegrationTest
   setup do
@@ -55,6 +56,79 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     get correcao_espaco_transacao_path(@espaco, transacao)
     assert_response :success
     assert_select "input[name='atributos[negociacoes][][quantidade]'][value='10.0']"
+  end
+
+  test "formulários dos fatos de posição e importação renderizam" do
+    sign_in @usuario
+    %w[saldo_inicial transferencia_custodia evento_corporativo].each do |tipo|
+      get new_espaco_transacao_path(@espaco, tipo:, investidor_id: @investidor.id)
+      assert_response :success
+    end
+    get new_espaco_importacoes_financeira_path(@espaco)
+    assert_response :success
+    assert_select "input[type=file][multiple]"
+  end
+
+  test "upload inválido mantém registro auditável sem armazenar PDF" do
+    sign_in @usuario
+    arquivo = Tempfile.new(["invalido", ".pdf"])
+    arquivo.write("inválido")
+    arquivo.flush
+    upload = Rack::Test::UploadedFile.new(arquivo.path, "application/pdf", original_filename: "invalido.pdf")
+    assert_difference("ImportacaoFinanceira.count", 1) do
+      post espaco_importacoes_financeiras_path(@espaco),
+        params: { conta_investimento_id: @conta.id, arquivos: [upload] }
+    end
+    importacao = ImportacaoFinanceira.order(:id).last
+    assert_redirected_to espaco_importacoes_financeira_path(@espaco, importacao)
+    assert_equal "falhou", importacao.estado
+    assert_not importacao.attributes.key?("arquivo")
+  ensure
+    arquivo&.close!
+  end
+
+  test "leitor não pode analisar nem conciliar importações" do
+    leitor = User.create!(email: "leitor-web@example.com", password: "segredo123")
+    @espaco.membros_espaco.create!(user: leitor, papel: "leitor")
+    arquivo = Tempfile.new(["invalido", ".pdf"])
+    arquivo.write("inválido")
+    arquivo.flush
+    upload = Rack::Test::UploadedFile.new(arquivo.path, "application/pdf", original_filename: "invalido.pdf")
+    sign_in leitor
+
+    assert_no_difference("ImportacaoFinanceira.count") do
+      post espaco_importacoes_financeiras_path(@espaco),
+        params: { conta_investimento_id: @conta.id, arquivos: [upload] }
+    end
+    assert_response :forbidden
+  ensure
+    arquivo&.close!
+  end
+
+  test "conciliação usa o saldo cronologicamente mais recente e corta lançamentos posteriores" do
+    %w[2026-01-10 2026-02-10].zip(%w[100 50]).each do |data, valor|
+      transacao = TransacoesFinanceiras.criar_rascunho(tipo: "movimentacao_caixa", investidor: @investidor,
+        usuario: @usuario, atributos: { tipo_movimentacao: "aporte", conta_caixa_destino_id: @caixa.id,
+          valor:, data_efetiva: data })
+      TransacoesFinanceiras.confirmar(transacao:, usuario: @usuario)
+    end
+    arquivo = Tempfile.new(["extrato", ".csv"])
+    arquivo.write("Data;Hora;Liquidação;Descrição;Valor;Saldo\n")
+    arquivo.write("2026-01-31;18:00;2026-01-31;Saldo final;R$ 0,00;R$ 100,00\n")
+    arquivo.write("2026-01-01;09:00;2026-01-01;Saldo inicial;R$ 0,00;R$ 0,00\n")
+    arquivo.flush
+    importacao = ImportacoesFinanceiras.analisar(arquivos: [arquivo], conta: @conta, usuario: @usuario).first
+    sign_in @usuario
+
+    get espaco_importacoes_financeira_path(@espaco, importacao)
+    assert_response :success
+    assert_select "table.saldos-conciliados tbody tr", 1 do
+      assert_select "td" do |celulas|
+        assert_equal ["BRL", "2026-01-31", "100.0", "100.0", "0.0"], celulas.map { |celula| celula.text.squish }
+      end
+    end
+  ensure
+    arquivo&.close!
   end
 
 

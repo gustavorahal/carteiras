@@ -8,6 +8,13 @@ class ContaInvestimento < ApplicationRecord
   has_many :contas_caixa, class_name: "ContaCaixa", inverse_of: :conta_investimento
   has_many :moedas, through: :contas_caixa
   has_many :posicoes_atuais, class_name: "PosicaoAtual", inverse_of: :conta_investimento
+  has_many :importacoes_financeiras, class_name: "ImportacaoFinanceira", inverse_of: :conta_investimento
+  has_many :saldos_iniciais, class_name: "SaldoInicial", inverse_of: :conta_investimento
+  has_many :transferencias_custodia_origem, class_name: "TransferenciaCustodia", foreign_key: :conta_origem_id,
+    inverse_of: :conta_origem
+  has_many :transferencias_custodia_destino, class_name: "TransferenciaCustodia", foreign_key: :conta_destino_id,
+    inverse_of: :conta_destino
+  has_many :eventos_corporativos, class_name: "EventoCorporativo", inverse_of: :conta_investimento
 
   delegate :investidor, :espaco, to: :carteira
   normaliza_texto :nome, :identificador_externo
@@ -22,7 +29,11 @@ class ContaInvestimento < ApplicationRecord
       TransacaoFinanceira.confirmadas.joins(:provento)
         .where(proventos: { conta_caixa_id: caixas }).exists? ||
       TransacaoFinanceira.confirmadas.joins(:movimentacao_caixa)
-        .where("movimentacoes_caixa.conta_caixa_origem_id IN (?) OR movimentacoes_caixa.conta_caixa_destino_id IN (?)", caixas, caixas).exists?
+        .where("movimentacoes_caixa.conta_caixa_origem_id IN (?) OR movimentacoes_caixa.conta_caixa_destino_id IN (?)", caixas, caixas).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:saldo_inicial).where(saldos_iniciais: { conta_investimento_id: id }).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:transferencia_custodia)
+        .where("transferencias_custodia.conta_origem_id = :id OR transferencias_custodia.conta_destino_id = :id", id:).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:evento_corporativo).where(eventos_corporativos: { conta_investimento_id: id }).exists?
   end
 
   private

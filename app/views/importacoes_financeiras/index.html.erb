@@ -1,0 +1,15 @@
+<div class="d-flex justify-content-between align-items-center">
+  <h1>Importações financeiras</h1>
+  <% if current_user.pode_editar?(@espaco) && !@espaco.arquivado? %><%= link_to "Analisar arquivos", new_espaco_importacoes_financeira_path(@espaco), class: "btn btn-primary" %><% end %>
+</div>
+<%= form_with url: confirmar_em_lote_espaco_importacoes_financeiras_path(@espaco), method: :post do %>
+  <table class="table align-middle"><thead><tr><th></th><th>Arquivo</th><th>Conta</th><th>Formato</th><th>Estado</th><th>Rascunhos</th></tr></thead><tbody>
+    <% @importacoes.each do |importacao| %><tr>
+      <td><%= check_box_tag "importacao_ids[]", importacao.id, false, disabled: importacao.estado != "concluida" || importacao.pendencias.any? %></td>
+      <td><%= link_to importacao.nome_original, espaco_importacoes_financeira_path(@espaco, importacao) %></td>
+      <td><%= importacao.conta_investimento.nome %></td><td><%= importacao.formato %></td><td><%= importacao.estado %></td>
+      <td><%= importacao.transacoes_financeiras.where(estado: "rascunho").count %></td>
+    </tr><% end %>
+  </tbody></table>
+  <%= submit_tag "Confirmar selecionadas em ordem cronológica", class: "btn btn-warning" %>
+<% end %>

@@ -2,6 +2,7 @@
   <h1><%= @espaco.nome %></h1>
   <div>
     <%= link_to "Transações", espaco_transacoes_path(@espaco), class: "btn btn-outline-primary" %>
+    <%= link_to "Importações", espaco_importacoes_financeiras_path(@espaco), class: "btn btn-outline-primary" %>
     <%= link_to "Editar", edit_espaco_path(@espaco), class: "btn btn-outline-secondary" if policy(@espaco).update? %>
     <% if @espaco.arquivado? && policy(@espaco).restaurar? %>
       <%= button_to "Restaurar", restaurar_espaco_path(@espaco), class: "btn btn-success", form: { class: "d-inline" } %>

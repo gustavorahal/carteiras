@@ -3,8 +3,8 @@ class TransacaoFinanceira < ApplicationRecord
   include FatoFinanceiroImutavel
   include Normalizavel
 
-  TIPOS = %w[nota_negociacao provento movimentacao_caixa reversao].freeze
-  ORIGENS = %w[manual sistema].freeze
+  TIPOS = %w[nota_negociacao provento movimentacao_caixa saldo_inicial transferencia_custodia evento_corporativo reversao].freeze
+  ORIGENS = %w[manual importacao sistema].freeze
   ESTADOS = %w[rascunho confirmada].freeze
 
   belongs_to :investidor, inverse_of: :transacoes_financeiras
@@ -15,6 +15,10 @@ class TransacaoFinanceira < ApplicationRecord
   has_one :nota_negociacao, inverse_of: :transacao_financeira
   has_one :provento, inverse_of: :transacao_financeira
   has_one :movimentacao_caixa, inverse_of: :transacao_financeira
+  has_one :saldo_inicial, inverse_of: :transacao_financeira
+  has_one :transferencia_custodia, inverse_of: :transacao_financeira
+  has_one :evento_corporativo, inverse_of: :transacao_financeira
+  belongs_to :importacao_financeira, inverse_of: :transacoes_financeiras, optional: true
   has_many :lancamentos_caixa, -> { order(:ordem) }, class_name: "LancamentoCaixa", inverse_of: :transacao_financeira
 
   normaliza_texto :observacao, :chave_idempotencia

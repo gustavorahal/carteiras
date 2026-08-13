@@ -8,6 +8,12 @@ class Ativo < ApplicationRecord
   has_many :negociacoes, inverse_of: :ativo
   has_many :proventos, inverse_of: :ativo
   has_many :cotacoes_ativos, class_name: "CotacaoAtivo", inverse_of: :ativo
+  has_many :saldos_iniciais, class_name: "SaldoInicial", inverse_of: :ativo
+  has_many :transferencias_custodia, class_name: "TransferenciaCustodia", inverse_of: :ativo
+  has_many :eventos_corporativos_origem, class_name: "EventoCorporativo", foreign_key: :ativo_origem_id,
+    inverse_of: :ativo_origem
+  has_many :eventos_corporativos_destino, class_name: "EventoCorporativo", foreign_key: :ativo_destino_id,
+    inverse_of: :ativo_destino
 
   normaliza_texto :codigo, :mercado, maiusculo: true
   normaliza_texto :descricao, :cnpj
@@ -26,7 +32,8 @@ class Ativo < ApplicationRecord
 
   def identidade_imutavel_apos_referencia
     return unless will_save_change_to_codigo? || will_save_change_to_mercado? || will_save_change_to_moeda_negociacao_id?
-    return unless negociacoes.exists? || proventos.exists? || cotacoes_ativos.exists?
+    return unless negociacoes.exists? || proventos.exists? || cotacoes_ativos.exists? || saldos_iniciais.exists? ||
+      transferencias_custodia.exists? || eventos_corporativos_origem.exists? || eventos_corporativos_destino.exists?
 
     errors.add(:base, "código, mercado e moeda não podem mudar após a primeira referência")
   end

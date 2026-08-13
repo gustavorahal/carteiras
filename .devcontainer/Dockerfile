@@ -27,6 +27,7 @@ RUN apt-get update \
       file \
       git \
       libpq-dev \
+      poppler-utils \
       postgresql-client-18 \
       shared-mime-info \
       sudo \

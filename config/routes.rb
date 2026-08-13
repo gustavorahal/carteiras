@@ -41,6 +41,10 @@ Rails.application.routes.draw do
         get :correcao
       end
     end
+    resources :importacoes_financeiras, path: :importacoes, only: %i[index new create show] do
+      member { post :criar_rascunhos }
+      collection { post :confirmar_em_lote }
+    end
   end
 
   namespace :admin do

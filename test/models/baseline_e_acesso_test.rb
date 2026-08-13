@@ -1,9 +1,9 @@
 require "test_helper"
 
 class BaselineEAcessoTest < ActiveSupport::TestCase
-  TABELAS = %w[users espacos membros_espaco investidores carteiras contas_investimento contas_caixa moedas instituicoes ativos fontes_cotacao transacoes_financeiras notas_negociacao negociacoes proventos movimentacoes_caixa lancamentos_caixa posicoes_atuais cotacoes_ativos cotacoes_cambio].sort.freeze
+  TABELAS = %w[users espacos membros_espaco investidores carteiras contas_investimento contas_caixa moedas instituicoes ativos fontes_cotacao transacoes_financeiras notas_negociacao negociacoes proventos movimentacoes_caixa saldos_iniciais transferencias_custodia eventos_corporativos importacoes_financeiras lancamentos_caixa posicoes_atuais cotacoes_ativos cotacoes_cambio].sort.freeze
 
-  test "banco primário tem exatamente as vinte tabelas funcionais" do
+  test "banco primário tem exatamente as vinte e quatro tabelas funcionais" do
     funcionais = ActiveRecord::Base.connection.tables - %w[schema_migrations ar_internal_metadata]
     assert_equal TABELAS, funcionais.sort
   end

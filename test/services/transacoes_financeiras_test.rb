@@ -38,6 +38,112 @@ class TransacoesFinanceirasTest < ActiveSupport::TestCase
     assert_equal 2, PosicaoAtual.count
   end
 
+  test "nota aceita custo explícito somente em todas as linhas e com soma exata" do
+    outro = Ativo.create!(codigo: "VALE3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl)
+    base = atributos_nota(custo: "3").merge(negociacoes: [
+      { ativo_id: @ativo.id, natureza: "compra", quantidade: "1", preco_unitario: "10", custo_alocado: "1" },
+      { ativo_id: outro.id, natureza: "compra", quantidade: "1", preco_unitario: "20", custo_alocado: "2" }
+    ])
+    previa = TransacoesFinanceiras.prever(tipo: "nota_negociacao", investidor: @investidor, usuario: @usuario, atributos: base)
+    assert_equal [BigDecimal("1"), BigDecimal("2")], previa.detalhe_normalizado[:negociacoes].pluck(:custo_alocado)
+
+    assert_raises(Financeiro::AtributosInvalidos) do
+      TransacoesFinanceiras.prever(tipo: "nota_negociacao", investidor: @investidor, usuario: @usuario,
+        atributos: base.deep_dup.tap { |a| a[:negociacoes].last.delete(:custo_alocado) })
+    end
+    assert_raises(Financeiro::AtributosInvalidos) do
+      TransacoesFinanceiras.prever(tipo: "nota_negociacao", investidor: @investidor, usuario: @usuario,
+        atributos: base.deep_dup.tap { |a| a[:negociacoes].last[:custo_alocado] = "1" })
+    end
+  end
+
+  test "saldo inicial transferência e eventos preservam custo até venda posterior" do
+    segunda_conta = @carteira.contas_investimento.create!(nome: "Conta 2", instituicao: @instituicao)
+    destino = Ativo.create!(codigo: "PETR3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl)
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "100", custo_total_local: "1000", custo_total_base: "1000", data_efetiva: "2026-01-01" })
+    assert_empty TransacaoFinanceira.last.lancamentos_caixa
+
+    criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: segunda_conta.id,
+      ativo_id: @ativo.id, quantidade: "40", data_efetiva: "2026-01-02" })
+    assert_equal [BigDecimal("60"), BigDecimal("40")], PosicaoAtual.where(ativo: @ativo).order(:conta_investimento_id).pluck(:quantidade)
+    assert_equal BigDecimal("400"), PosicaoAtual.find_by!(conta_investimento: segunda_conta, ativo: @ativo).custo_total_local
+
+    criar_e_confirmar("evento_corporativo", { tipo_evento: "desdobramento", conta_investimento_id: segunda_conta.id,
+      ativo_origem_id: @ativo.id, quantidade_final: "80", data_efetiva: "2026-01-03" })
+    criar_e_confirmar("evento_corporativo", { tipo_evento: "bonificacao", conta_investimento_id: segunda_conta.id,
+      ativo_origem_id: @ativo.id, quantidade_final: "88", data_efetiva: "2026-01-04" })
+    criar_e_confirmar("evento_corporativo", { tipo_evento: "conversao", conta_investimento_id: segunda_conta.id,
+      ativo_origem_id: @ativo.id, ativo_destino_id: destino.id, quantidade_final: "44", data_efetiva: "2026-01-05" })
+    convertida = PosicaoAtual.find_by!(conta_investimento: segunda_conta, ativo: destino)
+    assert_equal BigDecimal("44"), convertida.quantidade
+    assert_equal BigDecimal("400"), convertida.custo_total_local
+
+    caixa = segunda_conta.contas_caixa.create!(moeda: @brl)
+    venda = criar_e_confirmar("nota_negociacao", atributos_nota(natureza: "venda", quantidade: "22", preco: "20",
+      custo: "0", data: "2026-01-06", caixa:, ativo: destino))
+    resultado = TransacoesFinanceiras::Interno.projetar(TransacoesFinanceiras::Interno.eventos_confirmados(@investidor))[:resultados].last
+    assert_equal BigDecimal("200"), resultado[:custo_removido_local]
+    assert_equal BigDecimal("240"), resultado[:resultado_local]
+    assert_equal venda.id, resultado[:transacao_id]
+  end
+
+  test "saldo inicial não pode ser usado como ajuste recorrente e transferência exige lastro" do
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    assert_raises(Financeiro::HistoricoInvalido) do
+      criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+        quantidade: "1", custo_total_local: "10", custo_total_base: "10", data_efetiva: "2026-01-02" })
+    end
+    outra = @carteira.contas_investimento.create!(nome: "Sem lastro", instituicao: @instituicao)
+    assert_raises(Financeiro::HistoricoInvalido) do
+      criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: outra.id,
+        ativo_id: @ativo.id, quantidade: "11", data_efetiva: "2026-01-03" })
+    end
+  end
+
+  test "saldo inicial continua vedado depois de posição totalmente encerrada" do
+    criar_e_confirmar("nota_negociacao", atributos_nota(quantidade: "10", custo: "0", data: "2026-01-01"))
+    criar_e_confirmar("nota_negociacao", atributos_nota(natureza: "venda", quantidade: "10", custo: "0", data: "2026-01-02"))
+
+    assert_raises(Financeiro::HistoricoInvalido) do
+      criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+        quantidade: "1", custo_total_local: "10", custo_total_base: "10", data_efetiva: "2026-01-03" })
+    end
+  end
+
+  test "custódia entre bases e conversão entre moedas diferentes são rejeitadas na v1" do
+    carteira_usd = @investidor.carteiras.create!(nome: "Exterior", moeda_base: @usd)
+    conta_usd = carteira_usd.contas_investimento.create!(nome: "Conta USD", instituicao: @instituicao)
+    ativo_usd = Ativo.create!(codigo: "ARGT", mercado: "EUA", tipo: "etf", moeda_negociacao: @usd)
+
+    assert_raises(Financeiro::EscopoInvalido) do
+      TransacoesFinanceiras.prever(tipo: "transferencia_custodia", investidor: @investidor, usuario: @usuario,
+        atributos: { conta_origem_id: @conta.id, conta_destino_id: conta_usd.id, ativo_id: @ativo.id,
+          quantidade: "1", data_efetiva: "2026-01-02" })
+    end
+    assert_raises(Financeiro::EscopoInvalido) do
+      TransacoesFinanceiras.prever(tipo: "evento_corporativo", investidor: @investidor, usuario: @usuario,
+        atributos: { tipo_evento: "conversao", conta_investimento_id: @conta.id,
+          ativo_origem_id: @ativo.id, ativo_destino_id: ativo_usd.id, quantidade_final: "1",
+          data_efetiva: "2026-01-02" })
+    end
+  end
+
+  test "transferência total remove origem e grupamento preserva custo" do
+    destino = @carteira.contas_investimento.create!(nome: "Destino", instituicao: @instituicao)
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "100", custo_total_local: "900", custo_total_base: "900", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: destino.id,
+      ativo_id: @ativo.id, quantidade: "100", data_efetiva: "2026-01-02" })
+    assert_nil PosicaoAtual.find_by(conta_investimento: @conta, ativo: @ativo)
+    criar_e_confirmar("evento_corporativo", { tipo_evento: "grupamento", conta_investimento_id: destino.id,
+      ativo_origem_id: @ativo.id, quantidade_final: "20", data_efetiva: "2026-01-03" })
+    posicao = PosicaoAtual.find_by!(conta_investimento: destino, ativo: @ativo)
+    assert_equal BigDecimal("20"), posicao.quantidade
+    assert_equal BigDecimal("900"), posicao.custo_total_local
+  end
+
   test "long-only rejeita venda excedente e retroativa que remove lastro" do
     compra = criar_e_confirmar("nota_negociacao", atributos_nota(quantidade: "10", data: "2026-01-05"))
     criar_e_confirmar("nota_negociacao", atributos_nota(natureza: "venda", quantidade: "5", data: "2026-01-06"))

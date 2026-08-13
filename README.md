@@ -20,7 +20,7 @@ Open the repository in a Dev Container-compatible editor and let the `postCreate
 bin/rails server -b 0.0.0.0
 ```
 
-The app is forwarded on port `3000`. PostgreSQL runs only in the Compose service `db`, with user/password `carteiras`; Rails receives `DATABASE_HOST=db` automatically.
+The app is available at `http://localhost:3001`. PostgreSQL runs only in the Compose service `db`, with user/password `carteiras`; Rails receives `DATABASE_HOST=db` automatically. To use a different host port, set `CARTEIRAS_PORT` before starting Compose, for example `CARTEIRAS_PORT=3002 docker compose -f .devcontainer/docker-compose.yml up -d --build`.
 
 Useful verification commands inside the container:
 
@@ -37,3 +37,5 @@ docker compose -f .devcontainer/docker-compose.yml up -d --build
 docker compose -f .devcontainer/docker-compose.yml exec app bin/rails db:prepare
 docker compose -f .devcontainer/docker-compose.yml exec app bin/rails test
 ```
+
+The image installs the locked gems during the build, so this command-line flow also works with a new Docker environment and does not depend on the Dev Container `postCreateCommand`.

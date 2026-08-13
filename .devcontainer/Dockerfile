@@ -40,4 +40,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 USER ${USERNAME}
+
+COPY --chown=${USERNAME}:${USERNAME} Gemfile Gemfile.lock /tmp/carteiras-bundle/
+WORKDIR /tmp/carteiras-bundle
+RUN bundle install
+
 WORKDIR /workspace

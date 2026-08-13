@@ -5,6 +5,14 @@ pt-BR:
       short: "%d/%m"
       long: "%d de %B de %Y"
   financeiro:
+    categorias_alocacao:
+      acoes: "Ações"
+      renda_fixa: "Renda fixa"
+      internacional: "Internacional"
+      commodities: "Commodities"
+      fundos: "Fundos"
+      outros: "Outros"
+      nao_classificado: "Não classificado"
     tipos_ativo:
       acao: "Ação"
       fii: "FII"
@@ -17,7 +25,8 @@ pt-BR:
       nota_negociacao: "Nota de negociação"
       provento: "Provento"
       movimentacao_caixa: "Movimentação de caixa"
-      saldo_inicial: "Saldo inicial"
+      saldo_inicial: "Saldo inicial de posição"
+      saldo_inicial_caixa: "Saldo inicial de caixa"
       transferencia_custodia: "Transferência de custódia"
       evento_corporativo: "Evento corporativo"
       reversao: "Reversão"

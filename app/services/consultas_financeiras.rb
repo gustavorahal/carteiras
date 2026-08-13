@@ -1,7 +1,10 @@
 module ConsultasFinanceiras
   PosicaoDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
   SaldosCaixaDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
-  ResultadosDTO = Data.define(:carteira_id, :inicio, :fim, :itens, :totais_por_moeda, :total_base)
+  TotaisCorretoraDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
+  TotaisCategoriaDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
+  VariacoesCotacaoDTO = Data.define(:carteira_id, :inicio, :fim, :itens)
+  ResultadosDTO = Data.define(:carteira_id, :inicio, :fim, :itens, :totais_por_moeda, :total_base, :completo)
   RentabilidadeDTO = Data.define(:carteira_id, :inicio, :fim, :pontos, :twr_acumulado, :completo, :motivos_incompletude)
 
   class << self
@@ -27,7 +30,7 @@ module ConsultasFinanceiras
     def saldos_caixa(carteira:, data:, usuario:)
       autorizar!(carteira, usuario)
       data = data!(data)
-      caixas = carteira.contas_caixa.includes(:moeda, :conta_investimento).to_a
+      caixas = carteira.contas_caixa.includes(:moeda, conta_investimento: :instituicao).to_a
       saldos = LancamentoCaixa.where(conta_caixa_id: caixas.map(&:id)).where(data_efetiva: ..data).group(:conta_caixa_id).sum(:valor)
       cotacoes = Cotacoes.new([], caixas.map(&:moeda_id).uniq, carteira.moeda_base_id, data)
       completo = true
@@ -40,10 +43,74 @@ module ConsultasFinanceiras
         valor_base = cambio && (saldo * cambio[:taxa]).round(12)
         total += valor_base if valor_base
         { conta_caixa_id: caixa.id, conta_investimento_id: caixa.conta_investimento_id,
+          conta_investimento: caixa.conta_investimento.nome,
+          instituicao_id: caixa.conta_investimento.instituicao_id,
+          instituicao: caixa.conta_investimento.instituicao.nome,
           moeda_id: caixa.moeda_id, moeda: caixa.moeda.codigo, saldo:, taxa_cambio: cambio&.dig(:taxa),
           data_cambio: cambio&.dig(:data), valor_base:, defasagem_cambio: cambio && (data - cambio[:data]).to_i }.then { |item| Financeiro.congelar(item) }
       end.freeze
       SaldosCaixaDTO.new(carteira_id: carteira.id, data:, itens:, valor_total_base: completo ? total : nil, completo:)
+    end
+
+    def totais_por_corretora(posicao:, saldos:)
+      unless posicao.carteira_id == saldos.carteira_id && posicao.data == saldos.data
+        raise Financeiro::EscopoInvalido.new(resumo: ["posição e caixa devem usar a mesma carteira e data"])
+      end
+
+      grupos = Hash.new do |hash, instituicao_id|
+        hash[instituicao_id] = { instituicao_id:, instituicao: nil, ativos: BigDecimal("0"), caixa: BigDecimal("0"),
+          ativos_completos: true, caixa_completo: true }
+      end
+      posicao.itens.each do |item|
+        grupo = grupos[item[:instituicao_id]]
+        grupo[:instituicao] = item[:instituicao]
+        grupo[:ativos_completos] = false unless item[:valor_mercado_base]
+        grupo[:ativos] += item[:valor_mercado_base] if item[:valor_mercado_base]
+      end
+      saldos.itens.each do |item|
+        grupo = grupos[item[:instituicao_id]]
+        grupo[:instituicao] = item[:instituicao]
+        grupo[:caixa_completo] = false unless item[:valor_base]
+        grupo[:caixa] += item[:valor_base] if item[:valor_base]
+      end
+      itens = grupos.values.sort_by { |grupo| grupo[:instituicao] }.map do |grupo|
+        ativos = grupo[:ativos_completos] ? grupo[:ativos].round(12) : nil
+        caixa = grupo[:caixa_completo] ? grupo[:caixa].round(12) : nil
+        Financeiro.congelar({ instituicao_id: grupo[:instituicao_id], instituicao: grupo[:instituicao],
+          ativos:, caixa:, total: ativos && caixa && (ativos + caixa).round(12),
+          completo: grupo[:ativos_completos] && grupo[:caixa_completo] })
+      end.freeze
+      completo = posicao.completo && saldos.completo
+      total = completo ? posicao.valor_total_base + saldos.valor_total_base : nil
+      TotaisCorretoraDTO.new(carteira_id: posicao.carteira_id, data: posicao.data, itens:,
+        valor_total_base: total, completo:)
+    end
+
+    def totais_por_categoria(posicao:)
+      grupos = Hash.new do |hash, categoria|
+        hash[categoria] = { categoria:, ativo_ids: Set.new, valor: BigDecimal("0"), completo: true }
+      end
+      posicao.itens.each do |item|
+        categoria = item[:categoria].presence || "nao_classificado"
+        grupo = grupos[categoria]
+        grupo[:ativo_ids] << item[:ativo_id]
+        grupo[:completo] = false unless item[:valor_mercado_base]
+        grupo[:valor] += item[:valor_mercado_base] if item[:valor_mercado_base]
+      end
+
+      ordem = ClassificacaoAtivoCarteira::CATEGORIAS + ["nao_classificado"]
+      itens = grupos.values.sort_by { |grupo| ordem.index(grupo[:categoria]) }.map do |grupo|
+        valor = grupo[:completo] ? grupo[:valor].round(12) : nil
+        percentual = if valor && posicao.valor_total_base&.positive?
+          (valor / posicao.valor_total_base).round(12)
+        end
+        Financeiro.congelar({ categoria: grupo[:categoria],
+          categoria_descricao: ClassificacaoAtivoCarteira.descricao(grupo[:categoria]),
+          quantidade_ativos: grupo[:ativo_ids].size, valor:, percentual:, completo: grupo[:completo] })
+      end.freeze
+
+      TotaisCategoriaDTO.new(carteira_id: posicao.carteira_id, data: posicao.data, itens:,
+        valor_total_base: posicao.valor_total_base, completo: posicao.completo)
     end
 
     def resultados_realizados(carteira:, inicio:, fim:, usuario:)
@@ -58,9 +125,29 @@ module ConsultasFinanceiras
         ativo = ativos.fetch(r[:ativo_id])
         Financeiro.congelar(r.merge(ativo: ativo.codigo, moeda: ativo.moeda_negociacao.codigo))
       end.freeze
-      totais = Financeiro.congelar(itens.group_by { |i| i[:moeda] }.transform_values { |grupo| grupo.sum { |i| i[:resultado_local] } })
+      completo = itens.all? { |item| item[:resultado_base] }
+      totais = Financeiro.congelar(itens.group_by { |i| i[:moeda] }.transform_values do |grupo|
+        grupo.all? { |item| item[:resultado_local] } ? grupo.sum { |item| item[:resultado_local] } : nil
+      end)
       ResultadosDTO.new(carteira_id: carteira.id, inicio:, fim:, itens:, totais_por_moeda: totais,
-        total_base: itens.sum { |i| i[:resultado_base] })
+        total_base: completo ? itens.sum { |item| item[:resultado_base] } : nil, completo:)
+    end
+
+    def variacoes_cotacao(carteira:, inicio:, fim:, ativo_ids:, usuario:)
+      autorizar!(carteira, usuario)
+      inicio, fim = periodo!(inicio, fim)
+      ativos = Ativo.where(id: ativo_ids).index_by(&:id)
+      cotacoes = Cotacoes.new(ativos.keys, [], carteira.moeda_base_id, fim)
+      itens = ativos.values.sort_by(&:codigo).map do |ativo|
+        inicial = cotacoes.preco(ativo.id, inicio)
+        final = cotacoes.preco(ativo.id, fim)
+        calculavel = inicial && final && final[:data] > inicial[:data]
+        Financeiro.congelar({ ativo_id: ativo.id, ativo: ativo.codigo,
+          preco_inicial: inicial&.dig(:preco), data_inicial: inicial&.dig(:data),
+          preco_final: final&.dig(:preco), data_final: final&.dig(:data),
+          variacao: calculavel ? (final[:preco] / inicial[:preco] - 1).round(12) : nil })
+      end.freeze
+      VariacoesCotacaoDTO.new(carteira_id: carteira.id, inicio:, fim:, itens:)
     end
 
     def rentabilidade(carteira:, inicio:, fim:, usuario:)
@@ -129,18 +216,25 @@ module ConsultasFinanceiras
 
     def montar_posicao(carteira, data, posicoes)
       ativos = Ativo.includes(:moeda_negociacao).where(id: posicoes.map { |p| p[:ativo_id] }).index_by(&:id)
+      contas = ContaInvestimento.includes(:instituicao).where(id: posicoes.map { |p| p[:conta_investimento_id] }).index_by(&:id)
+      categorias = carteira.classificacoes_ativos.where(ativo_id: ativos.keys).pluck(:ativo_id, :categoria).to_h
       cotacoes = Cotacoes.new(ativos.keys, ativos.values.map(&:moeda_negociacao_id), carteira.moeda_base_id, data)
       completo = true
       total = BigDecimal("0")
       itens = posicoes.map do |p|
         ativo = ativos.fetch(p[:ativo_id])
+        conta = contas.fetch(p[:conta_investimento_id])
         preco = cotacoes.preco(ativo.id, data)
         cambio = cotacoes.cambio(ativo.moeda_negociacao_id, carteira.moeda_base_id, data)
         completo = false unless preco && cambio
         local = preco && (p[:quantidade] * preco[:preco]).round(12)
         base = local && cambio && (local * cambio[:taxa]).round(12)
         total += base if base
-        { conta_investimento_id: p[:conta_investimento_id], ativo_id: ativo.id, ativo: ativo.codigo,
+        { conta_investimento_id: conta.id, conta_investimento: conta.nome,
+          instituicao_id: conta.instituicao_id, instituicao: conta.instituicao.nome,
+          ativo_id: ativo.id, ativo: ativo.codigo, ativo_descricao: ativo.descricao,
+          categoria: categorias[ativo.id], categoria_descricao: ClassificacaoAtivoCarteira.descricao(categorias[ativo.id]),
+          categoria_sugerida: ClassificacaoAtivoCarteira.sugestao(ativo, carteira:),
           quantidade: p[:quantidade], custo_total_local: p[:custo_total_local], custo_total_base: p[:custo_total_base],
           preco: preco&.dig(:preco), data_preco: preco&.dig(:data), valor_mercado_local: local,
           taxa_cambio: cambio&.dig(:taxa), data_cambio: cambio&.dig(:data), valor_mercado_base: base,
@@ -235,6 +329,12 @@ module ConsultasFinanceiras
           valor = converter_fluxo_ativo(d[:quantidade], ativos.fetch(d[:ativo_id]), carteira.moeda_base_id,
             evento[:data_competencia], cotacoes)
           acumular_fluxo!(fluxos, evento[:data_competencia], valor)
+        when "saldo_inicial_caixa"
+          caixa = ContaCaixa.find(d[:conta_caixa_id])
+          next unless contas_da_carteira.include?(caixa.conta_investimento_id)
+          valor = converter_fluxo(d[:valor_saldo_inicial], caixa.moeda_id, carteira.moeda_base_id,
+            evento[:data_competencia], cotacoes)
+          acumular_fluxo!(fluxos, evento[:data_competencia], valor)
         when "transferencia_custodia"
           origem_aqui = contas_por_id[d[:conta_origem_id]] == carteira.id
           destino_aqui = contas_por_id[d[:conta_destino_id]] == carteira.id
@@ -282,9 +382,14 @@ module ConsultasFinanceiras
 
     def datas_saldo_inicial(carteira, inicio, fim, eventos)
       contas = carteira.contas_investimento.pluck(:id).to_set
+      caixas = carteira.contas_caixa.pluck(:id).to_set
       TransacoesFinanceiras::Interno.eventos_efetivos(eventos).filter_map do |evento|
-        next unless evento[:tipo] == "saldo_inicial" && evento[:data_competencia].between?(inicio, fim)
-        evento[:data_competencia] if contas.include?(evento[:detalhe][:conta_investimento_id])
+        next unless evento[:data_competencia].between?(inicio, fim)
+        d = evento[:detalhe]
+        if (evento[:tipo] == "saldo_inicial" && contas.include?(d[:conta_investimento_id])) ||
+            (evento[:tipo] == "saldo_inicial_caixa" && caixas.include?(d[:conta_caixa_id]))
+          evento[:data_competencia]
+        end
       end.to_set
     end
 

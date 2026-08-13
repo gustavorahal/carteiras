@@ -60,13 +60,16 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
 
   test "formulários dos fatos de posição e importação renderizam" do
     sign_in @usuario
-    %w[saldo_inicial transferencia_custodia evento_corporativo].each do |tipo|
+    %w[saldo_inicial saldo_inicial_caixa transferencia_custodia evento_corporativo].each do |tipo|
       get new_espaco_transacao_path(@espaco, tipo:, investidor_id: @investidor.id)
       assert_response :success
       if tipo == "saldo_inicial"
         assert_select "input[name='atributos[preco_medio_local]']"
         assert_select "input[name='atributos[preco_medio_base]']"
         assert_select "select[name='atributos[fonte_custo]'] option[value=xp]"
+      elsif tipo == "saldo_inicial_caixa"
+        assert_response :success
+        assert_select "legend", text: "Saldo inicial de caixa"
       end
     end
     get new_espaco_importacoes_financeira_path(@espaco)
@@ -143,6 +146,78 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     assert_response :success
     get new_espaco_investidor_carteira_conta_path(@espaco, @investidor, @carteira)
     assert_response :success
+  end
+
+  test "painel mostra totais de ativos e caixa por corretora" do
+    hoje = Date.current.to_s
+    saldo_posicao = TransacoesFinanceiras.criar_rascunho(tipo: "saldo_inicial", investidor: @investidor,
+      usuario: @usuario, atributos: { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+        quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: hoje })
+    TransacoesFinanceiras.confirmar(transacao: saldo_posicao, usuario: @usuario)
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: hoje, preco: "12",
+      fonte: FonteCotacao.find_by!(codigo: "MANUAL"), manual: true, usuario: @admin_sistema)
+
+    outra_instituicao = Instituicao.create!(nome: "Outra corretora")
+    outra_conta = @carteira.contas_investimento.create!(nome: "Conta 2", instituicao: outra_instituicao)
+    outro_caixa = outra_conta.contas_caixa.create!(moeda: @brl)
+    saldo_caixa = TransacoesFinanceiras.criar_rascunho(tipo: "saldo_inicial_caixa", investidor: @investidor,
+      usuario: @usuario, atributos: { conta_caixa_id: outro_caixa.id, valor: "50", data_efetiva: hoje })
+    TransacoesFinanceiras.confirmar(transacao: saldo_caixa, usuario: @usuario)
+    sign_in @usuario
+
+    get espaco_investidor_carteira_path(@espaco, @investidor, @carteira)
+
+    assert_response :success
+    assert_select "table.totais-corretora tbody tr", 2
+    assert_select "table.totais-corretora tbody tr", text: /Banco.*R\$ 120,00.*R\$ 0,00.*R\$ 120,00/
+    assert_select "table.totais-corretora tbody tr", text: /Outra corretora.*R\$ 0,00.*R\$ 50,00.*R\$ 50,00/
+  end
+
+  test "editor classifica ativo na carteira e painel mostra total por categoria" do
+    hoje = Date.current.to_s
+    saldo = TransacoesFinanceiras.criar_rascunho(tipo: "saldo_inicial", investidor: @investidor,
+      usuario: @usuario, atributos: { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+        quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: hoje })
+    TransacoesFinanceiras.confirmar(transacao: saldo, usuario: @usuario)
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: hoje, preco: "12",
+      fonte: FonteCotacao.find_by!(codigo: "MANUAL"), manual: true, usuario: @admin_sistema)
+    sign_in @usuario
+
+    assert_difference("ClassificacaoAtivoCarteira.count", 1) do
+      post espaco_investidor_carteira_classificacoes_ativos_path(@espaco, @investidor, @carteira),
+        params: { classificacao_ativo: { ativo_id: @ativo.id, categoria: "acoes" } }
+    end
+    assert_redirected_to %r{/espacos/#{@espaco.id}/investidores/#{@investidor.id}/carteiras/#{@carteira.id}}
+
+    get espaco_investidor_carteira_path(@espaco, @investidor, @carteira)
+    assert_response :success
+    assert_select "table.totais-categoria tbody tr", text: /Ações.*1.*100%.*R\$ 120,00/
+    assert_select "table.posicoes-categoria thead th", text: "Categoria", count: 0
+    assert_select "table.posicoes-categoria tr.categoria-posicoes[data-categoria=acoes] button[aria-expanded=true]", text: /Ações.*1 ativo/
+    assert_select "tr[data-category-groups-target=row][data-category=acoes]", 1
+    assert_select "table.posicoes-categoria td.text-nowrap", text: "Banco"
+    assert_select "summary[title='Alterar categoria de PETR4']", 1
+    assert_select "select[aria-label='Categoria de PETR4'] option[selected][value=acoes]", text: "Ações"
+  end
+
+  test "título da aba não escapa novamente o nome da carteira" do
+    @carteira.update!(nome: "Cláudio & Ana")
+    sign_in @usuario
+
+    get espaco_investidor_carteira_path(@espaco, @investidor, @carteira)
+
+    assert_response :success
+    assert_select "title", text: "Cláudio & Ana · Carteiras"
+  end
+
+  test "leitor não classifica ativo na carteira" do
+    @espaco.membros_espaco.create!(user: @estranho, papel: "leitor")
+    sign_in @estranho
+    assert_no_difference("ClassificacaoAtivoCarteira.count") do
+      post espaco_investidor_carteira_classificacoes_ativos_path(@espaco, @investidor, @carteira),
+        params: { classificacao_ativo: { ativo_id: @ativo.id, categoria: "acoes" } }
+    end
+    assert_response :forbidden
   end
 
   test "área administrativa renderiza catálogo global" do

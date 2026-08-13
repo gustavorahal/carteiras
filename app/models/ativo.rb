@@ -9,6 +9,7 @@ class Ativo < ApplicationRecord
   has_many :proventos, inverse_of: :ativo
   has_many :cotacoes_ativos, class_name: "CotacaoAtivo", inverse_of: :ativo
   has_many :saldos_iniciais, class_name: "SaldoInicial", inverse_of: :ativo
+  has_many :classificacoes_carteira, class_name: "ClassificacaoAtivoCarteira", inverse_of: :ativo
   has_many :transferencias_custodia, class_name: "TransferenciaCustodia", inverse_of: :ativo
   has_many :eventos_corporativos_origem, class_name: "EventoCorporativo", foreign_key: :ativo_origem_id,
     inverse_of: :ativo_origem

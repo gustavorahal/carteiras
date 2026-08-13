@@ -59,6 +59,13 @@ class EspacosTest < ApplicationSystemTestCase
     click_link "Uso pessoal"
     click_link "Principal"
     assert_text "PETR4"
+    grupo = find("button[data-action='category-groups#toggle']")
+    assert_equal "true", grupo["aria-expanded"]
+    grupo.click
+    assert_equal "false", grupo["aria-expanded"]
+    assert_no_selector "tr[data-category-groups-target=row]", visible: true
+    grupo.click
+    assert_selector "tr[data-category-groups-target=row]", visible: true
 
     visit url_original
     click_link "Corrigir"

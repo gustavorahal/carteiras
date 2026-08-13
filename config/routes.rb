@@ -18,6 +18,7 @@ Rails.application.routes.draw do
           post :arquivar
           post :restaurar
         end
+        resources :classificacoes_ativos, only: :create
         resources :contas, controller: "contas_investimento", path: :contas_investimento, except: %i[index show destroy] do
           member do
             post :arquivar

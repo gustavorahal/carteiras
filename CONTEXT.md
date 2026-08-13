@@ -10,12 +10,17 @@ Carteiras é um monólito Rails para acompanhamento financeiro long-only, com m�
 - **Investidor:** titular econômico das contas.
 - **Carteira:** agrupamento exclusivo de contas para acompanhamento e rentabilidade.
 - **Conta de investimento:** conta de custódia mantida em uma instituição.
-- **Conta de caixa:** saldo de uma moeda dentro da conta de investimento.
+- **Conta de caixa:** livro e saldo de uma moeda dentro da conta de investimento.
 - **Ativo:** item global negociável ou investível.
+- **Categoria de alocação:** classificação editável do papel de um ativo em uma carteira, independente de seu tipo e da conta onde está custodiado.
 - **Transação financeira:** fato que começa como rascunho e se torna imutável após confirmação.
 - **Lançamento de caixa:** efeito monetário assinado de uma transação.
-- **Posição:** estado reconstruível de quantidade e custo de um ativo em uma conta.
-- **Saldo inicial:** fato de implantação que inaugura uma posição documentada, sem gerar caixa.
+- **Posição:** estado reconstruível da quantidade de um ativo em uma conta; seu custo pode ser conhecido ou desconhecido.
+- **Custo desconhecido:** ausência documentada do custo de aquisição; não equivale a custo zero e impede apenas métricas que dependem do custo.
+- **Variação da cotação:** mudança do preço de mercado entre duas datas, sem considerar quantidade, custo, negociações ou proventos; não é a rentabilidade do investidor.
+- **Saldo inicial de posição:** fato de implantação que inaugura uma posição documentada, sem gerar caixa.
+- **Saldo inicial de caixa:** fato de implantação que estabelece o valor documentado de uma conta de caixa sem representar aporte.
+- **Saldo da conta de investimento:** visão derivada das posições e dos saldos de suas contas de caixa; nunca é um fato armazenado.
 - **Transferência de custódia:** deslocamento de quantidade e custo proporcional entre contas do mesmo investidor.
 - **Evento corporativo:** transformação manual de quantidade ou de ativo que preserva o custo econômico.
 - **Importação financeira:** análise auditável de uma nota ou extrato externo; nunca é o próprio fato financeiro.

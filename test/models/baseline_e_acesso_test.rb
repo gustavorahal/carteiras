@@ -1,11 +1,21 @@
 require "test_helper"
 
 class BaselineEAcessoTest < ActiveSupport::TestCase
-  TABELAS = %w[users espacos membros_espaco investidores carteiras contas_investimento contas_caixa moedas instituicoes ativos fontes_cotacao transacoes_financeiras notas_negociacao negociacoes proventos movimentacoes_caixa saldos_iniciais transferencias_custodia eventos_corporativos importacoes_financeiras lancamentos_caixa posicoes_atuais cotacoes_ativos cotacoes_cambio].sort.freeze
+  TABELAS = %w[users espacos membros_espaco investidores carteiras contas_investimento contas_caixa moedas instituicoes ativos fontes_cotacao transacoes_financeiras notas_negociacao negociacoes proventos movimentacoes_caixa saldos_iniciais saldos_iniciais_caixa transferencias_custodia eventos_corporativos importacoes_financeiras lancamentos_caixa posicoes_atuais cotacoes_ativos cotacoes_cambio classificacoes_ativos_carteira].sort.freeze
 
-  test "banco primário tem exatamente as vinte e quatro tabelas funcionais" do
+  test "banco primário tem exatamente as vinte e seis tabelas funcionais" do
     funcionais = ActiveRecord::Base.connection.tables - %w[schema_migrations ar_internal_metadata]
     assert_equal TABELAS, funcionais.sort
+  end
+
+  test "categoria de alocação é única por carteira e ativo" do
+    classificacao = @carteira.classificacoes_ativos.create!(ativo: @ativo, categoria: "acoes")
+    assert_equal "Ações", ClassificacaoAtivoCarteira.descricao(classificacao.categoria)
+    assert_not @carteira.classificacoes_ativos.new(ativo: @ativo, categoria: "commodities").valid?
+    assert_not @carteira.classificacoes_ativos.new(ativo: Ativo.new, categoria: "inexistente").valid?
+    assert_equal "acoes", ClassificacaoAtivoCarteira.sugestao(@ativo, carteira: @carteira)
+    assert_nil ClassificacaoAtivoCarteira.sugestao(
+      Ativo.new(tipo: "etf", moeda_negociacao: @brl), carteira: @carteira)
   end
 
   test "normaliza códigos nomes e campos opcionais" do

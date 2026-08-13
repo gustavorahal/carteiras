@@ -37,6 +37,27 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
     assert depois.completo
     assert_equal BigDecimal("120"), depois.valor_total_base
     assert_equal 2, depois.itens.first[:defasagem_preco]
+    assert_equal "Petrobras", depois.itens.first[:ativo_descricao]
+    assert_equal "Instituição", depois.itens.first[:instituicao]
+  end
+
+  test "variação da cotação independe do custo e exige duas observações" do
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_desconhecido: "1", data_efetiva: "2026-01-01" })
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-01", preco: "10",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-31", preco: "12",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+
+    variacoes = ConsultasFinanceiras.variacoes_cotacao(carteira: @carteira,
+      inicio: Date.new(2026, 1, 1), fim: Date.new(2026, 1, 31), ativo_ids: [@ativo.id], usuario: @usuario)
+    assert_equal BigDecimal("0.2"), variacoes.itens.first[:variacao]
+    assert_equal Date.new(2026, 1, 1), variacoes.itens.first[:data_inicial]
+    assert_equal Date.new(2026, 1, 31), variacoes.itens.first[:data_final]
+
+    indisponivel = ConsultasFinanceiras.variacoes_cotacao(carteira: @carteira,
+      inicio: Date.new(2026, 1, 31), fim: Date.new(2026, 2, 1), ativo_ids: [@ativo.id], usuario: @usuario)
+    assert_nil indisponivel.itens.first[:variacao]
   end
 
   test "saldo usa câmbio inverso sem triangular" do
@@ -47,6 +68,50 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
     assert saldos.completo
     assert_equal BigDecimal("500"), saldos.valor_total_base
     assert_equal BigDecimal("5"), saldos.itens.first[:taxa_cambio]
+  end
+
+  test "totais por corretora combinam posições e caixa" do
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+      valor: "50", data_efetiva: "2026-01-01" })
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-01", preco: "12",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+
+    posicao = ConsultasFinanceiras.posicao_historica(carteira: @carteira,
+      data: Date.new(2026, 1, 1), usuario: @usuario)
+    saldos = ConsultasFinanceiras.saldos_caixa(carteira: @carteira,
+      data: Date.new(2026, 1, 1), usuario: @usuario)
+    totais = ConsultasFinanceiras.totais_por_corretora(posicao:, saldos:)
+
+    assert_equal 1, totais.itens.size
+    assert_equal "Instituição", totais.itens.first[:instituicao]
+    assert_equal BigDecimal("120"), totais.itens.first[:ativos]
+    assert_equal BigDecimal("50"), totais.itens.first[:caixa]
+    assert_equal BigDecimal("170"), totais.itens.first[:total]
+  end
+
+  test "totais por categoria agregam ativos e explicitam os não classificados" do
+    outro = Ativo.create!(codigo: "GOLD11", mercado: "B3", tipo: "etf", moeda_negociacao: @brl)
+    @carteira.classificacoes_ativos.create!(ativo: outro, categoria: "commodities")
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: outro.id,
+      quantidade: "2", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-01", preco: "10",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+    Mercado.registrar_cotacao_ativo(ativo: outro, data: "2026-01-01", preco: "50",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+
+    posicao = ConsultasFinanceiras.posicao_historica(carteira: @carteira,
+      data: Date.new(2026, 1, 1), usuario: @usuario)
+    totais = ConsultasFinanceiras.totais_por_categoria(posicao:)
+
+    assert_equal ["commodities", "nao_classificado"], totais.itens.pluck(:categoria)
+    assert_equal BigDecimal("100"), totais.itens.first[:valor]
+    assert_equal BigDecimal("0.5"), totais.itens.first[:percentual]
+    assert_equal "Não classificado", totais.itens.last[:categoria_descricao]
+    assert_equal BigDecimal("200"), totais.valor_total_base
   end
 
   test "resultados realizados são derivados por custo médio e consulta não grava" do
@@ -76,6 +141,21 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
       fonte: @fonte_manual, usuario: @admin_sistema, manual: true)
     criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
       quantidade: "10", custo_total_local: "80", custo_total_base: "80", data_efetiva: "2026-01-01" })
+
+    no_corte = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 1), fim: Date.new(2026, 1, 1), usuario: @usuario)
+    assert_equal BigDecimal("100"), no_corte.pontos.first[:fluxo_externo_liquido]
+    assert_equal "corte_saldo_inicial", no_corte.pontos.first[:estado]
+
+    depois = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
+      inicio: Date.new(2026, 1, 2), fim: Date.new(2026, 1, 2), usuario: @usuario)
+    assert depois.completo
+    assert_equal BigDecimal("0"), depois.twr_acumulado
+  end
+
+  test "TWR começa no dia seguinte ao saldo inicial de caixa" do
+    criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+      valor: "100", data_efetiva: "2026-01-01" })
 
     no_corte = ConsultasFinanceiras.rentabilidade(carteira: @carteira,
       inicio: Date.new(2026, 1, 1), fim: Date.new(2026, 1, 1), usuario: @usuario)

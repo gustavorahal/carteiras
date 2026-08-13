@@ -23,6 +23,32 @@ class TransacoesFinanceirasTest < ActiveSupport::TestCase
     assert_equal BigDecimal("-1200"), resgate.lancamentos_caixa.first.valor
   end
 
+  test "saldo inicial de caixa inaugura o livro sem representar aporte" do
+    saldo = criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_usd.id,
+      valor: "93.50", data_efetiva: "2026-01-01", observacao: "Saldo documentado na corretora" })
+
+    assert_equal BigDecimal("93.5"), saldo.saldo_inicial_caixa.valor
+    assert_equal BigDecimal("93.5"), saldo.lancamentos_caixa.first.valor
+    assert_equal "saldo_inicial", saldo.lancamentos_caixa.first.natureza
+    assert_equal BigDecimal("93.5"), ConsultasFinanceiras.saldos_caixa(carteira: @carteira,
+      data: Date.new(2026, 1, 1), usuario: @usuario).itens.first[:saldo]
+  end
+
+  test "saldo inicial de caixa não funciona como ajuste recorrente" do
+    criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+      valor: "100", data_efetiva: "2026-01-01" })
+    assert_raises(Financeiro::HistoricoInvalido) do
+      criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+        valor: "20", data_efetiva: "2026-01-02" })
+    end
+
+    criar_e_confirmar("movimentacao_caixa", atributos_aporte(caixa: @caixa_usd, data: "2026-01-01"))
+    assert_raises(Financeiro::HistoricoInvalido) do
+      criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_usd.id,
+        valor: "20", data_efetiva: "2026-01-02" })
+    end
+  end
+
   test "nota multilinha rateia custo com resíduo e preview coincide com confirmação" do
     outro = Ativo.create!(codigo: "VALE3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl)
     atributos = atributos_nota(custo: "1").merge(negociacoes: [
@@ -103,6 +129,51 @@ class TransacoesFinanceirasTest < ActiveSupport::TestCase
     assert_equal BigDecimal("103.45"), saldo.preco_medio_local_informado
     assert_equal BigDecimal("103.45"), saldo.preco_medio_base_informado
     assert_equal "xp", saldo.fonte_custo
+  end
+
+  test "saldo inicial com custo desconhecido preserva posição e venda sem inventar resultado" do
+    saldo = criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_desconhecido: "1", data_efetiva: "2026-01-01" })
+    assert_nil saldo.saldo_inicial.custo_total_local
+    assert_equal "desconhecido", saldo.saldo_inicial.fonte_custo
+    assert_nil PosicaoAtual.find_by!(conta_investimento: @conta, ativo: @ativo).custo_total_base
+
+    criar_e_confirmar("nota_negociacao", atributos_nota(natureza: "venda", quantidade: "4",
+      preco: "15", custo: "2", data: "2026-01-02"))
+    estado = TransacoesFinanceiras::Interno.projetar(TransacoesFinanceiras::Interno.eventos_confirmados(@investidor))
+    assert_equal BigDecimal("6"), estado[:posicoes].values.first[:quantidade]
+    assert_nil estado[:posicoes].values.first[:custo_total_local]
+    assert_nil estado[:resultados].first[:resultado_local]
+    assert_nil estado[:resultados].first[:resultado_base]
+
+    resultados = ConsultasFinanceiras.resultados_realizados(carteira: @carteira,
+      inicio: Date.new(2026, 1, 1), fim: Date.new(2026, 1, 31), usuario: @usuario)
+    assert_not resultados.completo
+    assert_nil resultados.total_base
+  end
+
+  test "saldo inicial desconhecido rejeita custo preenchido" do
+    assert_raises(Financeiro::AtributosInvalidos) do
+      TransacoesFinanceiras.prever(tipo: "saldo_inicial", investidor: @investidor, usuario: @usuario,
+        atributos: { conta_investimento_id: @conta.id, ativo_id: @ativo.id, quantidade: "10",
+          custo_desconhecido: "1", custo_total_local: "100", custo_total_base: "100",
+          data_efetiva: "2026-01-01" })
+    end
+  end
+
+  test "transferência e conversão propagam custo desconhecido" do
+    destino = @carteira.contas_investimento.create!(nome: "Destino desconhecido", instituicao: @instituicao)
+    convertido = Ativo.create!(codigo: "PETR3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl)
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_desconhecido: "1", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("transferencia_custodia", { conta_origem_id: @conta.id, conta_destino_id: destino.id,
+      ativo_id: @ativo.id, quantidade: "4", data_efetiva: "2026-01-02" })
+    assert_nil PosicaoAtual.find_by!(conta_investimento: destino, ativo: @ativo).custo_total_local
+
+    criar_e_confirmar("evento_corporativo", { tipo_evento: "conversao", conta_investimento_id: destino.id,
+      ativo_origem_id: @ativo.id, ativo_destino_id: convertido.id, quantidade_final: "2",
+      data_efetiva: "2026-01-03" })
+    assert_nil PosicaoAtual.find_by!(conta_investimento: destino, ativo: convertido).custo_total_base
   end
 
   test "saldo inicial em moeda estrangeira exige preço médio base e não mistura modos" do

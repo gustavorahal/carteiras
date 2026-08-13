@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <title><%= content_for?(:title) ? "#{yield(:title)} · Carteiras" : "Carteiras" %></title>
+    <title><%= content_for?(:title) ? safe_join([yield(:title), "Carteiras"], " · ") : "Carteiras" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#17262a">
     <%= csrf_meta_tags %>

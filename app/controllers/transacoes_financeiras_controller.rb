@@ -141,10 +141,12 @@ class TransacoesFinanceirasController < ApplicationController
       .or(MovimentacaoCaixa.where(conta_caixa_destino_id: caixas)).select(:transacao_financeira_id)
     contas = carteira.contas_investimento.select(:id)
     saldos = SaldoInicial.where(conta_investimento_id: contas).select(:transacao_financeira_id)
+    saldos_caixa = SaldoInicialCaixa.where(conta_caixa_id: caixas).select(:transacao_financeira_id)
     custodias = TransferenciaCustodia.where(conta_origem_id: contas)
       .or(TransferenciaCustodia.where(conta_destino_id: contas)).select(:transacao_financeira_id)
     eventos = EventoCorporativo.where(conta_investimento_id: contas).select(:transacao_financeira_id)
     originais = por_nota.or(por_provento).or(relacao.where(id: movimentos)).or(relacao.where(id: saldos))
+      .or(relacao.where(id: saldos_caixa))
       .or(relacao.where(id: custodias)).or(relacao.where(id: eventos))
     originais.or(relacao.where(transacao_revertida_id: originais.select(:id)))
   end
@@ -190,10 +192,16 @@ class TransacoesFinanceirasController < ApplicationController
       if saldo.preco_medio_local_informado
         dados.merge(preco_medio_local: saldo.preco_medio_local_informado.to_s("F"),
           preco_medio_base: saldo.preco_medio_base_informado.to_s("F"))
+      elsif saldo.custo_total_local.nil?
+        dados.merge(custo_desconhecido: "1")
       else
         dados.merge(custo_total_local: saldo.custo_total_local.to_s("F"),
           custo_total_base: saldo.custo_total_base.to_s("F"))
       end
+    when "saldo_inicial_caixa"
+      saldo = transacao.saldo_inicial_caixa
+      comum.merge(conta_caixa_id: saldo.conta_caixa_id, valor: saldo.valor.to_s("F"),
+        data_efetiva: transacao.data_competencia)
     when "transferencia_custodia"
       transferencia = transacao.transferencia_custodia
       comum.merge(conta_origem_id: transferencia.conta_origem_id, conta_destino_id: transferencia.conta_destino_id,

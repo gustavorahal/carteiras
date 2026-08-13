@@ -37,14 +37,21 @@
       <div class="col-md-3"><%= label_tag "atributos_ativo_id", "Ativo", class: "form-label" %><%= select_tag "atributos[ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_id]), class: "form-select" %></div>
       <div class="col-md-3"><%= label_tag "atributos_quantidade", "Quantidade", class: "form-label" %><%= text_field_tag "atributos[quantidade]", dados[:quantidade], class: "form-control", inputmode: "decimal" %></div>
     </div></fieldset>
-    <fieldset class="form-section"><legend>Custo conhecido</legend><p class="form-text">Preencha um único modo: preço médio ou custo total.</p><div class="row g-3">
+    <fieldset class="form-section"><legend>Custo de aquisição</legend><p class="form-text">Preencha um único modo: preço médio, custo total ou custo desconhecido.</p><div class="row g-3">
+      <div class="col-12"><div class="form-check"><%= check_box_tag "atributos[custo_desconhecido]", "1", dados[:custo_desconhecido].to_s == "1", class: "form-check-input" %><%= label_tag "atributos_custo_desconhecido", "O custo de aquisição é desconhecido", class: "form-check-label" %></div></div>
       <div class="col-md-6"><%= label_tag "atributos_preco_medio_local", "Preço médio na moeda do ativo", class: "form-label" %><%= text_field_tag "atributos[preco_medio_local]", dados[:preco_medio_local], class: "form-control", inputmode: "decimal" %></div>
       <div class="col-md-6"><%= label_tag "atributos_preco_medio_base", "Preço médio na moeda-base", class: "form-label" %><%= text_field_tag "atributos[preco_medio_base]", dados[:preco_medio_base], class: "form-control", inputmode: "decimal" %></div>
       <div class="col-md-6"><%= label_tag "atributos_custo_total_local", "Custo total na moeda do ativo", class: "form-label" %><%= text_field_tag "atributos[custo_total_local]", dados[:custo_total_local], class: "form-control", inputmode: "decimal" %></div>
       <div class="col-md-6"><%= label_tag "atributos_custo_total_base", "Custo total na moeda-base", class: "form-label" %><%= text_field_tag "atributos[custo_total_base]", dados[:custo_total_base], class: "form-control", inputmode: "decimal" %></div>
       <div class="col-md-6"><%= label_tag "atributos_fonte_custo", "Fonte do custo", class: "form-label" %><%= select_tag "atributos[fonte_custo]", options_for_select([["Informado manualmente", "manual"], ["XP", "xp"], ["Avenue", "avenue"], ["Planilha", "planilha"], ["Outra", "outra"]], dados[:fonte_custo] || "manual"), class: "form-select" %></div>
       <div class="col-md-6"><%= label_tag "atributos_data_efetiva", "Data efetiva", class: "form-label" %><%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %></div>
-    </div><p class="form-text mb-0 mt-3">Inaugura uma posição documentada sem gerar caixa. O custo canônico é calculado a partir do preço médio informado.</p></fieldset>
+    </div><p class="form-text mb-0 mt-3">Inaugura uma posição documentada sem gerar caixa. Custo desconhecido preserva a posição, mas não produz preço médio nem resultado baseado em custo.</p></fieldset>
+  <% elsif @tipo == "saldo_inicial_caixa" %>
+    <fieldset class="form-section"><legend>Saldo inicial de caixa</legend><div class="row g-3">
+      <div class="col-md-6"><%= label_tag "atributos_conta_caixa_id", "Conta e moeda", class: "form-label" %><%= select_tag "atributos[conta_caixa_id]", options_from_collection_for_select(@caixas, :id, ->(c) { "#{c.conta_investimento.nome} · #{c.moeda.codigo}" }, dados[:conta_caixa_id]), class: "form-select" %></div>
+      <div class="col-md-3"><%= label_tag "atributos_valor", "Saldo documentado", class: "form-label" %><%= text_field_tag "atributos[valor]", dados[:valor], class: "form-control", inputmode: "decimal" %></div>
+      <div class="col-md-3"><%= label_tag "atributos_data_efetiva", "Data de corte", class: "form-label" %><%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %></div>
+    </div><p class="form-text mb-0 mt-3">Inaugura o caixa documentado nesta moeda sem classificá-lo como aporte. Pode ser usado uma única vez antes de outras movimentações da conta.</p></fieldset>
   <% elsif @tipo == "transferencia_custodia" %>
     <fieldset class="form-section"><legend>Transferência</legend><div class="row g-3">
       <div class="col-md-6"><%= label_tag "atributos_conta_origem_id", "Conta de origem", class: "form-label" %><%= select_tag "atributos[conta_origem_id]", options_from_collection_for_select(@contas_investimento, :id, ->(c) { "#{c.carteira.nome} · #{c.nome}" }, dados[:conta_origem_id]), class: "form-select" %></div>

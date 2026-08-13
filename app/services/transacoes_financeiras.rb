@@ -202,6 +202,7 @@ module TransacoesFinanceiras
       when "provento" then normalizar_provento(investidor, atributos)
       when "movimentacao_caixa" then normalizar_movimentacao(investidor, atributos)
       when "saldo_inicial" then normalizar_saldo_inicial(investidor, atributos)
+      when "saldo_inicial_caixa" then normalizar_saldo_inicial_caixa(investidor, atributos)
       when "transferencia_custodia" then normalizar_transferencia_custodia(investidor, atributos)
       when "evento_corporativo" then normalizar_evento_corporativo(investidor, atributos)
       else raise Financeiro::AtributosInvalidos.new(tipo: ["inválido"])
@@ -310,19 +311,24 @@ module TransacoesFinanceiras
 
     def normalizar_saldo_inicial(investidor, a)
       validar_chaves!(a, %i[conta_investimento_id ativo_id quantidade custo_total_local custo_total_base
-        preco_medio_local preco_medio_base fonte_custo data_efetiva observacao ordem_na_data],
-        opcionais: %i[custo_total_local custo_total_base preco_medio_local preco_medio_base fonte_custo observacao ordem_na_data])
+        preco_medio_local preco_medio_base custo_desconhecido fonte_custo data_efetiva observacao ordem_na_data],
+        opcionais: %i[custo_total_local custo_total_base preco_medio_local preco_medio_base custo_desconhecido fonte_custo observacao ordem_na_data])
       conta = conta_investimento!(a[:conta_investimento_id], investidor)
       ativo = ativo_disponivel!(a[:ativo_id])
       data_efetiva = data!(a[:data_efetiva], :data_efetiva)
       quantidade = decimal!(a[:quantidade], :quantidade, escala: 10, minimo_exclusivo: 0)
       usa_totais = a[:custo_total_local].present? || a[:custo_total_base].present?
       usa_precos_medios = a[:preco_medio_local].present? || a[:preco_medio_base].present?
-      unless usa_totais ^ usa_precos_medios
+      custo_desconhecido = a[:custo_desconhecido].to_s == "1"
+      if custo_desconhecido && (usa_totais || usa_precos_medios)
+        raise Financeiro::AtributosInvalidos.new(custo: ["não deve ser informado quando marcado como desconhecido"])
+      elsif !custo_desconhecido && !(usa_totais ^ usa_precos_medios)
         raise Financeiro::AtributosInvalidos.new(custo: ["informe os custos totais ou os preços médios, sem misturar os dois modos"])
       end
 
-      if usa_totais
+      if custo_desconhecido
+        custo_total_local = custo_total_base = preco_medio_local = preco_medio_base = nil
+      elsif usa_totais
         custo_total_local = decimal!(a[:custo_total_local], :custo_total_local, escala: 12, minimo: 0)
         custo_total_base = decimal!(a[:custo_total_base], :custo_total_base, escala: 12, minimo: 0)
         preco_medio_local = preco_medio_base = nil
@@ -338,7 +344,7 @@ module TransacoesFinanceiras
         custo_total_local = (quantidade * preco_medio_local).round(12)
         custo_total_base = (quantidade * preco_medio_base).round(12)
       end
-      fonte_custo = a[:fonte_custo].presence || "manual"
+      fonte_custo = custo_desconhecido ? "desconhecido" : (a[:fonte_custo].presence || "manual")
       unless SaldoInicial::FONTES_CUSTO.include?(fonte_custo)
         raise Financeiro::AtributosInvalidos.new(fonte_custo: ["inválida"])
       end
@@ -346,8 +352,19 @@ module TransacoesFinanceiras
       comum(a).merge(conta_investimento_id: conta.id, ativo_id: ativo.id,
         quantidade:, custo_total_local:, custo_total_base:,
         preco_medio_local_informado: preco_medio_local,
-        preco_medio_base_informado: preco_medio_base, fonte_custo:,
+        preco_medio_base_informado: preco_medio_base, fonte_custo:, custo_desconhecido:,
         data_efetiva:, data_competencia: data_efetiva)
+    end
+
+    def normalizar_saldo_inicial_caixa(investidor, a)
+      validar_chaves!(a, %i[conta_caixa_id valor data_efetiva observacao ordem_na_data],
+        opcionais: %i[observacao ordem_na_data])
+      caixa = caixa!(a[:conta_caixa_id], investidor)
+      valor = decimal!(a[:valor], :valor, escala: 12)
+      raise Financeiro::AtributosInvalidos.new(valor: ["deve ser diferente de zero"]) if valor.zero?
+      data_efetiva = data!(a[:data_efetiva], :data_efetiva)
+      comum(a).merge(conta_caixa_id: caixa.id, conta_investimento_id: caixa.conta_investimento_id,
+        valor_saldo_inicial: valor, data_efetiva:, data_competencia: data_efetiva)
     end
 
     def normalizar_transferencia_custodia(investidor, a)
@@ -434,6 +451,8 @@ module TransacoesFinanceiras
           quantidade: d[:quantidade], custo_total_local: d[:custo_total_local], custo_total_base: d[:custo_total_base],
           preco_medio_local_informado: d[:preco_medio_local_informado],
           preco_medio_base_informado: d[:preco_medio_base_informado], fonte_custo: d[:fonte_custo])
+      when "saldo_inicial_caixa"
+        transacao.create_saldo_inicial_caixa!(conta_caixa_id: d[:conta_caixa_id], valor: d[:valor_saldo_inicial])
       when "transferencia_custodia"
         transacao.create_transferencia_custodia!(conta_origem_id: d[:conta_origem_id], conta_destino_id: d[:conta_destino_id],
           ativo_id: d[:ativo_id], quantidade: d[:quantidade])
@@ -451,12 +470,14 @@ module TransacoesFinanceiras
       transacao.provento&.delete
       transacao.movimentacao_caixa&.delete
       transacao.saldo_inicial&.delete
+      transacao.saldo_inicial_caixa&.delete
       transacao.transferencia_custodia&.delete
       transacao.evento_corporativo&.delete
       transacao.association(:nota_negociacao).reset
       transacao.association(:provento).reset
       transacao.association(:movimentacao_caixa).reset
       transacao.association(:saldo_inicial).reset
+      transacao.association(:saldo_inicial_caixa).reset
       transacao.association(:transferencia_custodia).reset
       transacao.association(:evento_corporativo).reset
     end
@@ -490,6 +511,10 @@ module TransacoesFinanceiras
           preco_medio_local_informado: s.preco_medio_local_informado,
           preco_medio_base_informado: s.preco_medio_base_informado,
           fonte_custo: s.fonte_custo, data_efetiva: t.data_competencia)
+      when "saldo_inicial_caixa"
+        s = t.saldo_inicial_caixa or raise Financeiro::AtributosInvalidos.new(detalhe: ["ausente"])
+        comum.merge(conta_caixa_id: s.conta_caixa_id, conta_investimento_id: s.conta_caixa.conta_investimento_id,
+          valor_saldo_inicial: s.valor, data_efetiva: t.data_competencia)
       when "transferencia_custodia"
         c = t.transferencia_custodia or raise Financeiro::AtributosInvalidos.new(detalhe: ["ausente"])
         comum.merge(conta_origem_id: c.conta_origem_id, conta_destino_id: c.conta_destino_id,
@@ -506,7 +531,7 @@ module TransacoesFinanceiras
       reversoes = investidor.transacoes_financeiras.confirmadas.where(tipo: "reversao").pluck(:transacao_revertida_id).to_set
       investidor.transacoes_financeiras.confirmadas.where.not(tipo: "reversao")
         .includes({ nota_negociacao: [:negociacoes, :conta_caixa] }, { provento: :conta_caixa }, :movimentacao_caixa,
-          :saldo_inicial, :transferencia_custodia, :evento_corporativo).map do |t|
+          :saldo_inicial, { saldo_inicial_caixa: :conta_caixa }, :transferencia_custodia, :evento_corporativo).map do |t|
         evento_em_memoria(tipo: t.tipo, investidor:, normalizado: normalizado_do_banco(t), ordem: t.ordem_na_data, id: t.id, tombstone: reversoes.include?(t.id))
       end
     end
@@ -524,9 +549,10 @@ module TransacoesFinanceiras
       posicoes = {}
       resultados = []
       chaves_utilizadas = Set.new
+      caixas_utilizadas = Set.new
       eventos_efetivos(eventos).each do |evento|
         break if ate && evento[:data_competencia] > ate
-        aplicar_evento!(evento, posicoes, resultados, chaves_utilizadas)
+        aplicar_evento!(evento, posicoes, resultados, chaves_utilizadas, caixas_utilizadas)
       end
       { posicoes:, resultados: }
     end
@@ -536,10 +562,11 @@ module TransacoesFinanceiras
       posicoes = {}
       resultados = []
       chaves_utilizadas = Set.new
+      caixas_utilizadas = Set.new
       indice = 0
       datas.each do |data|
         while indice < ordenados.length && ordenados[indice][:data_competencia] <= data
-          aplicar_evento!(ordenados[indice], posicoes, resultados, chaves_utilizadas)
+          aplicar_evento!(ordenados[indice], posicoes, resultados, chaves_utilizadas, caixas_utilizadas)
           indice += 1
         end
         yield data, posicoes, resultados
@@ -552,12 +579,28 @@ module TransacoesFinanceiras
         .sort_by { |e| [e[:data_competencia], e[:ordem] || 2**31, e[:id] || 2**62] }
     end
 
-    def aplicar_evento!(evento, posicoes, resultados, chaves_utilizadas)
+    def aplicar_evento!(evento, posicoes, resultados, chaves_utilizadas, caixas_utilizadas)
+      registrar_uso_caixa!(evento, caixas_utilizadas)
       case evento[:tipo]
       when "nota_negociacao" then aplicar_nota!(evento, posicoes, resultados, chaves_utilizadas)
       when "saldo_inicial" then aplicar_saldo_inicial!(evento, posicoes, chaves_utilizadas)
       when "transferencia_custodia" then aplicar_transferencia_custodia!(evento, posicoes, chaves_utilizadas)
       when "evento_corporativo" then aplicar_evento_corporativo!(evento, posicoes, chaves_utilizadas)
+      end
+    end
+
+    def registrar_uso_caixa!(evento, caixas_utilizadas)
+      d = evento[:detalhe]
+      if evento[:tipo] == "saldo_inicial_caixa"
+        if caixas_utilizadas.include?(d[:conta_caixa_id])
+          raise Financeiro::HistoricoInvalido.new(saldo_inicial_caixa: ["só pode inaugurar uma conta de caixa"],
+            transacao_id: evento[:id], conta_caixa_id: d[:conta_caixa_id])
+        end
+        caixas_utilizadas << d[:conta_caixa_id]
+      else
+        [d[:conta_caixa_id], d[:conta_caixa_origem_id], d[:conta_caixa_destino_id]].compact.each do |caixa_id|
+          caixas_utilizadas << caixa_id
+        end
       end
     end
 
@@ -573,35 +616,37 @@ module TransacoesFinanceiras
         if n[:natureza] == "compra"
           chaves_utilizadas << chave
           atual[:quantidade] += n[:quantidade]
-          atual[:custo_total_local] += bruto + n[:custo_alocado]
-          atual[:custo_total_base] += (bruto + n[:custo_alocado]) * detalhe[:taxa_conversao_base]
+          if atual[:custo_total_local]
+            atual[:custo_total_local] += bruto + n[:custo_alocado]
+            atual[:custo_total_base] += (bruto + n[:custo_alocado]) * detalhe[:taxa_conversao_base]
+          end
         else
           if n[:quantidade] > atual[:quantidade]
             raise Financeiro::HistoricoInvalido.new(negociacoes: ["venda excede a posição disponível"], transacao_id: evento[:id], ativo_id: n[:ativo_id])
           end
           proporcao = n[:quantidade] / atual[:quantidade]
-          custo_local = (atual[:custo_total_local] * proporcao).round(12)
-          custo_base = (atual[:custo_total_base] * proporcao).round(12)
+          custo_local = atual[:custo_total_local] && (atual[:custo_total_local] * proporcao).round(12)
+          custo_base = atual[:custo_total_base] && (atual[:custo_total_base] * proporcao).round(12)
           alienacao_local = bruto
           custo_venda_local = n[:custo_alocado]
           alienacao_base = (alienacao_local * detalhe[:taxa_conversao_base]).round(12)
           custo_venda_base = (custo_venda_local * detalhe[:taxa_conversao_base]).round(12)
           resultados << { transacao_id: evento[:id], data: evento[:data_competencia], conta_investimento_id: conta_id,
             ativo_id: n[:ativo_id], quantidade: n[:quantidade], alienacao_local:, custo_removido_local: custo_local,
-            custo_venda_local:, resultado_local: alienacao_local - custo_local - custo_venda_local,
+            custo_venda_local:, resultado_local: custo_local && alienacao_local - custo_local - custo_venda_local,
             alienacao_base:, custo_removido_base: custo_base,
-            custo_venda_base:, resultado_base: alienacao_base - custo_base - custo_venda_base }
+            custo_venda_base:, resultado_base: custo_base && alienacao_base - custo_base - custo_venda_base }
           atual[:quantidade] -= n[:quantidade]
-          atual[:custo_total_local] -= custo_local
-          atual[:custo_total_base] -= custo_base
+          atual[:custo_total_local] -= custo_local if custo_local
+          atual[:custo_total_base] -= custo_base if custo_base
         end
         atual[:ultima_transacao_id] = evento[:id]
         if atual[:quantidade].zero?
           posicoes.delete(chave)
         else
           atual[:quantidade] = atual[:quantidade].round(10)
-          atual[:custo_total_local] = atual[:custo_total_local].round(12)
-          atual[:custo_total_base] = atual[:custo_total_base].round(12)
+          atual[:custo_total_local] = atual[:custo_total_local]&.round(12)
+          atual[:custo_total_base] = atual[:custo_total_base]&.round(12)
         end
       end
     end
@@ -630,11 +675,11 @@ module TransacoesFinanceiras
       end
 
       proporcao = d[:quantidade] / origem[:quantidade]
-      custo_local = (origem[:custo_total_local] * proporcao).round(12)
-      custo_base = (origem[:custo_total_base] * proporcao).round(12)
+      custo_local = origem[:custo_total_local] && (origem[:custo_total_local] * proporcao).round(12)
+      custo_base = origem[:custo_total_base] && (origem[:custo_total_base] * proporcao).round(12)
       origem[:quantidade] = (origem[:quantidade] - d[:quantidade]).round(10)
-      origem[:custo_total_local] = (origem[:custo_total_local] - custo_local).round(12)
-      origem[:custo_total_base] = (origem[:custo_total_base] - custo_base).round(12)
+      origem[:custo_total_local] = (origem[:custo_total_local] - custo_local).round(12) if custo_local
+      origem[:custo_total_base] = (origem[:custo_total_base] - custo_base).round(12) if custo_base
       origem[:ultima_transacao_id] = evento[:id]
       posicoes.delete(origem_chave) if origem[:quantidade].zero?
 
@@ -642,8 +687,8 @@ module TransacoesFinanceiras
         quantidade: BigDecimal("0"), custo_total_local: BigDecimal("0"), custo_total_base: BigDecimal("0"),
         ultima_transacao_id: evento[:id] }
       destino[:quantidade] = (destino[:quantidade] + d[:quantidade]).round(10)
-      destino[:custo_total_local] = (destino[:custo_total_local] + custo_local).round(12)
-      destino[:custo_total_base] = (destino[:custo_total_base] + custo_base).round(12)
+      destino[:custo_total_local] = combinar_custo(destino[:custo_total_local], custo_local)
+      destino[:custo_total_base] = combinar_custo(destino[:custo_total_base], custo_base)
       destino[:ultima_transacao_id] = evento[:id]
       chaves_utilizadas << destino_chave
     end
@@ -671,12 +716,16 @@ module TransacoesFinanceiras
           quantidade: BigDecimal("0"), custo_total_local: BigDecimal("0"), custo_total_base: BigDecimal("0"),
           ultima_transacao_id: evento[:id] }
         destino[:quantidade] = (destino[:quantidade] + d[:quantidade_final]).round(10)
-        destino[:custo_total_local] = (destino[:custo_total_local] + origem[:custo_total_local]).round(12)
-        destino[:custo_total_base] = (destino[:custo_total_base] + origem[:custo_total_base]).round(12)
+        destino[:custo_total_local] = combinar_custo(destino[:custo_total_local], origem[:custo_total_local])
+        destino[:custo_total_base] = combinar_custo(destino[:custo_total_base], origem[:custo_total_base])
         destino[:ultima_transacao_id] = evento[:id]
         chaves_utilizadas << destino_chave
         posicoes.delete(origem_chave)
       end
+    end
+
+    def combinar_custo(atual, adicional)
+      atual && adicional && (atual + adicional).round(12)
     end
 
     def lancamentos(d)
@@ -701,6 +750,9 @@ module TransacoesFinanceiras
           { ordem: 2, conta_caixa_id: d[:conta_caixa_destino_id], data_efetiva: d[:data_efetiva], natureza: "cambio_entrada", valor: d[:valor_destino] }
         ]
         end
+      elsif d.key?(:valor_saldo_inicial)
+        [{ ordem: 1, conta_caixa_id: d[:conta_caixa_id], data_efetiva: d[:data_efetiva],
+          natureza: "saldo_inicial", valor: d[:valor_saldo_inicial] }]
       else
         []
       end
@@ -756,6 +808,7 @@ module TransacoesFinanceiras
       presentes << "provento" if Provento.where(transacao_financeira_id: transacao.id).exists?
       presentes << "movimentacao_caixa" if MovimentacaoCaixa.where(transacao_financeira_id: transacao.id).exists?
       presentes << "saldo_inicial" if SaldoInicial.where(transacao_financeira_id: transacao.id).exists?
+      presentes << "saldo_inicial_caixa" if SaldoInicialCaixa.where(transacao_financeira_id: transacao.id).exists?
       presentes << "transferencia_custodia" if TransferenciaCustodia.where(transacao_financeira_id: transacao.id).exists?
       presentes << "evento_corporativo" if EventoCorporativo.where(transacao_financeira_id: transacao.id).exists?
       return if presentes == [transacao.tipo]

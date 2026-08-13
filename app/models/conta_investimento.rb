@@ -31,6 +31,8 @@ class ContaInvestimento < ApplicationRecord
       TransacaoFinanceira.confirmadas.joins(:movimentacao_caixa)
         .where("movimentacoes_caixa.conta_caixa_origem_id IN (?) OR movimentacoes_caixa.conta_caixa_destino_id IN (?)", caixas, caixas).exists? ||
       TransacaoFinanceira.confirmadas.joins(:saldo_inicial).where(saldos_iniciais: { conta_investimento_id: id }).exists? ||
+      TransacaoFinanceira.confirmadas.joins(:saldo_inicial_caixa)
+        .where(saldos_iniciais_caixa: { conta_caixa_id: caixas }).exists? ||
       TransacaoFinanceira.confirmadas.joins(:transferencia_custodia)
         .where("transferencias_custodia.conta_origem_id = :id OR transferencias_custodia.conta_destino_id = :id", id:).exists? ||
       TransacaoFinanceira.confirmadas.joins(:evento_corporativo).where(eventos_corporativos: { conta_investimento_id: id }).exists?

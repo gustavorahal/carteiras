@@ -18,3 +18,9 @@ docker compose -f .devcontainer/docker-compose.yml exec -T app bin/rails test:sy
 ```
 
 A aplicação fica disponível em `http://localhost:3001` quando o servidor Rails é iniciado no container.
+
+## Cotações automáticas
+
+As cotações dos ativos B3 são obtidas pela brapi.dev no plano gratuito, uma vez por dia útil às 21h no fuso de Brasília. O ticker enviado é o próprio `codigo` do ativo.
+
+Configure o token no backend pela variável `BRAPI_API_TOKEN` ou pela credencial Rails `brapi.api_token`. O token nunca deve ser enviado ao navegador ou incluído no repositório.

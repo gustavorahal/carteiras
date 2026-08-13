@@ -9,7 +9,7 @@ Moeda.find_or_create_by!(codigo: "USD") do |moeda|
 end
 
 FonteCotacao.find_or_create_by!(codigo: "MANUAL") { |fonte| fonte.nome = "Manual" }
-FonteCotacao.find_or_create_by!(codigo: "YAHOO") { |fonte| fonte.nome = "Yahoo Finance" }
+FonteCotacao.find_or_create_by!(codigo: "BRAPI") { |fonte| fonte.nome = "brapi.dev" }
 
 email = ENV["ADMIN_EMAIL"]&.strip&.downcase.presence
 senha = ENV["ADMIN_PASSWORD"].presence

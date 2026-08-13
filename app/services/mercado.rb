@@ -14,7 +14,7 @@ module Mercado
         Interno.autorizar_admin!(usuario)
         raise Financeiro::AtributosInvalidos.new(fonte: ["deve ser MANUAL"]) unless fonte.codigo == "MANUAL"
       else
-        raise Financeiro::AtributosInvalidos.new(fonte: ["deve ser YAHOO"]) unless fonte.codigo == "YAHOO"
+        raise Financeiro::AtributosInvalidos.new(fonte: ["deve ser BRAPI"]) unless fonte.codigo == "BRAPI"
         raise Financeiro::AtributosInvalidos.new(usuario: ["deve ser ausente na automação"]) if usuario
       end
 
@@ -51,21 +51,26 @@ module Mercado
       cotacao_ativo
     end
 
-    def buscar_e_registrar_yahoo(data:)
+    def buscar_e_registrar_brapi(data:)
       data = Interno.data!(data)
-      fonte = FonteCotacao.find_by!(codigo: "YAHOO")
+      fonte = FonteCotacao.find_by!(codigo: "BRAPI")
+      token = Interno.token_brapi!
       resultados = []
       falhas = []
-      Ativo.ativos.where.not(simbolo_yahoo: [nil, ""]).find_each do |ativo|
+      Ativo.ativos.where(mercado: "B3").find_each do |ativo|
         begin
-          preco = Interno.buscar_yahoo(ativo.simbolo_yahoo, data)
+          preco = Interno.buscar_brapi(ativo.codigo, data, token:)
+          unless preco
+            Rails.logger.info("brapi sem cotação para #{ativo.codigo} em #{data}")
+            next
+          end
           resultados << registrar_cotacao_ativo(ativo:, data:, preco: preco.to_s("F"), fonte:, manual: false)
         rescue StandardError => e
-          Rails.logger.error("Yahoo #{ativo.simbolo_yahoo} em #{data}: #{e.class}: #{e.message}")
-          falhas << "#{ativo.simbolo_yahoo}: #{e.message}"
+          Rails.logger.error("brapi #{ativo.codigo} em #{data}: #{e.class}: #{e.message}")
+          falhas << "#{ativo.codigo}: #{e.message}"
         end
       end
-      raise "falha ao buscar #{falhas.length} cotação(ões) Yahoo: #{falhas.join('; ')}" if falhas.any?
+      raise "falha ao buscar #{falhas.length} cotação(ões) brapi: #{falhas.join('; ')}" if falhas.any?
 
       resultados.freeze
     end
@@ -93,22 +98,40 @@ module Mercado
       raise Financeiro::AtributosInvalidos.new(data: ["inválida"])
     end
 
-    def buscar_yahoo(simbolo, data, http: Net::HTTP)
-      inicio = Time.utc(data.year, data.month, data.day).to_i
-      fim = inicio + 86_400
-      uri = URI("https://query1.finance.yahoo.com/v8/finance/chart/#{URI.encode_uri_component(simbolo)}?period1=#{inicio}&period2=#{fim}&interval=1d")
+    def token_brapi!
+      token = ENV["BRAPI_API_TOKEN"].presence || Rails.application.credentials.dig(:brapi, :api_token).presence
+      raise "BRAPI_API_TOKEN não configurado" unless token
+
+      token
+    end
+
+    def buscar_brapi(simbolo, data, token:, http: Net::HTTP)
+      uri = URI("https://brapi.dev/api/v2/stocks/historical")
+      uri.query = URI.encode_www_form(symbols: simbolo, startDate: data.iso8601, endDate: data.iso8601, interval: "1d")
+      requisicao = Net::HTTP::Get.new(uri)
+      requisicao["Authorization"] = "Bearer #{token}"
       resposta = if http == Net::HTTP
         conexao = http.new(uri.host, uri.port)
         conexao.use_ssl = true
         conexao.open_timeout = 5
         conexao.read_timeout = 10
-        conexao.get(uri.request_uri)
+        conexao.request(requisicao)
       else
-        http.get_response(uri)
+        http.request(uri, requisicao)
       end
+      return if resposta.is_a?(Net::HTTPNotFound)
+
       raise "resposta HTTP #{resposta.code}" unless resposta.is_a?(Net::HTTPSuccess)
       json = JSON.parse(resposta.body)
-      valor = json.dig("chart", "result", 0, "indicators", "quote", 0, "close", 0)
+      resultado = json.fetch("results", []).find { |item| item["requestedSymbol"].to_s.casecmp?(simbolo) }
+      historico = resultado&.dig("data", "historicalDataPrice") || []
+      ponto = historico.find do |item|
+        timestamp = Integer(item["date"], exception: false)
+        timestamp && Time.at(timestamp).in_time_zone("Brasilia").to_date == data
+      end
+      valor = ponto&.fetch("close", nil)
+      return if valor.nil?
+
       numero = BigDecimal(valor.to_s, exception: false)
       raise "preço ausente ou inválido" unless numero&.finite? && numero.positive?
       numero.round(12)

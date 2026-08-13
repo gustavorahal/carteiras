@@ -11,7 +11,7 @@ class ActiveSupport::TestCase
     @brl = Moeda.create!(codigo: "BRL", nome: "Real", casas_decimais: 2)
     @usd = Moeda.create!(codigo: "USD", nome: "Dólar", casas_decimais: 2)
     @fonte_manual = FonteCotacao.create!(codigo: "MANUAL", nome: "Manual")
-    @fonte_yahoo = FonteCotacao.create!(codigo: "YAHOO", nome: "Yahoo Finance")
+    @fonte_brapi = FonteCotacao.create!(codigo: "BRAPI", nome: "brapi.dev")
     @admin_sistema = User.create!(email: "admin-#{SecureRandom.hex(4)}@example.com", password: "segredo123", administrador_sistema: true)
     @usuario = User.create!(email: "editor-#{SecureRandom.hex(4)}@example.com", password: "segredo123")
     @leitor = User.create!(email: "leitor-#{SecureRandom.hex(4)}@example.com", password: "segredo123")
@@ -25,7 +25,7 @@ class ActiveSupport::TestCase
     @conta = @carteira.contas_investimento.create!(nome: "Conta 1", instituicao: @instituicao)
     @caixa_brl = @conta.contas_caixa.create!(moeda: @brl)
     @caixa_usd = @conta.contas_caixa.create!(moeda: @usd)
-    @ativo = Ativo.create!(codigo: "PETR4", mercado: "B3", descricao: "Petrobras", tipo: "acao", moeda_negociacao: @brl, simbolo_yahoo: "PETR4.SA")
+    @ativo = Ativo.create!(codigo: "PETR4", mercado: "B3", descricao: "Petrobras", tipo: "acao", moeda_negociacao: @brl)
   end
 
   def atributos_aporte(valor: "1000.00", data: "2026-01-02", caixa: @caixa_brl)

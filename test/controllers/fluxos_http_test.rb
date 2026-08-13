@@ -4,7 +4,7 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
   setup do
     @brl = Moeda.create!(codigo: "BRL", nome: "Real", casas_decimais: 2)
     FonteCotacao.create!(codigo: "MANUAL", nome: "Manual")
-    FonteCotacao.create!(codigo: "YAHOO", nome: "Yahoo")
+    FonteCotacao.create!(codigo: "BRAPI", nome: "brapi.dev")
     @usuario = User.create!(email: "web@example.com", password: "segredo123")
     @estranho = User.create!(email: "outro@example.com", password: "segredo123")
     @admin_sistema = User.create!(email: "root@example.com", password: "segredo123", administrador_sistema: true)

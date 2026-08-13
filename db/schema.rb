@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,13 +22,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.string "descricao"
     t.string "mercado", null: false
     t.bigint "moeda_negociacao_id", null: false
-    t.string "simbolo_yahoo"
     t.string "tipo", null: false
     t.datetime "updated_at", null: false
     t.index ["cnpj"], name: "index_ativos_on_cnpj"
     t.index ["codigo", "mercado"], name: "index_ativos_on_codigo_and_mercado", unique: true
     t.index ["moeda_negociacao_id"], name: "index_ativos_on_moeda_negociacao_id"
-    t.index ["simbolo_yahoo"], name: "index_ativos_on_simbolo_yahoo"
     t.check_constraint "cnpj IS NULL OR cnpj::text ~ '^[0-9]{14}$'::text", name: "ativos_cnpj_valido"
     t.check_constraint "codigo::text = upper(codigo::text) AND btrim(codigo::text) <> ''::text", name: "ativos_codigo_valido"
     t.check_constraint "mercado::text = upper(mercado::text) AND btrim(mercado::text) <> ''::text", name: "ativos_mercado_valido"

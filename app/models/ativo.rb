@@ -10,7 +10,7 @@ class Ativo < ApplicationRecord
   has_many :cotacoes_ativos, class_name: "CotacaoAtivo", inverse_of: :ativo
 
   normaliza_texto :codigo, :mercado, maiusculo: true
-  normaliza_texto :descricao, :simbolo_yahoo, :cnpj
+  normaliza_texto :descricao, :cnpj
   before_validation :normalizar_cnpj
   validates :codigo, :mercado, presence: true
   validates :codigo, uniqueness: { scope: :mercado }

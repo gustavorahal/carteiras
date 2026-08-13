@@ -65,7 +65,7 @@ O banco primário terminará com **20 tabelas funcionais da aplicação**, além
 | 7 | `contas_caixa` | `conta_investimento_id`, `moeda_id`, `arquivado_em:datetime?`. |
 | 8 | `moedas` | `codigo:string(3)`, `nome:string`, `casas_decimais:integer` com default `2`, `arquivado_em:datetime?`. |
 | 9 | `instituicoes` | `nome:string`, `arquivado_em:datetime?`. |
-| 10 | `ativos` | `codigo:string`, `mercado:string`, `descricao:string?`, `tipo:string`, `moeda_negociacao_id`, `simbolo_yahoo:string?`, `cnpj:string?`, `arquivado_em:datetime?`. |
+| 10 | `ativos` | `codigo:string`, `mercado:string`, `descricao:string?`, `tipo:string`, `moeda_negociacao_id`, `cnpj:string?`, `arquivado_em:datetime?`. |
 | 11 | `fontes_cotacao` | `codigo:string`, `nome:string`, `arquivado_em:datetime?`. |
 | 12 | `transacoes_financeiras` | `investidor_id`, `tipo:string`, `origem:string`, `data_competencia:date`, `ordem_na_data:integer?`, `estado:string` com default `rascunho`, `criado_por_id`, `confirmado_por_id?`, `observacao:text?`, `confirmada_em:datetime?`, `chave_idempotencia:string?`, `transacao_revertida_id?`. |
 | 13 | `notas_negociacao` | `transacao_financeira_id`, `conta_caixa_id`, `data_negociacao:date`, `data_liquidacao:date`, `custo_operacional_total:numeric(30,12)` com default `0`, `taxa_conversao_base:numeric(24,12)` com default `1`. |
@@ -93,7 +93,7 @@ Enums definitivos:
 
 - `users.email`, `users.reset_password_token` e `users.unlock_token` únicos conforme Devise;
 - `membros_espaco (espaco_id, user_id)`; `investidores (espaco_id, lower(nome))`; `carteiras (investidor_id, lower(nome))`; `contas_investimento (carteira_id, lower(nome))`; `contas_caixa (conta_investimento_id, moeda_id)`;
-- `moedas.codigo`, `instituicoes lower(nome)`, `ativos (codigo, mercado)` e `fontes_cotacao.codigo` únicos; indexar `contas_investimento.identificador_externo`, `ativos.simbolo_yahoo` e `ativos.cnpj` sem exigir unicidade;
+- `moedas.codigo`, `instituicoes lower(nome)`, `ativos (codigo, mercado)` e `fontes_cotacao.codigo` únicos; indexar `contas_investimento.identificador_externo` e `ativos.cnpj` sem exigir unicidade;
 - `transacoes_financeiras (investidor_id, chave_idempotencia)` único quando a chave estiver preenchida, `transacao_revertida_id` único quando preenchido e `(investidor_id, data_competencia, ordem_na_data, id)` para replay;
 - detalhe tipado único por `transacao_financeira_id`; `negociacoes (nota_negociacao_id, ordem)`; `lancamentos_caixa (transacao_financeira_id, ordem)`; `lancamentos_caixa.lancamento_original_id` único quando preenchido;
 - `lancamentos_caixa (conta_caixa_id, data_efetiva, transacao_financeira_id)`; `posicoes_atuais (conta_investimento_id, ativo_id)` único;
@@ -105,7 +105,7 @@ Normalizações e checks adicionais:
 - `cnpj`, quando informado, armazena somente 14 dígitos. Ele é metadado e não altera regras financeiras.
 - Nomes únicos ignoram caixa conforme os índices `lower(nome)`; código e mercado do ativo são normalizados para maiúsculas.
 - `posicoes_atuais` contém apenas quantidades estritamente positivas; uma zeragem remove a linha da projeção.
-- `fontes_cotacao` recebe nos seeds os códigos estáveis `MANUAL` e `YAHOO`. Não armazenar prioridade ou lista de tipos atendidos.
+- `fontes_cotacao` recebe nos seeds os códigos estáveis `MANUAL` e `BRAPI`. Não armazenar prioridade ou lista de tipos atendidos.
 - Depois da primeira referência, `moedas.codigo` e `fontes_cotacao.codigo` tornam-se imutáveis; nomes continuam editáveis. A instituição pode ser renomeada porque sua identidade é o ID e o nome não participa de cálculos.
 
 ### Acesso e propriedade
@@ -127,8 +127,8 @@ Arquivamento terá semântica uniforme: registros arquivados continuam disponív
 
 - `moedas`: catálogo global, inicialmente BRL e USD.
 - `instituicoes`: instituições financeiras globais.
-- `ativos`: catálogo global com código, mercado, descrição, tipo, moeda de negociação, `simbolo_yahoo` opcional, CNPJ opcional e arquivamento.
-- `fontes_cotacao`: fontes globais, inicialmente Manual e Yahoo Finance.
+- `ativos`: catálogo global com código, mercado, descrição, tipo, moeda de negociação, CNPJ opcional e arquivamento.
+- `fontes_cotacao`: fontes globais, inicialmente Manual e brapi.dev.
 
 Não separar ativo de listagem. A unicidade do ativo será `(codigo, mercado)`. Somente o administrador do sistema altera catálogos globais. Todos os ativos globais não arquivados ficam disponíveis para qualquer espaço por pesquisa, sem seleção, apelido ou arquivamento local.
 
@@ -248,7 +248,7 @@ Para manter uma única implementação correta, toda confirmação, reversão ou
 
 Uma busca automática de preço de ativo cria ou atualiza a linha canônica somente quando ela não estiver marcada como manual. Correção manual atualiza a mesma linha, registra fonte, autor e `manual = true`; substituir esse valor por automação exige ação explícita do administrador do sistema. Não manter revisões, observações rejeitadas ou tabelas de seleção.
 
-Uma cotação de ativo com `manual = true` exige fonte `MANUAL` e autor; uma automática exige fonte `YAHOO` e autor nulo. Ativos sem `simbolo_yahoo` não entram na busca automática. Yahoo fornecerá apenas preços de ativos neste escopo; cotações de câmbio serão sempre manuais, com fonte `MANUAL` e autor.
+Uma cotação de ativo com `manual = true` exige fonte `MANUAL` e autor; uma automática exige fonte `BRAPI` e autor nulo. Ativos ativos do mercado `B3` entram na busca automática usando seu próprio `codigo`. A brapi fornecerá apenas preços de ativos neste escopo; cotações de câmbio serão sempre manuais, com fonte `MANUAL` e autor.
 
 Leituras usam a cotação exata ou a última anterior e informam data e dias de defasagem. A convenção cambial é `destino = origem * taxa`: procurar primeiro o par direto e, se ausente, aceitar o par inverso usando `1/taxa`; nunca triangular por terceira moeda. A taxa persistida numa nota ou provento é parte do fato e não muda quando a cotação canônica é corrigida.
 
@@ -258,7 +258,7 @@ Como posição histórica, resultados e TWR são calculados sob demanda, uma cor
 
 ### Interfaces externas
 
-Controllers, jobs e testes funcionais atravessam somente três interfaces: `TransacoesFinanceiras`, `ConsultasFinanceiras` e `Mercado`. Projetor, alocador de custos, gerador de lançamentos, replay e cliente Yahoo são implementação interna; não criar classes públicas que apenas repassem argumentos.
+Controllers, jobs e testes funcionais atravessam somente três interfaces: `TransacoesFinanceiras`, `ConsultasFinanceiras` e `Mercado`. Projetor, alocador de custos, gerador de lançamentos, replay e cliente brapi são implementação interna; não criar classes públicas que apenas repassem argumentos.
 
 #### `TransacoesFinanceiras`
 
@@ -309,12 +309,12 @@ Períodos são inclusivos e exigem `inicio <= fim`. A consulta autoriza o usuár
 Mercado.registrar_cotacao_ativo(ativo:, data:, preco:, fonte:, manual:, usuario: nil)
 Mercado.registrar_cotacao_cambio(moeda_origem:, moeda_destino:, data:, taxa:, usuario:)
 Mercado.liberar_automacao(cotacao_ativo:, usuario:)
-Mercado.buscar_e_registrar_yahoo(data:)
+Mercado.buscar_e_registrar_brapi(data:)
 ```
 
-Registros manuais exigem administrador do sistema e `usuario`; gravações automáticas de ativo exigem fonte `YAHOO` e autor nulo. Os métodos de registro devolvem `ResultadoCotacao` com `cotacao` e estado `criada|atualizada|ignorada_manual`; o último estado só se aplica a ativo. `liberar_automacao` apenas muda `manual` para `false` numa cotação de ativo; a próxima busca poderá substituí-la. Uma busca que falha ou não encontra preço preserva o valor existente e registra a falha no log do job, sem criar outra tabela.
+Registros manuais exigem administrador do sistema e `usuario`; gravações automáticas de ativo exigem fonte `BRAPI` e autor nulo. Os métodos de registro devolvem `ResultadoCotacao` com `cotacao` e estado `criada|atualizada|ignorada_manual`; o último estado só se aplica a ativo. `liberar_automacao` apenas muda `manual` para `false` numa cotação de ativo; a próxima busca poderá substituí-la. Uma busca que falha ou não encontra preço preserva o valor existente e registra a falha no log do job, sem criar outra tabela.
 
-Haverá somente um buscador automático, Yahoo. Implementá-lo privadamente com dependência HTTP injetável para teste; não criar registro genérico de adapters ou framework de provedores antes de existir uma segunda fonte automática real. Timeout, resposta inválida e indisponibilidade de rede são falhas recuperáveis do job e usam o retry padrão do Solid Queue, limitado a três tentativas.
+Haverá somente um buscador automático, brapi.dev. Implementá-lo privadamente com dependência HTTP injetável para teste; não criar registro genérico de adapters ou framework de provedores antes de existir uma segunda fonte automática real. Timeout, resposta inválida e indisponibilidade de rede são falhas recuperáveis do job e usam retry exponencial do Solid Queue, limitado a três tentativas. Dias sem pregão são ausência esperada e não disparam retry.
 
 ### Erros das interfaces
 
@@ -417,7 +417,7 @@ A entrega continua sendo um único Big Bang. As etapas abaixo organizam o trabal
 1. **Documentação e baseline:** criar `CONTEXT.md` e ADR; substituir a migration primária pelo inventário exato das 20 tabelas; atualizar schema e seeds. Concluída quando os bancos vazios são preparados duas vezes e os testes de constraints do novo schema passam.
 2. **Acesso e catálogos:** implementar models, policies, scopes e telas de espaços, membros, investidores, carteiras, contas e catálogos. Concluída com matriz de autorização, arquivamento e proteção do último administrador passando.
 3. **Núcleo financeiro:** implementar `TransacoesFinanceiras`, projetor puro, replay, lançamentos e posição atual, começando por movimentação, depois provento e por fim nota multilinha. Concluída quando prévia/confirmação/replay são idênticos e cenários long-only, retroativos, reversão, correção e concorrência passam.
-4. **Mercado e consultas:** implementar cotações canônicas, busca Yahoo, DTOs, posição histórica, caixa, resultados e TWR. Concluída com testes de ausência/defasagem de cotação, câmbio direto/inverso e períodos de 30/365 dias.
+4. **Mercado e consultas:** implementar cotações canônicas, busca brapi, DTOs, posição histórica, caixa, resultados e TWR. Concluída com testes de ausência/defasagem de cotação, câmbio direto/inverso e períodos de 30/365 dias.
 5. **Fluxos HTTP:** implementar rotas, controllers e telas mínimas sobre as interfaces já testadas. Concluída com system tests dos fluxos principais e verificação de N+1.
 6. **Remoção e corte:** apagar implementação, testes, rotas e dependências das capacidades removidas; revisar textos; executar o checklist destrutivo e toda a validação. Concluída somente quando não restam constantes/tabelas/rotas legadas e toda a suíte passa.
 

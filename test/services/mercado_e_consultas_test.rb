@@ -7,12 +7,12 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
       fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
     assert_equal "criada", manual.estado
     ignorada = Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-05", preco: "11",
-      fonte: @fonte_yahoo, manual: false)
+      fonte: @fonte_brapi, manual: false)
     assert_equal "ignorada_manual", ignorada.estado
     assert_equal BigDecimal("10.5"), manual.cotacao.reload.preco
     Mercado.liberar_automacao(cotacao_ativo: manual.cotacao, usuario: @admin_sistema)
     atualizada = Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-05", preco: "11",
-      fonte: @fonte_yahoo, manual: false)
+      fonte: @fonte_brapi, manual: false)
     assert_equal "atualizada", atualizada.estado
     assert_equal BigDecimal("11"), atualizada.cotacao.preco
   end
@@ -138,34 +138,61 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
     assert_equal pequeno, grande
   end
 
-  test "falha Yahoo preserva valor e não impede os ativos posteriores" do
-    outro = Ativo.create!(codigo: "VALE3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl,
-      simbolo_yahoo: "VALE3.SA")
+  test "falha brapi preserva valor e não impede os ativos posteriores" do
+    outro = Ativo.create!(codigo: "VALE3", mercado: "B3", tipo: "acao", moeda_negociacao: @brl)
     data = Date.new(2026, 1, 5)
-    existente = Mercado.registrar_cotacao_ativo(ativo: @ativo, data:, preco: "9", fonte: @fonte_yahoo, manual: false).cotacao
-    buscador = lambda do |simbolo, _data|
-      raise Net::ReadTimeout, "timeout de teste" if simbolo == @ativo.simbolo_yahoo
+    existente = Mercado.registrar_cotacao_ativo(ativo: @ativo, data:, preco: "9", fonte: @fonte_brapi, manual: false).cotacao
+    buscador = lambda do |simbolo, _data, token:|
+      assert_equal "token-teste", token
+      raise Net::ReadTimeout, "timeout de teste" if simbolo == @ativo.codigo
       BigDecimal("20")
     end
 
     assert_raises(RuntimeError) do
-      Mercado::Interno.stub(:buscar_yahoo, buscador) { Mercado.buscar_e_registrar_yahoo(data:) }
+      Mercado::Interno.stub(:token_brapi!, "token-teste") do
+        Mercado::Interno.stub(:buscar_brapi, buscador) { Mercado.buscar_e_registrar_brapi(data:) }
+      end
     end
     assert_equal BigDecimal("9"), existente.reload.preco
     assert_equal BigDecimal("20"), CotacaoAtivo.find_by!(ativo: outro, data:).preco
   end
 
-  test "cliente Yahoo trata timeout e resposta inválida como falhas" do
-    timeout = Object.new
-    timeout.define_singleton_method(:get_response) { |_uri| raise Net::ReadTimeout, "timeout" }
-    assert_raises(Net::ReadTimeout) { Mercado::Interno.buscar_yahoo("PETR4.SA", Date.current, http: timeout) }
+  test "cliente brapi autentica e seleciona somente a cotação da data solicitada" do
+    data = Date.new(2026, 1, 5)
+    anterior = Time.find_zone!("Brasilia").local(2026, 1, 2).to_i
+    exato = Time.find_zone!("Brasilia").local(2026, 1, 5).to_i
+    resposta = resposta_http(Net::HTTPOK, {
+      results: [{ requestedSymbol: "PETR4", data: { historicalDataPrice: [
+        { date: anterior, close: 9 }, { date: exato, close: 12.34 }
+      ] } }]
+    }.to_json)
+    cliente = Object.new
+    cliente.define_singleton_method(:request) do |uri, requisicao|
+      raise "consulta sem data exata" unless uri.query.include?("startDate=2026-01-05") && uri.query.include?("endDate=2026-01-05")
+      raise "token ausente" unless requisicao["Authorization"] == "Bearer segredo"
+      resposta
+    end
 
-    resposta = Net::HTTPOK.new("1.1", "200", "OK")
-    resposta.instance_variable_set(:@read, true)
-    resposta.body = "não é json"
+    assert_equal BigDecimal("12.34"), Mercado::Interno.buscar_brapi("PETR4", data, token: "segredo", http: cliente)
+  end
+
+  test "cliente brapi trata dia sem pregão sem falhar" do
+    resposta = resposta_http(Net::HTTPNotFound, { error: true, code: "NOT_FOUND" }.to_json)
+    cliente = Object.new
+    cliente.define_singleton_method(:request) { |_uri, _requisicao| resposta }
+
+    assert_nil Mercado::Interno.buscar_brapi("PETR4", Date.new(2026, 1, 4), token: "segredo", http: cliente)
+  end
+
+  test "cliente brapi trata timeout e resposta inválida como falhas" do
+    timeout = Object.new
+    timeout.define_singleton_method(:request) { |_uri, _requisicao| raise Net::ReadTimeout, "timeout" }
+    assert_raises(Net::ReadTimeout) { Mercado::Interno.buscar_brapi("PETR4", Date.current, token: "segredo", http: timeout) }
+
+    resposta = resposta_http(Net::HTTPOK, "não é json")
     invalido = Object.new
-    invalido.define_singleton_method(:get_response) { |_uri| resposta }
-    erro = assert_raises(RuntimeError) { Mercado::Interno.buscar_yahoo("PETR4.SA", Date.current, http: invalido) }
+    invalido.define_singleton_method(:request) { |_uri, _requisicao| resposta }
+    erro = assert_raises(RuntimeError) { Mercado::Interno.buscar_brapi("PETR4", Date.current, token: "segredo", http: invalido) }
     assert_match(/resposta inválida/, erro.message)
   end
 
@@ -178,5 +205,13 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
     end
     ActiveSupport::Notifications.subscribed(callback, "sql.active_record") { yield }
     total
+  end
+
+  def resposta_http(classe, corpo)
+    codigo = Net::HTTPResponse::CODE_TO_OBJ.key(classe)
+    resposta = classe.new("1.1", codigo, "Teste")
+    resposta.instance_variable_set(:@read, true)
+    resposta.body = corpo
+    resposta
   end
 end

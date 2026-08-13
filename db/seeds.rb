@@ -1,32 +1,26 @@
-brl = Moeda.find_or_create_by!(codigo: "BRL") do |moeda|
+Moeda.find_or_create_by!(codigo: "BRL") do |moeda|
   moeda.nome = "Real brasileiro"
-  moeda.tipo = :fiduciaria
   moeda.casas_decimais = 2
 end
 
 Moeda.find_or_create_by!(codigo: "USD") do |moeda|
   moeda.nome = "Dólar americano"
-  moeda.tipo = :fiduciaria
   moeda.casas_decimais = 2
 end
 
-FonteCotacao.find_or_create_by!(nome: "Manual") do |fonte|
-  fonte.prioridade = 0
-  fonte.tipos_atendidos = %w[ativo cambio]
+FonteCotacao.find_or_create_by!(codigo: "MANUAL") { |fonte| fonte.nome = "Manual" }
+FonteCotacao.find_or_create_by!(codigo: "YAHOO") { |fonte| fonte.nome = "Yahoo Finance" }
+
+email = ENV["ADMIN_EMAIL"]&.strip&.downcase.presence
+senha = ENV["ADMIN_PASSWORD"].presence
+raise "ADMIN_EMAIL e ADMIN_PASSWORD devem estar ambos presentes ou ambos ausentes" if email.present? != senha.present?
+if Rails.env.production? && !email && !User.exists?(administrador_sistema: true)
+  raise "ADMIN_EMAIL e ADMIN_PASSWORD são obrigatórios no primeiro preparo de produção"
 end
 
-FonteCotacao.find_or_create_by!(nome: "Yahoo Finance") do |fonte|
-  fonte.prioridade = 10
-  fonte.tipos_atendidos = %w[acao fii etf moeda]
-end
-
-if ENV["ADMIN_EMAIL"].present?
-  usuario = User.find_or_initialize_by(email: ENV.fetch("ADMIN_EMAIL"))
-  usuario.password = ENV.fetch("ADMIN_PASSWORD")
-  usuario.role = :admin
+if email
+  usuario = User.find_or_initialize_by(email:)
+  usuario.password = senha
+  usuario.administrador_sistema = true
   usuario.save!
-  Investidor.find_or_create_by!(user: usuario) do |investidor|
-    investidor.nome = ENV.fetch("ADMIN_NOME", "Administrador")
-    investidor.moeda_fiscal = brl
-  end
 end

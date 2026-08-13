@@ -1,18 +1,11 @@
 class MovimentacaoCaixa < ApplicationRecord
   self.table_name = "movimentacoes_caixa"
-  include ConfirmadoImutavel
-  belongs_to :evento_financeiro, inverse_of: :movimentacao_caixa
-  belongs_to :conta_caixa
+  include FatoFinanceiroImutavel
 
-  enum :natureza, { aporte: "aporte", resgate: "resgate", ajuste: "ajuste" }, validate: true
-  enum :direcao, { entrada: "entrada", saida: "saida" }, validate: true
-  validates :valor, numericality: { greater_than: 0 }
-  validate :natureza_e_direcao_coerentes
+  belongs_to :transacao_financeira, inverse_of: :movimentacao_caixa
+  belongs_to :conta_caixa_origem, class_name: "ContaCaixa", optional: true
+  belongs_to :conta_caixa_destino, class_name: "ContaCaixa", optional: true
 
-  private
-
-  def natureza_e_direcao_coerentes
-    errors.add(:direcao, "deve ser entrada para aporte") if aporte? && !entrada?
-    errors.add(:direcao, "deve ser saída para resgate") if resgate? && !saida?
-  end
+  validates :tipo, inclusion: { in: %w[aporte resgate transferencia cambio] }
+  validates :data_efetiva, presence: true
 end

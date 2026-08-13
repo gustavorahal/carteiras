@@ -1,0 +1,45 @@
+<% dados = @atributos_formulario || {} %>
+<% if flash.now[:alert].present? %><div class="alert alert-danger"><%= flash.now[:alert] %></div><% end %>
+<% destino = if @correcao then corrigir_espaco_transacao_path(@espaco, @transacao) elsif @transacao&.persisted? then espaco_transacao_path(@espaco, @transacao) else espaco_transacoes_path(@espaco) end %>
+<%= form_with url: destino, method: (@correcao ? :post : (@transacao&.persisted? ? :patch : :post)), class: "vstack gap-3" do |f| %>
+  <%= hidden_field_tag :tipo, @tipo %>
+  <% if @transacao&.persisted? %><%= hidden_field_tag :investidor_id, @investidor&.id %><%= hidden_field_tag :id, @transacao.id %><% end %>
+  <% if @correcao %><%= hidden_field_tag :correcao, "1" %><% end %>
+  <% unless @transacao&.persisted? %>
+    <div><%= label_tag :investidor_id, "Investidor", class: "form-label" %><%= select_tag :investidor_id, options_from_collection_for_select(@investidores, :id, :nome, @investidor&.id), class: "form-select" %></div>
+    <div><%= label_tag :chave_idempotencia, "Chave de idempotência", class: "form-label" %><%= text_field_tag :chave_idempotencia, nil, class: "form-control" %></div>
+  <% end %>
+
+  <% if @tipo == "nota_negociacao" %>
+    <div><%= label_tag "atributos_conta_caixa_id", "Conta de caixa", class: "form-label" %><%= select_tag "atributos[conta_caixa_id]", options_from_collection_for_select(@caixas, :id, ->(c) { "#{c.conta_investimento.nome} · #{c.moeda.codigo}" }, dados[:conta_caixa_id]), class: "form-select" %></div>
+    <div class="row"><div class="col"><%= date_field_tag "atributos[data_negociacao]", dados[:data_negociacao] || Date.current, class: "form-control" %></div><div class="col"><%= date_field_tag "atributos[data_liquidacao]", dados[:data_liquidacao] || Date.current, class: "form-control" %></div></div>
+    <div class="row"><div class="col"><%= text_field_tag "atributos[custo_operacional_total]", dados.fetch(:custo_operacional_total, "0"), class: "form-control", placeholder: "Custos" %></div><div class="col"><%= text_field_tag "atributos[taxa_conversao_base]", dados.fetch(:taxa_conversao_base, "1"), class: "form-control", placeholder: "Taxa base" %></div></div>
+    <fieldset class="border p-3" data-controller="negociacoes"><legend class="h5">Negociações</legend>
+      <% linhas = Array(dados[:negociacoes]); linhas = [{}] if linhas.empty? %>
+      <div data-negociacoes-target="linhas"><% linhas.each do |linha| %><%= render "linha_negociacao", linha: %><% end %></div>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-action="negociacoes#adicionar">Adicionar negociação</button>
+      <p class="form-text">A ordem visual define a aplicação econômica e o resíduo do rateio.</p>
+    </fieldset>
+  <% elsif @tipo == "provento" %>
+    <%= select_tag "atributos[conta_caixa_id]", options_from_collection_for_select(@caixas, :id, ->(c) { "#{c.conta_investimento.nome} · #{c.moeda.codigo}" }, dados[:conta_caixa_id]), class: "form-select" %>
+    <%= select_tag "atributos[ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, dados[:ativo_id]), class: "form-select" %>
+    <%= select_tag "atributos[tipo_provento]", options_for_select(%w[dividendo jcp rendimento juros outro], dados[:tipo_provento]), class: "form-select" %>
+    <div class="row"><div class="col"><%= date_field_tag "atributos[data_base]", dados[:data_base] || Date.current, class: "form-control" %></div><div class="col"><%= date_field_tag "atributos[data_pagamento]", dados[:data_pagamento] || Date.current, class: "form-control" %></div></div>
+    <% { quantidade_referencia: "Quantidade", valor_bruto: "Bruto", retencoes: "Retenções", taxa_conversao_base: "Taxa base" }.each do |campo, rotulo| %><%= text_field_tag "atributos[#{campo}]", dados.fetch(campo, campo == :taxa_conversao_base ? "1" : "0"), class: "form-control", placeholder: rotulo %><% end %>
+  <% else %>
+    <% movimento = @movimento || params[:movimento].presence_in(%w[aporte resgate transferencia cambio]) || "aporte" %>
+    <%= hidden_field_tag "atributos[tipo_movimentacao]", movimento %>
+    <p><strong><%= movimento.humanize %></strong> · <%= link_to "aporte", new_espaco_transacao_path(@espaco, tipo: @tipo, movimento: "aporte") %> · <%= link_to "resgate", new_espaco_transacao_path(@espaco, tipo: @tipo, movimento: "resgate") %> · <%= link_to "transferência", new_espaco_transacao_path(@espaco, tipo: @tipo, movimento: "transferencia") %> · <%= link_to "câmbio", new_espaco_transacao_path(@espaco, tipo: @tipo, movimento: "cambio") %></p>
+    <% if %w[resgate transferencia cambio].include?(movimento) %><%= select_tag "atributos[conta_caixa_origem_id]", options_from_collection_for_select(@caixas, :id, ->(c) { "#{c.conta_investimento.nome} · #{c.moeda.codigo}" }, dados[:conta_caixa_origem_id]), class: "form-select" %><% end %>
+    <% if %w[aporte transferencia cambio].include?(movimento) %><%= select_tag "atributos[conta_caixa_destino_id]", options_from_collection_for_select(@caixas, :id, ->(c) { "#{c.conta_investimento.nome} · #{c.moeda.codigo}" }, dados[:conta_caixa_destino_id]), class: "form-select" %><% end %>
+    <% if movimento == "cambio" %>
+      <%= text_field_tag "atributos[valor_origem]", dados[:valor_origem], class: "form-control", placeholder: "Valor de origem" %><%= text_field_tag "atributos[valor_destino]", dados[:valor_destino], class: "form-control", placeholder: "Valor de destino" %>
+    <% else %><%= text_field_tag "atributos[valor]", dados[:valor], class: "form-control", placeholder: "Valor" %><% end %>
+    <%= date_field_tag "atributos[data_efetiva]", dados[:data_efetiva] || Date.current, class: "form-control" %>
+  <% end %>
+  <%= text_area_tag "atributos[observacao]", dados[:observacao], class: "form-control", placeholder: "Observação" %>
+  <%= number_field_tag "atributos[ordem_na_data]", dados[:ordem_na_data], min: 1, class: "form-control", placeholder: "Ordem opcional" %>
+  <div><%= f.submit(@correcao ? "Aplicar correção" : (@transacao&.persisted? ? "Atualizar rascunho" : "Criar rascunho"), class: "btn btn-primary") %>
+    <%= button_tag "Prévia", formaction: prever_espaco_transacoes_path(@espaco), formmethod: "post", class: "btn btn-outline-secondary" %></div>
+<% end %>
+<% if @previa %><pre class="mt-3"><%= JSON.pretty_generate(@previa.to_h) %></pre><% end %>

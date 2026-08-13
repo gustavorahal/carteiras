@@ -1,31 +1,36 @@
-<div class="d-flex justify-content-between align-items-center">
-  <h1><%= @carteira.nome %></h1>
-  <div>
-    <%= link_to "Eventos", carteira_eventos_financeiros_path(@carteira), class: "btn btn-outline-primary" %>
-    <%= link_to "Contas", carteira_contas_investimento_index_path(@carteira), class: "btn btn-outline-primary" %>
-    <%= link_to "Importar extrato", new_carteira_importacoes_extrato_path(@carteira), class: "btn btn-outline-primary" %>
-    <%= link_to "Comparar referência", carteira_comparacao_referencia_path(@carteira), class: "btn btn-outline-primary" %>
-    <%= link_to "Resultados econômicos", carteira_ganho_de_capital_path(@carteira), class: "btn btn-outline-primary" %>
-  </div>
+<div class="d-flex justify-content-between"><h1><%= @carteira.nome %></h1>
+  <div><%= link_to "Nova conta", new_espaco_investidor_carteira_conta_path(@espaco, @investidor, @carteira), class: "btn btn-primary" if policy(@carteira).update? %>
+  <%= link_to "Editar", edit_espaco_investidor_carteira_path(@espaco, @investidor, @carteira), class: "btn btn-outline-secondary" if policy(@carteira).update? %>
+  <% if policy(@carteira).restaurar? && @carteira.arquivado? %><%= button_to "Restaurar", restaurar_espaco_investidor_carteira_path(@espaco, @investidor, @carteira), class: "btn btn-outline-success d-inline" %><% elsif policy(@carteira).arquivar? %><%= button_to "Arquivar", arquivar_espaco_investidor_carteira_path(@espaco, @investidor, @carteira), class: "btn btn-outline-warning d-inline" %><% end %></div>
 </div>
-
-<p>Posição em <%= l @posicao.data %>. Cotações defasadas são sinalizadas e valores incompletos não são estimados.</p>
-<table class="table table-striped">
-  <thead><tr><th>Conta</th><th>Ativo</th><th>Quantidade</th><th>Custo</th><th>Cotação</th><th>Câmbio</th><th>Valor base</th></tr></thead>
-  <tbody>
-    <% @posicao.itens.each do |item| %>
-      <tr>
-        <td><%= item.posicao.conta_investimento.nome %></td>
-        <td><%= item.posicao.ativo.codigo %></td>
-        <td><%= item.posicao.quantidade %></td>
-        <td><%= item.posicao.custo_total %></td>
-        <td><%= item.cotacao || "sem cotação" %><%= " (#{l item.data_cotacao}, defasada)" if item.cotacao_defasada %></td>
-        <td><%= item.data_cambio ? l(item.data_cambio) : (item.posicao.ativo.moeda_negociacao_id == @carteira.moeda_base_id ? "moeda-base" : "sem câmbio") %><%= " (defasado)" if item.cambio_defasado %></td>
-        <td><%= item.valor_base || "incompleto" %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<h2>Caixa</h2>
-<ul><% @posicao.saldos_caixa.each do |conta_id, saldo| %><li>Conta #<%= conta_id %>: <%= saldo %></li><% end %></ul>
+<p>Base de liquidação/pagamento · moeda-base <%= @carteira.moeda_base.codigo %></p>
+<%= form_with url: espaco_investidor_carteira_path(@espaco, @investidor, @carteira), method: :get, class: "row g-2 mb-4" do |f| %>
+  <div class="col"><%= f.label :data, "Data da posição", class: "form-label" %><%= f.date_field :data, value: @data, class: "form-control" %></div>
+  <div class="col"><%= f.label :inicio, "Início do período", class: "form-label" %><%= f.date_field :inicio, value: @inicio, class: "form-control" %></div>
+  <div class="col"><%= f.label :fim, "Fim do período", class: "form-label" %><%= f.date_field :fim, value: @fim, class: "form-control" %></div>
+  <div class="col align-self-end"><%= f.submit "Atualizar painel", class: "btn btn-outline-primary" %></div>
+<% end %>
+<h2>Posição em <%= @data %></h2>
+<table class="table"><thead><tr><th>Ativo</th><th>Quantidade</th><th>Valor base</th><th>Cotação</th></tr></thead><tbody>
+  <% @posicao.itens.each do |item| %><tr><td><%= item[:ativo] %></td><td><%= item[:quantidade] %></td><td><%= item[:valor_mercado_base] || "Incompleto" %></td><td><%= item[:data_preco] %></td></tr><% end %>
+</tbody></table>
+<h2>Caixa em <%= @data %></h2>
+<table class="table"><% @saldos.itens.each do |item| %><tr><td><%= item[:moeda] %></td><td><%= item[:saldo] %></td><td><%= item[:valor_base] || "Incompleto" %></td></tr><% end %></table>
+<h2>Resultados realizados</h2>
+<p>Total-base: <%= @resultados.total_base %></p>
+<table class="table"><thead><tr><th>Data</th><th>Ativo</th><th>Quantidade</th><th>Resultado local</th><th>Resultado base</th></tr></thead><tbody>
+  <% @resultados.itens.each do |item| %><tr><td><%= item[:data] %></td><td><%= item[:ativo] %></td><td><%= item[:quantidade] %></td><td><%= item[:resultado_local] %> <%= item[:moeda] %></td><td><%= item[:resultado_base] %></td></tr><% end %>
+</tbody></table>
+<h2>Rentabilidade TWR</h2>
+<p><%= @rentabilidade.completo ? "Acumulado: #{@rentabilidade.twr_acumulado}" : "Incompleta: #{@rentabilidade.motivos_incompletude.join(', ')}" %></p>
+<table class="table"><thead><tr><th>Data</th><th>Patrimônio inicial</th><th>Patrimônio final</th><th>Fluxo externo</th><th>TWR diário</th><th>Estado</th></tr></thead><tbody>
+  <% @rentabilidade.pontos.each do |ponto| %><tr><td><%= ponto[:data] %></td><td><%= ponto[:patrimonio_inicial] %></td><td><%= ponto[:patrimonio_final] %></td><td><%= ponto[:fluxo_externo_liquido] %></td><td><%= ponto[:twr_diario] %></td><td><%= ponto[:estado] %></td></tr><% end %>
+</tbody></table>
+<h2>Contas</h2>
+<% @carteira.contas_investimento.includes(:instituicao, contas_caixa: :moeda).each do |conta| %>
+  <div class="card mb-2"><div class="card-body"><strong><%= conta.nome %></strong> · <%= conta.instituicao.nome %>
+    <span class="text-muted"><% conta.contas_caixa.each do |caixa| %><span class="me-2"><%= caixa.moeda.codigo %><%= " (arquivada)" if caixa.arquivado? %> <% if caixa.arquivado? && policy(caixa).restaurar? %><%= button_to "Restaurar", restaurar_espaco_investidor_carteira_conta_caixa_path(@espaco, @investidor, @carteira, conta, caixa), class: "btn btn-sm btn-link d-inline" %><% elsif policy(caixa).arquivar? %><%= button_to "Arquivar", arquivar_espaco_investidor_carteira_conta_caixa_path(@espaco, @investidor, @carteira, conta, caixa), class: "btn btn-sm btn-link d-inline" %><% end %></span><% end %></span>
+    <% if policy(conta).update? %><%= link_to "Editar", edit_espaco_investidor_carteira_conta_path(@espaco, @investidor, @carteira, conta), class: "btn btn-sm btn-outline-secondary" %><%= button_to "Arquivar", arquivar_espaco_investidor_carteira_conta_path(@espaco, @investidor, @carteira, conta), class: "btn btn-sm btn-outline-warning d-inline" %><% elsif policy(conta).restaurar? && conta.arquivado? %><%= button_to "Restaurar", restaurar_espaco_investidor_carteira_conta_path(@espaco, @investidor, @carteira, conta), class: "btn btn-sm btn-outline-success d-inline" %><% end %>
+  </div></div>
+  <% if policy(conta).update? %><%= form_with url: espaco_investidor_carteira_conta_caixas_path(@espaco, @investidor, @carteira, conta), scope: :conta_caixa, class: "d-flex mb-3" do |f| %><%= f.collection_select :moeda_id, Moeda.ativos.where.not(id: conta.contas_caixa.select(:moeda_id)).order(:codigo), :id, :codigo, {}, class: "form-select form-select-sm" %><%= f.submit "Adicionar moeda", class: "btn btn-sm btn-outline-primary" %><% end %><% end %>
+<% end %>

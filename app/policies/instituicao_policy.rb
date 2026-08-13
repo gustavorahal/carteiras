@@ -1,0 +1,1 @@
+class InstituicaoPolicy < CatalogoGlobalPolicy; end

@@ -1,0 +1,1 @@
+class MoedaPolicy < CatalogoGlobalPolicy; end

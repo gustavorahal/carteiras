@@ -1,0 +1,1 @@
+<h1><%= @registro.respond_to?(:nome) ? @registro.nome : @registro.to_s %></h1><pre><%= JSON.pretty_generate(@registro.attributes) %></pre><%= link_to "Editar", url_for(action: :edit, id: @registro.id), class: "btn btn-primary" %>

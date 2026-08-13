@@ -1,0 +1,1 @@
+class FonteCotacaoPolicy < CatalogoGlobalPolicy; end

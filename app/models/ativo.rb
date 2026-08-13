@@ -1,36 +1,33 @@
 class Ativo < ApplicationRecord
-  belongs_to :moeda_negociacao, class_name: "Moeda"
-  belongs_to :moeda_exposicao, class_name: "Moeda"
-  has_many :cotacoes, class_name: "CotacaoAtivo", inverse_of: :ativo
+  include Arquivavel
+  include Normalizavel
 
-  enum :tipo, {
-    acao: "acao", fii: "fii", fundo: "fundo", criptomoeda: "criptomoeda",
-    tesouro: "tesouro", etf: "etf", debenture: "debenture", cra: "cra", cdb: "cdb"
-  }, validate: true
+  TIPOS = %w[acao fii fundo etf renda_fixa criptoativo outro].freeze
 
-  before_validation :normalizar_codigo_e_cnpj
+  belongs_to :moeda_negociacao, class_name: "Moeda", inverse_of: :ativos
+  has_many :negociacoes, inverse_of: :ativo
+  has_many :proventos, inverse_of: :ativo
+  has_many :cotacoes_ativos, class_name: "CotacaoAtivo", inverse_of: :ativo
 
+  normaliza_texto :codigo, :mercado, maiusculo: true
+  normaliza_texto :descricao, :simbolo_yahoo, :cnpj
+  before_validation :normalizar_cnpj
   validates :codigo, :mercado, presence: true
   validates :codigo, uniqueness: { scope: :mercado }
-  validates :cnpj, presence: true, if: :fundo?
-
-  scope :ativos, -> { where(arquivado_em: nil) }
-
-  def nome_amigavel
-    return "#{codigo} (#{cnpj})" if fundo?
-    descricao.blank? ? codigo : "#{codigo} (#{descricao})"
-  end
-
-  def usd? = moeda_negociacao.codigo == "USD"
-  def brl? = moeda_negociacao.codigo == "BRL"
-  def na_bolsa? = tipo.in?(self.class.tipos_bolsa)
-
-  def self.tipos_bolsa = %w[acao fii etf]
+  validates :tipo, inclusion: { in: TIPOS }
+  validates :cnpj, format: { with: /\A\d{14}\z/ }, allow_nil: true
+  validate :identidade_imutavel_apos_referencia, on: :update
 
   private
 
-  def normalizar_codigo_e_cnpj
-    self.codigo = codigo.to_s.strip.upcase
-    self.cnpj = cnpj.to_s.gsub(/\D/, "").presence
+  def normalizar_cnpj
+    self.cnpj = cnpj&.gsub(/\D/, "").presence
+  end
+
+  def identidade_imutavel_apos_referencia
+    return unless will_save_change_to_codigo? || will_save_change_to_mercado? || will_save_change_to_moeda_negociacao_id?
+    return unless negociacoes.exists? || proventos.exists? || cotacoes_ativos.exists?
+
+    errors.add(:base, "código, mercado e moeda não podem mudar após a primeira referência")
   end
 end

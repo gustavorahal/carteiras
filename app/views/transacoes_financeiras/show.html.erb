@@ -1,0 +1,10 @@
+<h1><%= @transacao.tipo.humanize %></h1>
+<dl class="row"><dt class="col-sm-3">Competência</dt><dd class="col-sm-9"><%= @transacao.data_competencia %></dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><%= @transacao.estado %></dd><dt class="col-sm-3">Ordem</dt><dd class="col-sm-9"><%= @transacao.ordem_na_data %></dd></dl>
+<h2>Lançamentos</h2><table class="table"><% @transacao.lancamentos_caixa.each do |l| %><tr><td><%= l.data_efetiva %></td><td><%= l.natureza %></td><td><%= l.valor %></td></tr><% end %></table>
+<% if @transacao.rascunho? %>
+  <% if @previa %><h2>Prévia antes da confirmação</h2><pre><%= JSON.pretty_generate(@previa.to_h) %></pre><% end %>
+  <% if policy(@transacao).update? %><%= link_to "Editar", edit_espaco_transacao_path(@espaco, @transacao), class: "btn btn-secondary" %><%= button_to "Confirmar", confirmar_espaco_transacao_path(@espaco, @transacao), class: "btn btn-primary d-inline" %><%= button_to "Excluir rascunho", espaco_transacao_path(@espaco, @transacao), method: :delete, class: "btn btn-danger d-inline" %><% end %>
+<% elsif policy(@transacao).reverter? %>
+  <%= button_to "Reverter", reverter_espaco_transacao_path(@espaco, @transacao), class: "btn btn-warning" %>
+  <%= link_to "Corrigir", correcao_espaco_transacao_path(@espaco, @transacao), class: "btn btn-outline-warning" %>
+<% end %>

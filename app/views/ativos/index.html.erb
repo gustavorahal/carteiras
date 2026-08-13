@@ -1,2 +1,0 @@
-<div class="d-flex justify-content-between"><h1>Ativos</h1><%= link_to "Novo ativo", new_ativo_path, class: "btn btn-primary" if policy(Ativo).create? %></div>
-<table class="table"><thead><tr><th>Código</th><th>Mercado</th><th>Tipo</th><th>Moeda</th><th></th></tr></thead><tbody><% @ativos.each do |ativo| %><tr><td><%= ativo.codigo %></td><td><%= ativo.mercado %></td><td><%= ativo.tipo %></td><td><%= ativo.moeda_negociacao.codigo %></td><td><%= link_to "Editar", edit_ativo_path(ativo) if policy(ativo).update? %></td></tr><% end %></tbody></table>

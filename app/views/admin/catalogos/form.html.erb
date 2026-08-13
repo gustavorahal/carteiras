@@ -1,0 +1,7 @@
+<h1><%= @registro.persisted? ? "Editar" : "Novo" %> <%= @registro.model_name.human %></h1>
+<% destino = @registro.persisted? ? url_for(action: :update, id: @registro.id) : url_for(action: :create) %>
+<%= bootstrap_form_with model: @registro, url: destino, method: (@registro.persisted? ? :patch : :post) do |f| %>
+  <% controller.class.campos_permitidos.each do |campo| %>
+    <% if campo == :moeda_negociacao_id %><%= f.collection_select campo, Moeda.ativos.order(:codigo), :id, :codigo %><% elsif campo == :tipo && @registro.is_a?(Ativo) %><%= f.select campo, Ativo::TIPOS %><% elsif campo == :casas_decimais %><%= f.number_field campo, min: 0, max: 10 %><% else %><%= f.text_field campo %><% end %>
+  <% end %><%= f.primary %>
+<% end %>

@@ -1,23 +1,12 @@
 class Provento < ApplicationRecord
-  self.table_name = "proventos"
-  include ConfirmadoImutavel
+  include FatoFinanceiroImutavel
 
-  belongs_to :evento_financeiro, inverse_of: :provento
-  belongs_to :conta_investimento
-  belongs_to :ativo
-  belongs_to :moeda
+  belongs_to :transacao_financeira, inverse_of: :provento
+  belongs_to :conta_caixa
+  belongs_to :ativo, inverse_of: :proventos
 
-  enum :tipo, { dividendo: "dividendo", jcp: "jcp", rendimento: "rendimento" }, validate: true
-
-  validates :quantidade_referencia, :valor_bruto, :tributos, :valor_liquido,
-    numericality: { greater_than_or_equal_to: 0 }
-  validates :taxa_conversao_base, :taxa_conversao_fiscal, numericality: { greater_than: 0 }
-  validate :valor_liquido_coerente
-
-  private
-
-  def valor_liquido_coerente
-    return if valor_bruto.nil? || tributos.nil? || valor_liquido.nil?
-    errors.add(:valor_liquido, "deve ser igual ao bruto menos tributos") unless valor_liquido == valor_bruto - tributos
-  end
+  validates :tipo, inclusion: { in: %w[dividendo jcp rendimento juros outro] }
+  validates :data_base, :data_pagamento, presence: true
+  validates :quantidade_referencia, :valor_bruto, :retencoes, :valor_liquido, numericality: { greater_than_or_equal_to: 0 }
+  validates :taxa_conversao_base, numericality: { greater_than: 0 }
 end

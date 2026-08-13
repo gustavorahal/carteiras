@@ -1,0 +1,9 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Espaços</h1>
+  <%= link_to "Novo espaço", new_espaco_path, class: "btn btn-primary" %>
+</div>
+<div class="list-group">
+  <% @espacos.each do |espaco| %>
+    <%= link_to espaco.nome, espaco, class: "list-group-item list-group-item-action#{' text-muted' if espaco.arquivado?}" %>
+  <% end %>
+</div>

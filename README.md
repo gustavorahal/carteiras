@@ -1,41 +1,20 @@
 # Carteiras
 
-## About This Project
+Aplicação Rails de uso pessoal ou compartilhado para acompanhar investidores, carteiras e contas em múltiplas moedas. O domínio suporta compras e vendas long-only, notas com várias negociações, proventos, aportes, resgates, transferências, câmbio, posições históricas, resultados econômicos e rentabilidade TWR.
 
-Carteiras is a personal Rails application I built and used between 2020 and 2023 to track investment portfolios for myself and close family members. It was created as a practical tool for consolidating brokerage activity, cash balances, portfolio positions, dividends, taxes, and performance across different accounts and asset classes.
+Consulte [CONTEXT.md](CONTEXT.md) para a linguagem e as interfaces do domínio e [ADR 001](docs/adr/001-redesenho-big-bang.md) para as decisões do redesenho.
 
-This was not built as a commercial product or professional financial platform. It was a long-running personal software project: useful enough to support real financial tracking workflows, but developed primarily for my own needs, with the tradeoffs and rough edges that come from a tool built incrementally over several years.
+## Dev Container
 
-The application includes features for registering assets, brokers, portfolios, operations, cash movements, dividends and other proceeds; importing brokerage statements; calculating current positions and historical profitability; comparing portfolio allocation against reference targets; fetching market prices from external sources; and supporting tax-related views for investment operations.
-
-The public version of this repository has been sanitized to remove private financial data, credentials, and personal statement fixtures.
-
-## Development Container
-
-This repository includes a Dev Container for the current Rails setup. It runs Ruby `4.0.5`, Rails `8.1.x`, PostgreSQL `18.4`, Chromium/Chromedriver for system tests, native build dependencies, and bundled gems inside a Docker volume. The Dev Container is the canonical development and test environment; a host PostgreSQL installation is not required.
-
-Open the repository in a Dev Container-compatible editor and let the `postCreateCommand` run. The setup prepares the databases from the consolidated baseline schema. Then start Rails from inside the container:
-
-```sh
-bin/rails server -b 0.0.0.0
-```
-
-The app is available at `http://localhost:3001`. PostgreSQL runs only in the Compose service `db`, with user/password `carteiras`; Rails receives `DATABASE_HOST=db` automatically. To use a different host port, set `CARTEIRAS_PORT` before starting Compose, for example `CARTEIRAS_PORT=3002 docker compose -f .devcontainer/docker-compose.yml up -d --build`.
-
-Useful verification commands inside the container:
-
-```sh
-bin/rails zeitwerk:check
-bin/rails test
-bin/rails test:system
-```
-
-The same environment can be started without an editor:
+O Dev Container é o ambiente canônico. Ele inclui Ruby 4.0.5, Rails 8.1, PostgreSQL 18.4 e Chromium/Chromedriver. PostgreSQL roda exclusivamente no serviço Compose `db`.
 
 ```sh
 docker compose -f .devcontainer/docker-compose.yml up -d --build
-docker compose -f .devcontainer/docker-compose.yml exec app bin/rails db:prepare
-docker compose -f .devcontainer/docker-compose.yml exec app bin/rails test
+docker compose -f .devcontainer/docker-compose.yml exec -T app bin/rails db:prepare
+docker compose -f .devcontainer/docker-compose.yml exec -T app env RAILS_ENV=test bin/rails db:prepare
+docker compose -f .devcontainer/docker-compose.yml exec -T app bin/rails zeitwerk:check
+docker compose -f .devcontainer/docker-compose.yml exec -T app bin/rails test
+docker compose -f .devcontainer/docker-compose.yml exec -T app bin/rails test:system
 ```
 
-The image installs the locked gems during the build, so this command-line flow also works with a new Docker environment and does not depend on the Dev Container `postCreateCommand`.
+A aplicação fica disponível em `http://localhost:3001` quando o servidor Rails é iniciado no container.

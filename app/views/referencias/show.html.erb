@@ -1,2 +1,0 @@
-<div class="d-flex justify-content-between"><h1><%= @referencia.nome %></h1><%= link_to "Nova versão", new_referencia_versoes_referencia_path(@referencia), class: "btn btn-primary" %></div><p><%= @referencia.descricao %></p>
-<table class="table"><thead><tr><th>Vigência</th><th>Estado</th><th></th></tr></thead><tbody><% @versoes.each do |v| %><tr><td><%= l v.vigencia_inicial %></td><td><%= v.estado %></td><td><%= link_to "Detalhe", referencia_versoes_referencia_path(@referencia, v) %></td></tr><% end %></tbody></table>

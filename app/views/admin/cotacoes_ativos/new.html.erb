@@ -1,0 +1,1 @@
+<h1>Nova cotação de ativo</h1><% if flash.now[:alert] %><div class="alert alert-danger"><%= flash.now[:alert] %></div><% end %><%= bootstrap_form_with model: @cotacao, url: admin_cotacoes_ativos_path do |f| %><%= f.collection_select :ativo_id, Ativo.ativos.order(:codigo), :id, :codigo %><%= f.date_field :data %><%= f.text_field :preco %><%= f.primary %><% end %>

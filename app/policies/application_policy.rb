@@ -1,81 +1,75 @@
-# Classe de permissão base. A ideia é que ela seja super restritiva e seletivamente
-# as subclasses vão relaxando as permissões.
-class ApplicationPolicy < Struct.new(:user, :record)
-  class Scope < Struct.new(:user, :scope)
-    def resolve
-      return scope.all if user&.admin?
-      return scope.none unless user&.investidor? && user.investidor.present?
+class ApplicationPolicy
+  attr_reader :user, :record
 
-      if scoped_model.column_names.include?('investidor_id')
-        scope.where(investidor: user.investidor)
-      elsif scoped_model.reflect_on_association(:carteira)
-        scope.joins(:carteira).where(carteiras: { investidor_id: user.investidor.id })
-      else
-        scope.none
-      end
+  def initialize(user, record)
+    @user = user
+    @record = record
+  end
+
+  def index? = leitura?
+  def show? = leitura?
+  def create? = edicao?
+  def new? = create?
+  def update? = edicao?
+  def edit? = update?
+  def destroy? = edicao?
+
+  def leitura?
+    user&.administrador_sistema? || (espaco && user&.pode_ler?(espaco))
+  end
+
+  def edicao?
+    return false if espaco&.arquivado?
+    return false if record.respond_to?(:arquivado?) && record.arquivado?
+    return false if ascendencia_arquivada?
+    user&.administrador_sistema? || (espaco && user&.pode_editar?(espaco))
+  end
+
+  def administracao?
+    return false if espaco&.arquivado?
+    user&.administrador_sistema? || (espaco && user&.pode_administrar?(espaco))
+  end
+
+  private
+
+  def ascendencia_arquivada?
+    return true if record.respond_to?(:investidor) && record.investidor&.arquivado?
+    return true if record.respond_to?(:carteira) && record.carteira&.arquivado?
+    return true if record.respond_to?(:conta_investimento) && record.conta_investimento&.arquivado?
+    false
+  end
+
+  def espaco
+    return record if record.is_a?(Espaco)
+    return record.espaco if record.respond_to?(:espaco)
+    return record.investidor.espaco if record.respond_to?(:investidor) && record.investidor
+    return record.carteira.espaco if record.respond_to?(:carteira) && record.carteira
+  end
+
+  class Scope
+    attr_reader :user, :scope
+
+    def initialize(user, scope)
+      @user = user
+      @scope = scope
+    end
+
+    def resolve
+      return scope.all if user&.administrador_sistema?
+      return scope.none unless user
+
+      case model.name
+      when "Espaco" then scope.joins(:membros_espaco).where(membros_espaco: { user_id: user.id })
+      when "Investidor" then scope.joins(espaco: :membros_espaco).where(membros_espaco: { user_id: user.id })
+      when "Carteira" then scope.joins(investidor: { espaco: :membros_espaco }).where(membros_espaco: { user_id: user.id })
+      when "ContaInvestimento" then scope.joins(carteira: { investidor: { espaco: :membros_espaco } }).where(membros_espaco: { user_id: user.id })
+      when "TransacaoFinanceira" then scope.joins(investidor: { espaco: :membros_espaco }).where(membros_espaco: { user_id: user.id })
+      else scope.none
+      end.distinct
     end
 
     private
 
-    def scoped_model
-      scope.respond_to?(:klass) ? scope.klass : scope
-    end
-  end
-
-  def index?
-    admin? || owner?
-  end
-
-  def show?
-    admin? || owner?
-  end
-
-  def create?
-    admin? || owner?
-  end
-
-  def new?
-    admin? || owner?
-  end
-
-  def update?
-    admin? || owner?
-  end
-
-  def edit?
-    admin? || owner?
-  end
-
-  def destroy?
-    admin? || owner?
-  end
-
-
-
-  def admin?
-    user&.admin?
-  end
-
-  def owner?
-    return false if record.is_a? Symbol
-    return false unless user&.investidor
-
-    # em caso de novos objetos ex. Operacao.new, apesar do método que aponta para outro objeto (ex.
-    # investidor) estar presente, o mesmo não esta instanciado (nil), portanto checar isso.
-    if record.respond_to?(:investidor) && record.investidor.present?
-      user.investidor.id == record.investidor.id
-    elsif record.respond_to?(:carteira) && record.carteira.present?
-      user.investidor.id == record.carteira.investidor.id
-    elsif record.respond_to?(:conta_investimento) && record.conta_investimento.present?
-      user.investidor.id == record.conta_investimento.carteira.investidor.id
-    elsif record.respond_to?(:conta_caixa) && record.conta_caixa.present?
-      user.investidor.id == record.conta_caixa.carteira.investidor.id
-    else
-      false
-    end
-  end
-
-  def scope
-    Pundit.policy_scope!(user, record.class)
+    def model = scope.respond_to?(:klass) ? scope.klass : scope
   end
 end

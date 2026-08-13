@@ -18,12 +18,8 @@ gem "bootstrap_form", "~> 5.0"
 gem "bootstrap-icons-helper"
 gem "devise"
 gem "devise-i18n"
-gem "holidays"
 gem "pundit"
-gem "roo"
-gem "roo-xls"
 gem "solid_queue"
-gem "rexml"
 
 group :development, :test do
   gem "debug"

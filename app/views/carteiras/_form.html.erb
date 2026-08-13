@@ -1,0 +1,5 @@
+<%= bootstrap_form_with model: [@espaco, @investidor, carteira] do |f| %>
+  <%= f.text_field :nome, required: true %>
+  <%= f.collection_select :moeda_base_id, Moeda.ativos.order(:codigo), :id, :codigo %>
+  <%= f.primary %>
+<% end %>

@@ -6,30 +6,41 @@ class ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   setup do
-    @brl = Moeda.create!(codigo: "BRL", nome: "Real", tipo: :fiduciaria, casas_decimais: 2)
-    @usd = Moeda.create!(codigo: "USD", nome: "Dólar", tipo: :fiduciaria, casas_decimais: 2)
-    @usuario = User.create!(email: "pessoa-#{SecureRandom.hex(4)}@example.com", password: "segredo123", role: :investidor)
-    @investidor = Investidor.create!(user: @usuario, nome: "Pessoa", moeda_fiscal: @brl)
-    @carteira = Carteira.create!(investidor: @investidor, nome: "Principal", moeda_base: @brl)
-    @corretora = Corretora.create!(nome: "Corretora", pais: "BR")
-    @conta = ContaInvestimento.create!(carteira: @carteira, corretora: @corretora, nome: "Conta 1")
-    @caixa_brl = ContaCaixa.create!(conta_investimento: @conta, moeda: @brl)
-    @ativo = Ativo.create!(codigo: "PETR4", mercado: "B3", descricao: "Petrobras", tipo: :acao,
-      moeda_negociacao: @brl, moeda_exposicao: @brl)
+    next if is_a?(ActionDispatch::IntegrationTest) || is_a?(ActionDispatch::SystemTestCase)
+
+    @brl = Moeda.create!(codigo: "BRL", nome: "Real", casas_decimais: 2)
+    @usd = Moeda.create!(codigo: "USD", nome: "Dólar", casas_decimais: 2)
+    @fonte_manual = FonteCotacao.create!(codigo: "MANUAL", nome: "Manual")
+    @fonte_yahoo = FonteCotacao.create!(codigo: "YAHOO", nome: "Yahoo Finance")
+    @admin_sistema = User.create!(email: "admin-#{SecureRandom.hex(4)}@example.com", password: "segredo123", administrador_sistema: true)
+    @usuario = User.create!(email: "editor-#{SecureRandom.hex(4)}@example.com", password: "segredo123")
+    @leitor = User.create!(email: "leitor-#{SecureRandom.hex(4)}@example.com", password: "segredo123")
+    @estranho = User.create!(email: "estranho-#{SecureRandom.hex(4)}@example.com", password: "segredo123")
+    @espaco = Espaco.create!(nome: "Meu espaço")
+    @espaco.membros_espaco.create!(user: @usuario, papel: "administrador")
+    @espaco.membros_espaco.create!(user: @leitor, papel: "leitor")
+    @investidor = @espaco.investidores.create!(nome: "Pessoa")
+    @carteira = @investidor.carteiras.create!(nome: "Principal", moeda_base: @brl)
+    @instituicao = Instituicao.create!(nome: "Instituição")
+    @conta = @carteira.contas_investimento.create!(nome: "Conta 1", instituicao: @instituicao)
+    @caixa_brl = @conta.contas_caixa.create!(moeda: @brl)
+    @caixa_usd = @conta.contas_caixa.create!(moeda: @usd)
+    @ativo = Ativo.create!(codigo: "PETR4", mercado: "B3", descricao: "Petrobras", tipo: "acao", moeda_negociacao: @brl, simbolo_yahoo: "PETR4.SA")
   end
 
-  def atributos_operacao(natureza:, quantidade:, preco:, data: Date.new(2026, 1, 10), custos: 0, conta: @conta, ativo: @ativo)
-    {
-      conta_investimento: conta, ativo:, natureza:, quantidade:, preco_unitario: preco,
-      moeda: ativo.moeda_negociacao, data_negociacao: data, data_liquidacao: data + 2,
-      taxa: custos, emolumentos: 0, corretagem: 0, iss_iof: 0, irrf: 0, outros: 0,
-      taxa_conversao_base: 1, taxa_conversao_fiscal: 1
-    }
+  def atributos_aporte(valor: "1000.00", data: "2026-01-02", caixa: @caixa_brl)
+    { tipo_movimentacao: "aporte", conta_caixa_destino_id: caixa.id, valor:, data_efetiva: data }
   end
 
-  def registrar_operacao(**opcoes)
-    RegistrarOperacao.call(carteira: @carteira, usuario: @usuario,
-      atributos: atributos_operacao(**opcoes))
+  def atributos_nota(natureza: "compra", quantidade: "10", preco: "10", custo: "2", data: "2026-01-05", caixa: @caixa_brl, ativo: @ativo)
+    { conta_caixa_id: caixa.id, data_negociacao: data, data_liquidacao: data,
+      custo_operacional_total: custo, taxa_conversao_base: "1",
+      negociacoes: [{ ativo_id: ativo.id, natureza:, quantidade:, preco_unitario: preco }] }
+  end
+
+  def criar_e_confirmar(tipo, atributos, usuario: @usuario)
+    transacao = TransacoesFinanceiras.criar_rascunho(tipo:, investidor: @investidor, usuario:, atributos:)
+    TransacoesFinanceiras.confirmar(transacao:, usuario:)
   end
 end
 

@@ -175,10 +175,14 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
 
   test "editor classifica ativo na carteira e painel mostra total por categoria" do
     hoje = Date.current.to_s
+    @ativo.update!(descricao: "Petrobras")
     saldo = TransacoesFinanceiras.criar_rascunho(tipo: "saldo_inicial", investidor: @investidor,
       usuario: @usuario, atributos: { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
         quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: hoje })
     TransacoesFinanceiras.confirmar(transacao: saldo, usuario: @usuario)
+    caixa = TransacoesFinanceiras.criar_rascunho(tipo: "saldo_inicial_caixa", investidor: @investidor,
+      usuario: @usuario, atributos: { conta_caixa_id: @caixa.id, valor: "30", data_efetiva: hoje })
+    TransacoesFinanceiras.confirmar(transacao: caixa, usuario: @usuario)
     Mercado.registrar_cotacao_ativo(ativo: @ativo, data: hoje, preco: "12",
       fonte: FonteCotacao.find_by!(codigo: "MANUAL"), manual: true, usuario: @admin_sistema)
     sign_in @usuario
@@ -191,11 +195,17 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
 
     get espaco_investidor_carteira_path(@espaco, @investidor, @carteira)
     assert_response :success
-    assert_select "table.totais-categoria tbody tr", text: /Ações.*1.*100%.*R\$ 120,00/
+    assert_select "table.totais-categoria tbody tr", text: /Ações.*1.*80%.*R\$ 120,00/
     assert_select "table.posicoes-categoria thead th", text: "Categoria", count: 0
     assert_select "table.posicoes-categoria tr.categoria-posicoes[data-categoria=acoes] button[aria-expanded=true]", text: /Ações.*1 ativo/
     assert_select "tr[data-category-groups-target=row][data-category=acoes]", 1
-    assert_select "table.posicoes-categoria td.text-nowrap", text: "Banco"
+    assert_select "table.posicoes-categoria thead th", text: "Descrição", count: 0
+    assert_select "table.posicoes-categoria thead th", text: "Corretora", count: 0
+    assert_select ".broker-mark[title=Banco][aria-label='Corretora Banco']", text: "BA"
+    assert_select ".asset-cell .asset-description", text: "Petrobras"
+    assert_select "td[data-role=preco-atual] .text-secondary", text: I18n.l(Date.current)
+    assert_select "table.posicoes-categoria th", text: "% da carteira"
+    assert_select "table.posicoes-categoria td[data-role=participacao-carteira]", text: "80%"
     assert_select "summary[title='Alterar categoria de PETR4']", 1
     assert_select "select[aria-label='Categoria de PETR4'] option[selected][value=acoes]", text: "Ações"
   end

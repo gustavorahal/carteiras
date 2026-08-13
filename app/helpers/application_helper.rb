@@ -65,6 +65,13 @@ module ApplicationHelper
     I18n.t("financeiro.motivos.#{valor}", default: valor.to_s.humanize)
   end
 
+  def sigla_instituicao(nome)
+    palavra = nome.to_s.strip.split.first
+    return "—" if palavra.blank?
+
+    (palavra.length <= 3 ? palavra : palavra.first(2)).upcase
+  end
+
   def status_badge(valor)
     content_tag(:span, display_estado(valor), class: "badge rounded-pill status-badge #{STATUS_CLASSES.fetch(valor.to_s, 'text-bg-light')}")
   end

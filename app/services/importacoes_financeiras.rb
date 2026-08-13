@@ -4,8 +4,41 @@ module ImportacoesFinanceiras
   MAXIMO_ARQUIVOS = 20
   MAXIMO_BYTES = 25.megabytes
   VERSAO_PARSER = "1".freeze
+  ConciliacaoDTO = Data.define(:importacao_id, :itens_extrato, :saldos, :posicoes)
 
   class << self
+    def conciliacao(importacao:, usuario:)
+      autorizar_leitura!(importacao, usuario)
+      dados = importacao.dados_extraidos
+      itens_extrato = Financeiro.congelar(Array(dados["itens"]).deep_dup)
+      saldos_informados = itens_extrato.group_by { |item| item["moeda"] }.transform_values do |itens|
+        itens.each_with_index.select { |item, _indice| item["saldo_informado"].present? }
+          .max_by { |item, indice| [Date.iso8601(item.fetch("data_liquidacao")), indice] }&.first
+      end
+      saldos = importacao.conta_investimento.contas_caixa.includes(:moeda).map do |caixa|
+        item_saldo = saldos_informados[caixa.moeda.codigo]
+        data_saldo = item_saldo && Date.iso8601(item_saldo.fetch("data_liquidacao"))
+        calculado = if data_saldo
+          caixa.lancamentos_caixa.where(data_efetiva: ..data_saldo).sum(:valor)
+        else
+          caixa.lancamentos_caixa.sum(:valor)
+        end
+        informado = item_saldo && BigDecimal(item_saldo.fetch("saldo_informado"))
+        Financeiro.congelar({ conta_caixa_id: caixa.id, moeda: caixa.moeda.codigo, data_saldo:,
+          calculado:, informado:, diferenca: informado && (calculado - informado).round(12) })
+      end.freeze
+
+      informadas = Array(dados["posicoes_informadas"]).index_by { |item| item["ativo_id"] }
+      posicoes = importacao.conta_investimento.posicoes_atuais.joins(:ativo).includes(:ativo).order("ativos.codigo").map do |posicao|
+        informada = informadas[posicao.ativo_id]&.dig("quantidade")&.then { |quantidade| BigDecimal(quantidade) }
+        Financeiro.congelar({ ativo_id: posicao.ativo_id, ativo: posicao.ativo.codigo,
+          informado: informada, calculado: posicao.quantidade,
+          diferenca: informada && (posicao.quantidade - informada).round(10) })
+      end.freeze
+
+      ConciliacaoDTO.new(importacao_id: importacao.id, itens_extrato:, saldos:, posicoes:)
+    end
+
     def analisar(arquivos:, conta:, usuario:)
       autorizar!(conta, usuario)
       arquivos = Array(arquivos).compact
@@ -69,6 +102,13 @@ module ImportacoesFinanceiras
     end
 
     private
+
+    def autorizar_leitura!(importacao, usuario)
+      raise Financeiro::NaoAutorizado unless usuario&.pode_ler?(importacao.investidor.espaco)
+      unless importacao.conta_investimento.investidor.id == importacao.investidor_id
+        raise Financeiro::EscopoInvalido.new(importacao_financeira: ["conta não pertence ao investidor"])
+      end
+    end
 
     def analisar_um(arquivo, conta, usuario)
       caminho = Interno.caminho(arquivo)

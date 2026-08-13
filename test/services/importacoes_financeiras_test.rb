@@ -224,4 +224,23 @@ class ImportacoesFinanceirasTest < ActiveSupport::TestCase
   ensure
     arquivo&.close!
   end
+
+  test "conciliação entrega diferenças de caixa e quantidade sem cálculo no caller" do
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+      valor: "100", data_efetiva: "2026-01-01" })
+    importacao = @conta.importacoes_financeiras.create!(investidor: @investidor, autor: @usuario,
+      nome_original: "extrato.csv", checksum_sha256: "conciliacao", formato: "extrato_xp",
+      versao_parser: ImportacoesFinanceiras::VERSAO_PARSER, estado: "analisada", dados_extraidos: {
+        "itens" => [{ "moeda" => "BRL", "data_liquidacao" => "2026-01-31", "saldo_informado" => "80" }],
+        "posicoes_informadas" => [{ "ativo_id" => @ativo.id, "quantidade" => "8" }]
+      })
+
+    conciliacao = ImportacoesFinanceiras.conciliacao(importacao:, usuario: @leitor)
+
+    assert_equal BigDecimal("20"), conciliacao.saldos.first[:diferenca]
+    assert_equal BigDecimal("2"), conciliacao.posicoes.first[:diferenca]
+    assert_equal "PETR4", conciliacao.posicoes.first[:ativo]
+  end
 end

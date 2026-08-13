@@ -3,11 +3,38 @@ module ConsultasFinanceiras
   SaldosCaixaDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
   TotaisCorretoraDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
   TotaisCategoriaDTO = Data.define(:carteira_id, :data, :itens, :valor_total_base, :completo)
+  ComposicaoDTO = Data.define(:carteira_id, :data, :posicao, :saldos, :patrimonio_total_base,
+    :totais_por_corretora, :totais_por_categoria, :grupos_posicoes, :completo)
   VariacoesCotacaoDTO = Data.define(:carteira_id, :inicio, :fim, :itens)
   ResultadosDTO = Data.define(:carteira_id, :inicio, :fim, :itens, :totais_por_moeda, :total_base, :completo)
   RentabilidadeDTO = Data.define(:carteira_id, :inicio, :fim, :pontos, :twr_acumulado, :completo, :motivos_incompletude)
 
   class << self
+    def composicao(carteira:, data:, usuario:)
+      autorizar!(carteira, usuario)
+      data = data!(data)
+      posicao = if data == Date.current
+        posicao_atual(carteira:, usuario:)
+      else
+        posicao_historica(carteira:, data:, usuario:)
+      end
+      saldos = saldos_caixa(carteira:, data:, usuario:)
+      completo = posicao.completo && saldos.completo
+      patrimonio_total = completo ? (posicao.valor_total_base + saldos.valor_total_base).round(12) : nil
+      posicao = enriquecer_posicao(posicao, patrimonio_total)
+      totais_corretora = totais_por_corretora(posicao:, saldos:)
+      totais_categoria = totais_por_categoria(posicao:, patrimonio_total:)
+      itens_por_categoria = posicao.itens.group_by { |item| item[:categoria].presence || "nao_classificado" }
+      grupos = totais_categoria.itens.map do |resumo|
+        itens = itens_por_categoria.fetch(resumo[:categoria]).sort_by { |item| [item[:ativo], item[:instituicao]] }
+        Financeiro.congelar({ resumo:, itens: })
+      end.freeze
+
+      ComposicaoDTO.new(carteira_id: carteira.id, data:, posicao:, saldos:,
+        patrimonio_total_base: patrimonio_total, totais_por_corretora: totais_corretora,
+        totais_por_categoria: totais_categoria, grupos_posicoes: grupos, completo:)
+    end
+
     def posicao_atual(carteira:, usuario:)
       autorizar!(carteira, usuario)
       data = Date.current
@@ -86,7 +113,7 @@ module ConsultasFinanceiras
         valor_total_base: total, completo:)
     end
 
-    def totais_por_categoria(posicao:)
+    def totais_por_categoria(posicao:, patrimonio_total:)
       grupos = Hash.new do |hash, categoria|
         hash[categoria] = { categoria:, ativo_ids: Set.new, valor: BigDecimal("0"), completo: true }
       end
@@ -101,8 +128,8 @@ module ConsultasFinanceiras
       ordem = ClassificacaoAtivoCarteira::CATEGORIAS + ["nao_classificado"]
       itens = grupos.values.sort_by { |grupo| ordem.index(grupo[:categoria]) }.map do |grupo|
         valor = grupo[:completo] ? grupo[:valor].round(12) : nil
-        percentual = if valor && posicao.valor_total_base&.positive?
-          (valor / posicao.valor_total_base).round(12)
+        percentual = if valor && patrimonio_total&.positive?
+          (valor / patrimonio_total).round(12)
         end
         Financeiro.congelar({ categoria: grupo[:categoria],
           categoria_descricao: ClassificacaoAtivoCarteira.descricao(grupo[:categoria]),
@@ -213,6 +240,18 @@ module ConsultasFinanceiras
     end
 
     private
+
+    def enriquecer_posicao(posicao, patrimonio_total)
+      itens = posicao.itens.map do |item|
+        preco_medio = item[:custo_total_local] && (item[:custo_total_local] / item[:quantidade]).round(12)
+        participacao = if item[:valor_mercado_base] && patrimonio_total&.positive?
+          (item[:valor_mercado_base] / patrimonio_total).round(12)
+        end
+        Financeiro.congelar(item.merge(preco_medio_local: preco_medio, participacao_carteira: participacao))
+      end.freeze
+      PosicaoDTO.new(carteira_id: posicao.carteira_id, data: posicao.data, itens:,
+        valor_total_base: posicao.valor_total_base, completo: posicao.completo)
+    end
 
     def montar_posicao(carteira, data, posicoes)
       ativos = Ativo.includes(:moeda_negociacao).where(id: posicoes.map { |p| p[:ativo_id] }).index_by(&:id)

@@ -66,20 +66,9 @@ class ImportacoesFinanceirasController < ApplicationController
   end
 
   def preparar_conciliacao
-    dados = @importacao.dados_extraidos
-    @itens_extrato = Array(dados["itens"])
-    @posicoes_calculadas = @importacao.conta_investimento.posicoes_atuais.joins(:ativo).includes(:ativo).order("ativos.codigo")
-    saldos_informados = @itens_extrato.group_by { |item| item["moeda"] }.transform_values do |itens|
-      itens.each_with_index.select { |item, _indice| item["saldo_informado"].present? }
-        .max_by { |item, indice| [Date.iso8601(item.fetch("data_liquidacao")), indice] }&.first
-    end
-    @saldos_conciliados = @importacao.conta_investimento.contas_caixa.includes(:moeda).map do |caixa|
-      item_saldo = saldos_informados[caixa.moeda.codigo]
-      data_saldo = item_saldo && Date.iso8601(item_saldo.fetch("data_liquidacao"))
-      calculado = data_saldo ? caixa.lancamentos_caixa.where(data_efetiva: ..data_saldo).sum(:valor) : caixa.lancamentos_caixa.sum(:valor)
-      informado = item_saldo && BigDecimal(item_saldo.fetch("saldo_informado"))
-      { caixa:, data_saldo:, calculado:, informado:, diferenca: informado && calculado - informado }
-    end
-    @posicoes_informadas = Array(dados["posicoes_informadas"]).index_by { |item| item["ativo_id"] }
+    @conciliacao = ImportacoesFinanceiras.conciliacao(importacao: @importacao, usuario: current_user)
+    @itens_extrato = @conciliacao.itens_extrato
+    @saldos_conciliados = @conciliacao.saldos
+    @posicoes_conciliadas = @conciliacao.posicoes
   end
 end

@@ -105,13 +105,34 @@ class MercadoEConsultasTest < ActiveSupport::TestCase
 
     posicao = ConsultasFinanceiras.posicao_historica(carteira: @carteira,
       data: Date.new(2026, 1, 1), usuario: @usuario)
-    totais = ConsultasFinanceiras.totais_por_categoria(posicao:)
+    totais = ConsultasFinanceiras.totais_por_categoria(posicao:, patrimonio_total: posicao.valor_total_base)
 
     assert_equal ["commodities", "nao_classificado"], totais.itens.pluck(:categoria)
     assert_equal BigDecimal("100"), totais.itens.first[:valor]
     assert_equal BigDecimal("0.5"), totais.itens.first[:percentual]
     assert_equal "Não classificado", totais.itens.last[:categoria_descricao]
     assert_equal BigDecimal("200"), totais.valor_total_base
+  end
+
+  test "composição entrega patrimônio preço médio e participações com caixa no denominador" do
+    @carteira.classificacoes_ativos.create!(ativo: @ativo, categoria: "acoes")
+    criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })
+    criar_e_confirmar("saldo_inicial_caixa", { conta_caixa_id: @caixa_brl.id,
+      valor: "30", data_efetiva: "2026-01-01" })
+    Mercado.registrar_cotacao_ativo(ativo: @ativo, data: "2026-01-01", preco: "12",
+      fonte: @fonte_manual, manual: true, usuario: @admin_sistema)
+
+    composicao = ConsultasFinanceiras.composicao(carteira: @carteira,
+      data: Date.new(2026, 1, 1), usuario: @usuario)
+    item = composicao.posicao.itens.first
+
+    assert composicao.completo
+    assert_equal BigDecimal("150"), composicao.patrimonio_total_base
+    assert_equal BigDecimal("10"), item[:preco_medio_local]
+    assert_equal BigDecimal("0.8"), item[:participacao_carteira]
+    assert_equal BigDecimal("0.8"), composicao.totais_por_categoria.itens.first[:percentual]
+    assert_equal item, composicao.grupos_posicoes.first[:itens].first
   end
 
   test "resultados realizados são derivados por custo médio e consulta não grava" do

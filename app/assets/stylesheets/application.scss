@@ -189,6 +189,28 @@ a { text-underline-offset: .16em; }
 .category-edit > summary:focus-visible { outline: 2px solid #135d66; outline-offset: 1px; }
 .category-edit form { min-width: 17rem; }
 
+.asset-cell { min-width: 12rem; }
+.asset-identity { align-items: flex-start; display: flex; gap: .65rem; }
+.asset-copy { min-width: 0; }
+.asset-title { align-items: center; display: flex; white-space: nowrap; }
+.asset-description { color: var(--carteiras-muted); font-size: .8rem; line-height: 1.25; margin-top: .15rem; }
+.broker-mark {
+  align-items: center;
+  background: #e3ecea;
+  border: 1px solid #c8d8d5;
+  border-radius: .4rem;
+  color: #31545a;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: var(--carteiras-mono);
+  font-size: .65rem;
+  font-weight: 750;
+  height: 1.65rem;
+  justify-content: center;
+  letter-spacing: -.02em;
+  width: 1.9rem;
+}
+
 .status-badge { border: 1px solid currentColor; font-size: .74rem; font-weight: 700; letter-spacing: .025em; }
 
 .empty-state {

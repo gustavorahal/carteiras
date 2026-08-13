@@ -1,6 +1,10 @@
 require "test_helper"
 
 class ApplicationHelperTest < ActionView::TestCase
+  test "gera sigla compacta a partir do nome da instituição" do
+    assert_equal "XP", sigla_instituicao("XP Investimentos")
+    assert_equal "AV", sigla_instituicao("Avenue")
+  end
   test "formata números datas moedas e percentuais para pt-BR" do
     assert_equal "1.234,5", display_numero(BigDecimal("1234.5"))
     assert_equal "31/01/2026", display_data(Date.new(2026, 1, 31))

@@ -1,9 +1,24 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1>Espaços</h1>
-  <%= link_to "Novo espaço", new_espaco_path, class: "btn btn-primary" %>
-</div>
-<div class="list-group">
-  <% @espacos.each do |espaco| %>
-    <%= link_to espaco.nome, espaco, class: "list-group-item list-group-item-action#{' text-muted' if espaco.arquivado?}" %>
-  <% end %>
-</div>
+<% content_for :title, "Espaços" %>
+<header class="page-header">
+  <div><p class="page-eyebrow">Organização</p><h1 class="page-title">Seus espaços</h1><p class="page-subtitle">Ambientes isolados para investidores, carteiras e membros.</p></div>
+  <div class="page-actions"><%= link_to "Novo espaço", new_espaco_path, class: "btn btn-primary" %></div>
+</header>
+
+<% if @espacos.any? %>
+  <div class="row g-3">
+    <% @espacos.each do |espaco| %>
+      <div class="col-md-6 col-xl-4">
+        <%= link_to espaco, class: "card h-100 text-decoration-none text-body" do %>
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div><p class="page-eyebrow mb-2">Espaço financeiro</p><h2 class="h4 mb-1"><%= espaco.nome %></h2><p class="text-secondary small mb-0">Acessar investidores e carteiras</p></div>
+              <%= status_badge(espaco.arquivado? ? "arquivado" : "ativo") %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="empty-state"><strong>Nenhum espaço criado</strong><span>Crie o primeiro espaço para começar a organizar suas carteiras.</span></div>
+<% end %>

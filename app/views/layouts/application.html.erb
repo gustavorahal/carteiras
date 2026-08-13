@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
-    <title>Carteiras</title>
+    <title><%= content_for?(:title) ? "#{yield(:title)} · Carteiras" : "Carteiras" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#17262a">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= stylesheet_link_tag "application", "rails_bootstrap_forms", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= render 'layouts/menu' %>
-    <%= render 'common/flash_msgs' %>
-    <br>
-    <div class="container-fluid">
+    <%= render "layouts/menu" %>
+    <%= render "common/flash_msgs" %>
+    <main class="app-main <%= 'auth-shell' unless user_signed_in? %>" id="conteudo-principal">
       <%= yield %>
-    </div>
+    </main>
   </body>
 </html>

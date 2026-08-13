@@ -1,1 +1,1 @@
-<h1>Nova conta</h1><%= render "form", conta: @conta %>
+<% content_for :title, "Nova conta" %><header class="page-header"><div><p class="page-eyebrow"><%= @carteira.nome %></p><h1 class="page-title">Nova conta de investimento</h1><p class="page-subtitle">Vincule uma instituição e as moedas movimentadas.</p></div></header><%= render "form", conta: @conta %>

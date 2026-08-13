@@ -1,1 +1,1 @@
-<h1>Nova carteira</h1><%= render "form", carteira: @carteira %>
+<% content_for :title, "Nova carteira" %><header class="page-header"><div><p class="page-eyebrow"><%= @investidor.nome %></p><h1 class="page-title">Nova carteira</h1><p class="page-subtitle">Agrupe contas para acompanhar patrimônio e rentabilidade.</p></div></header><%= render "form", carteira: @carteira %>

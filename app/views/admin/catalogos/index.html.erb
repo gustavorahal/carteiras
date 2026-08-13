@@ -1,2 +1,21 @@
-<div class="d-flex justify-content-between"><h1><%= controller_name.humanize %></h1><%= link_to "Novo", url_for(action: :new), class: "btn btn-primary" %></div>
-<table class="table"><% @registros.each do |registro| %><tr><td><%= link_to(registro.respond_to?(:nome) ? registro.nome : registro.to_s, url_for(action: :show, id: registro.id)) %></td><td><%= registro.respond_to?(:codigo) ? registro.codigo : nil %></td><td><%= registro.arquivado? ? "Arquivado" : "Ativo" %></td><td><% if registro.arquivado? %><%= button_to "Restaurar", url_for(action: :restaurar, id: registro.id), class: "btn btn-sm btn-outline-success" %><% else %><%= button_to "Arquivar", url_for(action: :arquivar, id: registro.id), class: "btn btn-sm btn-outline-warning" %><% end %></td></tr><% end %></table>
+<% titulo = controller_name.humanize %>
+<% catalogo_ativos = @registros.klass == Ativo %>
+<% content_for :title, titulo %>
+<header class="page-header">
+  <div><p class="page-eyebrow">Catálogo global</p><h1 class="page-title"><%= titulo %></h1><p class="page-subtitle">Cadastros compartilhados entre todos os espaços.</p></div>
+  <div class="page-actions"><%= link_to "Novo registro", url_for(action: :new), class: "btn btn-primary" %></div>
+</header>
+
+<% if @registros.any? %>
+  <div class="table-responsive table-shell"><table class="table align-middle">
+    <thead><tr><th><%= catalogo_ativos ? "Ativo" : "Nome" %></th><th><%= catalogo_ativos ? "Mercado" : "Código" %></th><th>Estado</th><th class="text-end">Ação</th></tr></thead>
+    <tbody><% @registros.each do |registro| %><tr>
+      <td><%= link_to registro_titulo(registro), url_for(action: :show, id: registro.id), class: "fw-semibold" %><% if registro_subtitulo(registro) %><div class="small text-secondary mt-1"><%= registro_subtitulo(registro) %></div><% end %></td>
+      <td class="mono"><%= catalogo_ativos ? registro.mercado : (registro.respond_to?(:codigo) ? registro.codigo : "—") %></td>
+      <td><%= status_badge(registro.arquivado? ? "arquivado" : "ativo") %></td>
+      <td class="text-end"><% if registro.arquivado? %><%= button_to "Restaurar", url_for(action: :restaurar, id: registro.id), class: "btn btn-sm btn-outline-success" %><% else %><%= button_to "Arquivar", url_for(action: :arquivar, id: registro.id), class: "btn btn-sm btn-outline-warning", form: { data: { turbo_confirm: "Arquivar este registro?" } } %><% end %></td>
+    </tr><% end %></tbody>
+  </table></div>
+<% else %>
+  <div class="empty-state"><strong>Nenhum registro</strong><span>Crie o primeiro item deste catálogo.</span></div>
+<% end %>

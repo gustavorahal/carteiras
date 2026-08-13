@@ -1,8 +1,8 @@
-<h1>Analisar arquivos financeiros</h1>
-<p>Notas PDF XP/Avenue e extratos XLSX/CSV. Até 20 arquivos e 25 MB por envio; os arquivos não são armazenados.</p>
-<%= form_with url: espaco_importacoes_financeiras_path(@espaco), method: :post, multipart: true, class: "vstack gap-3" do %>
-  <div><%= label_tag :conta_investimento_id, "Conta de investimento", class: "form-label" %>
-    <%= select_tag :conta_investimento_id, options_from_collection_for_select(@contas, :id, ->(c) { "#{c.carteira.nome} · #{c.instituicao.nome} · #{c.nome}" }), class: "form-select" %></div>
-  <div><%= label_tag :arquivos, "Arquivos", class: "form-label" %><%= file_field_tag "arquivos[]", multiple: true, accept: ".pdf,.xlsx,.csv", class: "form-control" %></div>
-  <%= submit_tag "Analisar", class: "btn btn-primary" %>
+<% content_for :title, "Analisar arquivos" %>
+<nav aria-label="Trilha de navegação"><ol class="breadcrumb"><li class="breadcrumb-item"><%= link_to @espaco.nome, @espaco %></li><li class="breadcrumb-item"><%= link_to "Importações", espaco_importacoes_financeiras_path(@espaco) %></li><li class="breadcrumb-item active" aria-current="page">Analisar</li></ol></nav>
+<header class="page-header"><div><p class="page-eyebrow">Importação segura</p><h1 class="page-title">Analisar arquivos financeiros</h1><p class="page-subtitle">Notas PDF XP/Avenue e extratos XLSX/CSV. Até 20 arquivos e 25 MB por envio; os arquivos não são armazenados.</p></div></header>
+<%= form_with url: espaco_importacoes_financeiras_path(@espaco), method: :post, multipart: true, class: "surface" do %>
+  <div class="row g-4"><div class="col-lg-5"><%= label_tag :conta_investimento_id, "Conta de investimento", class: "form-label" %><%= select_tag :conta_investimento_id, options_from_collection_for_select(@contas, :id, ->(c) { "#{c.carteira.nome} · #{c.instituicao.nome} · #{c.nome}" }), class: "form-select" %><div class="form-text">Os rascunhos serão associados a esta conta.</div></div><div class="col-lg-7"><%= label_tag :arquivos, "Arquivos", class: "form-label" %><%= file_field_tag "arquivos[]", multiple: true, accept: ".pdf,.xlsx,.csv", class: "form-control" %><div class="form-text">Formatos aceitos: PDF, XLSX e CSV.</div></div></div>
+  <div class="alert alert-info mt-4 mb-0"><strong>Privacidade:</strong> os arquivos são processados durante a requisição e não ficam armazenados.</div>
+  <div class="d-flex gap-2 mt-4"><%= submit_tag "Analisar arquivos", class: "btn btn-primary" %><%= link_to "Cancelar", espaco_importacoes_financeiras_path(@espaco), class: "btn btn-outline-secondary" %></div>
 <% end %>

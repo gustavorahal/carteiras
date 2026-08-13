@@ -1,6 +1,37 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3"><div class="container-fluid">
-  <%= link_to "Carteiras", espacos_path, class: "navbar-brand" %>
-  <% if user_signed_in? %><div class="navbar-nav me-auto">
-    <% if current_user.administrador_sistema? %><%= link_to "Ativos", admin_ativos_path, class: "nav-link" %><%= link_to "Instituições", admin_instituicoes_path, class: "nav-link" %><%= link_to "Moedas", admin_moedas_path, class: "nav-link" %><%= link_to "Fontes", admin_fontes_cotacao_index_path, class: "nav-link" %><%= link_to "Preços", admin_cotacoes_ativos_path, class: "nav-link" %><%= link_to "Câmbio", admin_cotacoes_cambio_index_path, class: "nav-link" %><% end %>
-  </div><%= button_to "Sair", destroy_user_session_path, method: :delete, class: "btn btn-outline-light btn-sm" %><% end %>
-</div></nav>
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top" aria-label="Navegação principal">
+  <div class="container-fluid px-lg-4">
+    <%= link_to espacos_path, class: "navbar-brand" do %>
+      <span class="brand-mark" aria-hidden="true">C</span>
+      Carteiras
+    <% end %>
+
+    <% if user_signed_in? %>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appNavigation" aria-controls="appNavigation" aria-expanded="false" aria-label="Abrir navegação">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="appNavigation">
+        <div class="navbar-nav me-auto mt-3 mt-lg-0">
+          <%= link_to "Espaços", espacos_path, class: nav_link_class(%r{\A/espacos}) %>
+          <% if current_user.administrador_sistema? %>
+            <div class="nav-item dropdown">
+              <button class="nav-link dropdown-toggle <%= 'active' if request.path.start_with?('/admin') %>" data-bs-toggle="dropdown" aria-expanded="false">Administração</button>
+              <ul class="dropdown-menu dropdown-menu-dark shadow">
+                <li><%= link_to "Ativos", admin_ativos_path, class: "dropdown-item" %></li>
+                <li><%= link_to "Instituições", admin_instituicoes_path, class: "dropdown-item" %></li>
+                <li><%= link_to "Moedas", admin_moedas_path, class: "dropdown-item" %></li>
+                <li><%= link_to "Fontes de cotação", admin_fontes_cotacao_index_path, class: "dropdown-item" %></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><%= link_to "Preços de ativos", admin_cotacoes_ativos_path, class: "dropdown-item" %></li>
+                <li><%= link_to "Câmbio", admin_cotacoes_cambio_index_path, class: "dropdown-item" %></li>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+        <div class="d-lg-flex align-items-lg-center gap-3 py-3 py-lg-0">
+          <span class="navbar-text small d-block mb-2 mb-lg-0"><%= current_user.email %></span>
+          <%= button_to "Sair", destroy_user_session_path, method: :delete, class: "btn btn-outline-light btn-sm w-100" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</nav>

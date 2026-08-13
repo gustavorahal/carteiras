@@ -1,0 +1,14 @@
+<% content_for :title, "Recuperar senha" %>
+<section class="card auth-card">
+  <div class="card-body p-4 p-md-5">
+    <p class="page-eyebrow">Recuperação de acesso</p>
+    <h1 class="h2">Redefina sua senha</h1>
+    <p class="text-secondary mb-4">Enviaremos as instruções para o e-mail cadastrado.</p>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "vstack gap-3" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+      <div><%= f.label :email, "E-mail", class: "form-label" %><%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control form-control-lg" %></div>
+      <%= f.submit "Enviar instruções", class: "btn btn-primary btn-lg" %>
+      <%= link_to "Voltar ao login", new_session_path(resource_name), class: "btn btn-link" %>
+    <% end %>
+  </div>
+</section>

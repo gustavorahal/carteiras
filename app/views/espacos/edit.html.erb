@@ -1,2 +1,1 @@
-<h1>Editar espaço</h1>
-<%= render "form", espaco: @espaco %>
+<% content_for :title, "Editar #{@espaco.nome}" %><header class="page-header"><div><p class="page-eyebrow">Configuração</p><h1 class="page-title">Editar espaço</h1><p class="page-subtitle"><%= @espaco.nome %></p></div></header><%= render "form", espaco: @espaco %>

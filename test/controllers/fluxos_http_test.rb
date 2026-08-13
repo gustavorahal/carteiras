@@ -63,6 +63,11 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     %w[saldo_inicial transferencia_custodia evento_corporativo].each do |tipo|
       get new_espaco_transacao_path(@espaco, tipo:, investidor_id: @investidor.id)
       assert_response :success
+      if tipo == "saldo_inicial"
+        assert_select "input[name='atributos[preco_medio_local]']"
+        assert_select "input[name='atributos[preco_medio_base]']"
+        assert_select "select[name='atributos[fonte_custo]'] option[value=xp]"
+      end
     end
     get new_espaco_importacoes_financeira_path(@espaco)
     assert_response :success
@@ -124,7 +129,7 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "table.saldos-conciliados tbody tr", 1 do
       assert_select "td" do |celulas|
-        assert_equal ["BRL", "2026-01-31", "100.0", "100.0", "0.0"], celulas.map { |celula| celula.text.squish }
+        assert_equal ["BRL", "31/01/2026", "100", "100", "0"], celulas.map { |celula| celula.text.squish }
       end
     end
   ensure
@@ -144,6 +149,9 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     sign_in @admin_sistema
     get admin_ativos_path
     assert_response :success
+    assert_select "a[href='#{admin_ativo_path(@ativo)}']", text: @ativo.codigo
+    assert_select "td", text: /Ação/
+    assert_no_match(/#&lt;Ativo:/, response.body)
     get new_admin_ativo_path
     assert_response :success
   end
@@ -186,8 +194,8 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
 
     get espaco_transacoes_path(@espaco), params: { carteira_id: @carteira.id }
     assert_response :success
-    assert_match(/2026-01-02/, response.body)
-    assert_no_match(/2026-01-03/, response.body)
+    assert_match(%r{02/01/2026}, response.body)
+    assert_no_match(%r{03/01/2026}, response.body)
     assert_match(/#{espaco_transacao_path(@espaco, reversao)}/, response.body)
   end
 
@@ -201,6 +209,8 @@ class FluxosHttpTest < ActionDispatch::IntegrationTest
     get espaco_transacao_path(@espaco, rascunho)
     assert_response :success
     assert_select "h2", text: "Prévia antes da confirmação"
+    assert_select "details.technical-details"
+    assert_select ".status-badge", text: "Rascunho"
     post prever_espaco_transacoes_path(@espaco), params: { id: rascunho.id, investidor_id: @investidor.id,
       tipo: "nota_negociacao", atributos: { conta_caixa_id: @caixa.id, data_negociacao: "2026-01-05",
         data_liquidacao: "2026-01-05", custo_operacional_total: "0", taxa_conversao_base: "1",

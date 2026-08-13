@@ -1,1 +1,1 @@
-<h1>Novo investidor</h1><%= render "form", investidor: @investidor %>
+<% content_for :title, "Novo investidor" %><header class="page-header"><div><p class="page-eyebrow"><%= @espaco.nome %></p><h1 class="page-title">Novo investidor</h1><p class="page-subtitle">Cadastre o titular econômico das contas e carteiras.</p></div></header><%= render "form", investidor: @investidor %>

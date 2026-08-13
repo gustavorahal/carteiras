@@ -1,7 +1,10 @@
-<h1><%= @registro.persisted? ? "Editar" : "Novo" %> <%= @registro.model_name.human %></h1>
+<% titulo = "#{@registro.persisted? ? 'Editar' : 'Novo'} #{@registro.model_name.human.downcase}" %><% content_for :title, titulo %>
+<header class="page-header"><div><p class="page-eyebrow">Catálogo global</p><h1 class="page-title"><%= titulo %></h1><p class="page-subtitle">As alterações ficam disponíveis para todos os espaços.</p></div></header>
 <% destino = @registro.persisted? ? url_for(action: :update, id: @registro.id) : url_for(action: :create) %>
-<%= bootstrap_form_with model: @registro, url: destino, method: (@registro.persisted? ? :patch : :post) do |f| %>
+<%= bootstrap_form_with model: @registro, url: destino, method: (@registro.persisted? ? :patch : :post), html: { class: "surface" } do |f| %>
+  <%= f.alert_message "Revise os dados abaixo." %>
   <% controller.class.campos_permitidos.each do |campo| %>
-    <% if campo == :moeda_negociacao_id %><%= f.collection_select campo, Moeda.ativos.order(:codigo), :id, :codigo %><% elsif campo == :tipo && @registro.is_a?(Ativo) %><%= f.select campo, Ativo::TIPOS %><% elsif campo == :casas_decimais %><%= f.number_field campo, min: 0, max: 10 %><% else %><%= f.text_field campo %><% end %>
-  <% end %><%= f.primary %>
+    <% if campo == :moeda_negociacao_id %><%= f.collection_select campo, Moeda.ativos.order(:codigo), :id, :codigo, label: "Moeda de negociação" %><% elsif campo == :tipo && @registro.is_a?(Ativo) %><%= f.select campo, Ativo::TIPOS.map { |tipo| [tipo.humanize, tipo] }, label: "Tipo" %><% elsif campo == :casas_decimais %><%= f.number_field campo, min: 0, max: 10, label: "Casas decimais" %><% else %><%= f.text_field campo, label: @registro.class.human_attribute_name(campo) %><% end %>
+  <% end %>
+  <div class="d-flex gap-2 mt-4"><%= f.primary @registro.persisted? ? "Salvar alterações" : "Criar registro" %><%= link_to "Cancelar", url_for(action: :index), class: "btn btn-outline-secondary" %></div>
 <% end %>

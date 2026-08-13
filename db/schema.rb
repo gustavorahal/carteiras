@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_13_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -324,12 +324,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_13_170000) do
     t.datetime "created_at", null: false
     t.decimal "custo_total_base", precision: 30, scale: 12, null: false
     t.decimal "custo_total_local", precision: 30, scale: 12, null: false
+    t.string "fonte_custo", default: "manual", null: false
+    t.decimal "preco_medio_base_informado", precision: 30, scale: 12
+    t.decimal "preco_medio_local_informado", precision: 30, scale: 12
     t.decimal "quantidade", precision: 30, scale: 10, null: false
     t.bigint "transacao_financeira_id", null: false
     t.datetime "updated_at", null: false
     t.index ["ativo_id"], name: "index_saldos_iniciais_on_ativo_id"
     t.index ["conta_investimento_id"], name: "index_saldos_iniciais_on_conta_investimento_id"
     t.index ["transacao_financeira_id"], name: "index_saldos_iniciais_on_transacao_financeira_id", unique: true
+    t.check_constraint "fonte_custo::text = ANY (ARRAY['manual'::character varying, 'xp'::character varying, 'avenue'::character varying, 'planilha'::character varying, 'outra'::character varying]::text[])", name: "saldos_iniciais_fonte_custo_valida"
+    t.check_constraint "preco_medio_local_informado IS NULL AND preco_medio_base_informado IS NULL OR preco_medio_local_informado > 0::numeric AND preco_medio_base_informado > 0::numeric", name: "saldos_iniciais_precos_medios_validos"
     t.check_constraint "quantidade > 0::numeric AND custo_total_local >= 0::numeric AND custo_total_base >= 0::numeric", name: "saldos_iniciais_valores_validos"
   end
 

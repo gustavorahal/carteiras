@@ -1,9 +1,11 @@
-
-<% flash2type = { 'alert' => 'danger', 'notice' => 'success' } %>
-
-<% flash.each do |name, msg| %>
-  <div class="alert alert-<%= flash2type[name] %> alert-dismissable fade show" role="alert">
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <%= msg %>
+<% tipos = { "alert" => "danger", "notice" => "success" } %>
+<% if flash.any? %>
+  <div class="flash-stack" aria-live="polite">
+    <% flash.each do |nome, mensagem| %>
+      <div class="alert alert-<%= tipos.fetch(nome, 'info') %> alert-dismissible fade show shadow-sm" role="alert">
+        <%= mensagem %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+      </div>
+    <% end %>
   </div>
 <% end %>

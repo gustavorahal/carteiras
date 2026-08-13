@@ -1,0 +1,42 @@
+pt-BR:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d/%m"
+      long: "%d de %B de %Y"
+  financeiro:
+    tipos_ativo:
+      acao: "Ação"
+      fii: "FII"
+      fundo: "Fundo"
+      etf: "ETF"
+      renda_fixa: "Renda fixa"
+      criptoativo: "Criptoativo"
+      outro: "Outro"
+    tipos:
+      nota_negociacao: "Nota de negociação"
+      provento: "Provento"
+      movimentacao_caixa: "Movimentação de caixa"
+      saldo_inicial: "Saldo inicial"
+      transferencia_custodia: "Transferência de custódia"
+      evento_corporativo: "Evento corporativo"
+      reversao: "Reversão"
+    estados:
+      rascunho: "Rascunho"
+      confirmada: "Confirmada"
+      revertida: "Revertida"
+      pendente: "Pendente"
+      analisada: "Analisada"
+      concluida: "Concluída"
+      falhou: "Falhou"
+      detectando: "Analisando"
+      ativo: "Ativo"
+      arquivado: "Arquivado"
+      calculado: "Calculado"
+      incompleto: "Dados incompletos"
+      sem_patrimonio_inicial_valido: "Sem patrimônio inicial"
+      corte_saldo_inicial: "Reinício da série"
+    motivos:
+      patrimonio_inicial_nao_positivo: "Não há patrimônio inicial positivo no período."
+      cotacao_ausente: "Faltam cotações para calcular todo o período."
+      corte_saldo_inicial: "Um saldo inicial reiniciou a série de rentabilidade."

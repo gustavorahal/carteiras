@@ -1,6 +1,8 @@
-<div class="row g-2 mb-2" data-negociacoes-target="linha"><div class="col"><%= select_tag "atributos[negociacoes][][ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, linha[:ativo_id]), class: "form-select" %></div>
-<div class="col"><%= select_tag "atributos[negociacoes][][natureza]", options_for_select(%w[compra venda], linha[:natureza]), class: "form-select" %></div>
-<div class="col"><%= text_field_tag "atributos[negociacoes][][quantidade]", linha[:quantidade], class: "form-control", placeholder: "Quantidade" %></div>
-<div class="col"><%= text_field_tag "atributos[negociacoes][][preco_unitario]", linha[:preco_unitario], class: "form-control", placeholder: "Preço" %></div>
-<div class="col"><%= text_field_tag "atributos[negociacoes][][custo_alocado]", linha[:custo_alocado], class: "form-control", placeholder: "Custo opcional" %></div>
-<div class="col-auto"><button type="button" class="btn btn-outline-danger" data-action="negociacoes#remover">Remover</button></div></div>
+<div class="transaction-row" data-negociacoes-target="linha"><div class="row g-2 align-items-end">
+  <div class="col-md-3"><%= label_tag nil, "Ativo", class: "form-label" %><%= select_tag "atributos[negociacoes][][ativo_id]", options_from_collection_for_select(@ativos, :id, :codigo, linha[:ativo_id]), class: "form-select", aria: { label: "Ativo" } %></div>
+  <div class="col-md-2"><%= label_tag nil, "Natureza", class: "form-label" %><%= select_tag "atributos[negociacoes][][natureza]", options_for_select([["Compra", "compra"], ["Venda", "venda"]], linha[:natureza]), class: "form-select", aria: { label: "Natureza" } %></div>
+  <div class="col-md-2"><%= label_tag nil, "Quantidade", class: "form-label" %><%= text_field_tag "atributos[negociacoes][][quantidade]", linha[:quantidade], class: "form-control", inputmode: "decimal", aria: { label: "Quantidade" } %></div>
+  <div class="col-md-2"><%= label_tag nil, "Preço unitário", class: "form-label" %><%= text_field_tag "atributos[negociacoes][][preco_unitario]", linha[:preco_unitario], class: "form-control", inputmode: "decimal", aria: { label: "Preço unitário" } %></div>
+  <div class="col-md-2"><%= label_tag nil, "Custo alocado", class: "form-label" %><%= text_field_tag "atributos[negociacoes][][custo_alocado]", linha[:custo_alocado], class: "form-control", inputmode: "decimal", placeholder: "Opcional", aria: { label: "Custo alocado" } %></div>
+  <div class="col-md-1"><button type="button" class="btn btn-outline-danger w-100" data-action="negociacoes#remover" aria-label="Remover negociação">×</button></div>
+</div></div>

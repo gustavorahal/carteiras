@@ -1,4 +1,5 @@
-<%= bootstrap_form_with model: espaco do |f| %>
-  <%= f.text_field :nome, required: true %>
-  <%= f.primary %>
+<%= bootstrap_form_with model: espaco, html: { class: "surface" } do |f| %>
+  <%= f.alert_message "Revise os dados abaixo." %>
+  <%= f.text_field :nome, label: "Nome do espaço", help: "Ex.: Patrimônio familiar ou Empresa", autofocus: true %>
+  <div class="d-flex gap-2 mt-4"><%= f.primary espaco.persisted? ? "Salvar alterações" : "Criar espaço" %><%= link_to "Cancelar", espaco.persisted? ? espaco_path(espaco) : espacos_path, class: "btn btn-outline-secondary" %></div>
 <% end %>

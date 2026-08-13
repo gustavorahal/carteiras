@@ -1,1 +1,1 @@
-<h1>Editar investidor</h1><%= render "form", investidor: @investidor %>
+<% content_for :title, "Editar #{@investidor.nome}" %><header class="page-header"><div><p class="page-eyebrow"><%= @espaco.nome %></p><h1 class="page-title">Editar investidor</h1><p class="page-subtitle"><%= @investidor.nome %></p></div></header><%= render "form", investidor: @investidor %>

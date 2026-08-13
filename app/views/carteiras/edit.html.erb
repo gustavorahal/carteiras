@@ -1,1 +1,1 @@
-<h1>Editar carteira</h1><%= render "form", carteira: @carteira %>
+<% content_for :title, "Editar #{@carteira.nome}" %><header class="page-header"><div><p class="page-eyebrow"><%= @investidor.nome %></p><h1 class="page-title">Editar carteira</h1><p class="page-subtitle"><%= @carteira.nome %></p></div></header><%= render "form", carteira: @carteira %>

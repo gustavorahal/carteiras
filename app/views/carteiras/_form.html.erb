@@ -1,5 +1,4 @@
-<%= bootstrap_form_with model: [@espaco, @investidor, carteira] do |f| %>
-  <%= f.text_field :nome, required: true %>
-  <%= f.collection_select :moeda_base_id, Moeda.ativos.order(:codigo), :id, :codigo %>
-  <%= f.primary %>
+<%= bootstrap_form_with model: [@espaco, @investidor, carteira], html: { class: "surface" } do |f| %>
+  <%= f.alert_message "Revise os dados abaixo." %><%= f.text_field :nome, label: "Nome da carteira", autofocus: true %><%= f.collection_select :moeda_base_id, Moeda.ativos.order(:codigo), :id, :codigo, label: "Moeda-base", help: "Moeda usada para consolidar patrimônio e resultados." %>
+  <div class="d-flex gap-2 mt-4"><%= f.primary carteira.persisted? ? "Salvar alterações" : "Criar carteira" %><%= link_to "Cancelar", carteira.persisted? ? [@espaco, @investidor, carteira] : @espaco, class: "btn btn-outline-secondary" %></div>
 <% end %>

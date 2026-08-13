@@ -1,45 +1,63 @@
-<div class="d-flex justify-content-between align-items-center">
-  <h1><%= @espaco.nome %></h1>
-  <div>
-    <%= link_to "Transações", espaco_transacoes_path(@espaco), class: "btn btn-outline-primary" %>
+<% content_for :title, @espaco.nome %>
+<nav aria-label="Trilha de navegação"><ol class="breadcrumb"><li class="breadcrumb-item"><%= link_to "Espaços", espacos_path %></li><li class="breadcrumb-item active" aria-current="page"><%= @espaco.nome %></li></ol></nav>
+<header class="page-header">
+  <div><p class="page-eyebrow">Espaço financeiro</p><h1 class="page-title"><%= @espaco.nome %></h1><p class="page-subtitle">Investidores, carteiras e permissões deste ambiente.</p></div>
+  <div class="page-actions">
+    <%= link_to "Transações", espaco_transacoes_path(@espaco), class: "btn btn-primary" %>
     <%= link_to "Importações", espaco_importacoes_financeiras_path(@espaco), class: "btn btn-outline-primary" %>
     <%= link_to "Editar", edit_espaco_path(@espaco), class: "btn btn-outline-secondary" if policy(@espaco).update? %>
     <% if @espaco.arquivado? && policy(@espaco).restaurar? %>
-      <%= button_to "Restaurar", restaurar_espaco_path(@espaco), class: "btn btn-success", form: { class: "d-inline" } %>
+      <%= button_to "Restaurar", restaurar_espaco_path(@espaco), class: "btn btn-success" %>
     <% elsif policy(@espaco).arquivar? %>
-      <%= button_to "Arquivar", arquivar_espaco_path(@espaco), class: "btn btn-warning", form: { class: "d-inline" } %>
+      <%= button_to "Arquivar", arquivar_espaco_path(@espaco), class: "btn btn-outline-warning", form: { data: { turbo_confirm: "Arquivar este espaço?" } } %>
     <% end %>
   </div>
-</div>
+</header>
 
-<h2 class="mt-4">Investidores</h2>
-<%= link_to "Novo investidor", new_espaco_investidor_path(@espaco), class: "btn btn-sm btn-primary" if policy(@espaco.investidores.new).create? %>
-<div class="row mt-2">
-  <% @espaco.investidores.includes(:carteiras).order(:nome).each do |investidor| %>
-    <div class="col-md-6"><div class="card mb-3"><div class="card-body">
-      <h3 class="h5"><%= investidor.nome %></h3>
-      <% investidor.carteiras.each do |carteira| %>
-        <div><%= link_to carteira.nome, [@espaco, investidor, carteira] %></div>
-      <% end %>
-      <% if policy(investidor).update? %><%= link_to "Nova carteira", new_espaco_investidor_carteira_path(@espaco, investidor), class: "btn btn-sm btn-outline-primary mt-2" %><%= link_to "Editar investidor", edit_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-secondary mt-2" %><%= button_to "Arquivar", arquivar_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-warning mt-2" %><% elsif investidor.arquivado? && policy(investidor).restaurar? %><%= button_to "Restaurar", restaurar_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-success mt-2" %><% end %>
-    </div></div></div>
-  <% end %>
-</div>
+<div class="section-stack">
+  <section class="surface">
+    <div class="section-heading"><div><p class="page-eyebrow mb-1">Estrutura patrimonial</p><h2 class="h3">Investidores</h2></div><%= link_to "Novo investidor", new_espaco_investidor_path(@espaco), class: "btn btn-sm btn-primary" if policy(@espaco.investidores.new).create? %></div>
+    <% investidores = @espaco.investidores.includes(:carteiras).order(:nome) %>
+    <% if investidores.any? %>
+      <div class="row g-3">
+        <% investidores.each do |investidor| %>
+          <div class="col-lg-6">
+            <article class="card h-100"><div class="card-body">
+              <div class="d-flex align-items-start justify-content-between gap-3 mb-3"><div><h3 class="h5 mb-1"><%= investidor.nome %></h3><span class="small text-secondary"><%= pluralize(investidor.carteiras.size, "carteira", "carteiras") %></span></div><%= status_badge(investidor.arquivado? ? "arquivado" : "ativo") %></div>
+              <% if investidor.carteiras.any? %>
+                <div class="list-group list-group-flush border rounded mb-3"><% investidor.carteiras.each do |carteira| %><%= link_to carteira.nome, [@espaco, investidor, carteira], class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" %><% end %></div>
+              <% else %><p class="text-secondary small">Nenhuma carteira criada.</p><% end %>
+              <div class="d-flex flex-wrap gap-2">
+                <% if investidor.arquivado? && policy(investidor).restaurar? %>
+                  <%= button_to "Restaurar", restaurar_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-success" %>
+                <% elsif policy(investidor).update? %>
+                  <%= link_to "Nova carteira", new_espaco_investidor_carteira_path(@espaco, investidor), class: "btn btn-sm btn-outline-primary" %>
+                  <%= link_to "Editar", edit_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-secondary" %>
+                  <%= button_to "Arquivar", arquivar_espaco_investidor_path(@espaco, investidor), class: "btn btn-sm btn-outline-warning", form: { data: { turbo_confirm: "Arquivar este investidor?" } } %>
+                <% end %>
+              </div>
+            </div></article>
+          </div>
+        <% end %>
+      </div>
+    <% else %><div class="empty-state"><strong>Nenhum investidor</strong><span>Adicione um titular econômico para criar a primeira carteira.</span></div><% end %>
+  </section>
 
-<h2>Membros</h2>
-<table class="table"><thead><tr><th>E-mail</th><th>Papel</th><th></th></tr></thead><tbody>
-  <% @espaco.membros_espaco.includes(:user).each do |membro| %>
-    <tr><td><%= membro.user.email %></td><td><% if policy(membro).update? %><%= form_with url: espaco_membro_path(@espaco, membro), method: :patch, scope: :membro_espaco, class: "d-flex" do |f| %><%= f.select :papel, MembroEspaco::PAPEIS, { selected: membro.papel }, class: "form-select form-select-sm" %><%= f.submit "Alterar", class: "btn btn-sm btn-outline-primary" %><% end %><% else %><%= membro.papel %><% end %></td><td>
-      <% if policy(membro).destroy? %>
-        <%= button_to "Remover", espaco_membro_path(@espaco, membro), method: :delete, class: "btn btn-sm btn-outline-danger" %>
+  <section class="surface">
+    <div class="section-heading"><div><p class="page-eyebrow mb-1">Acesso e permissões</p><h2 class="h3">Membros</h2></div></div>
+    <div class="table-responsive table-shell mb-3"><table class="table align-middle"><thead><tr><th>E-mail</th><th>Papel</th><th class="text-end">Ação</th></tr></thead><tbody>
+      <% @espaco.membros_espaco.includes(:user).each do |membro| %>
+        <tr><td><%= membro.user.email %></td><td>
+          <% if policy(membro).update? %><%= form_with url: espaco_membro_path(@espaco, membro), method: :patch, scope: :membro_espaco, class: "d-flex gap-2" do |f| %><%= f.select :papel, MembroEspaco::PAPEIS.map { |p| [p.humanize, p] }, { selected: membro.papel }, class: "form-select form-select-sm" %><%= f.submit "Alterar", class: "btn btn-sm btn-outline-primary" %><% end %><% else %><%= membro.papel.humanize %><% end %>
+        </td><td class="text-end"><% if policy(membro).destroy? %><%= button_to "Remover", espaco_membro_path(@espaco, membro), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Remover este membro do espaço?" } } %><% end %></td></tr>
       <% end %>
-    </td></tr>
-  <% end %>
-</tbody></table>
-<% if policy(@espaco.membros_espaco.new).create? %>
-  <%= form_with url: espaco_membros_path(@espaco), scope: :membro_espaco, class: "row g-2" do |f| %>
-    <div class="col"><%= f.email_field :email, placeholder: "E-mail já cadastrado", class: "form-control", required: true %></div>
-    <div class="col"><%= f.select :papel, MembroEspaco::PAPEIS, {}, class: "form-select" %></div>
-    <div class="col"><%= f.submit "Adicionar membro", class: "btn btn-primary" %></div>
-  <% end %>
-<% end %>
+    </tbody></table></div>
+    <% if policy(@espaco.membros_espaco.new).create? %>
+      <%= form_with url: espaco_membros_path(@espaco), scope: :membro_espaco, class: "row g-2 align-items-end" do |f| %>
+        <div class="col-md-6"><%= f.label :email, "E-mail do usuário", class: "form-label" %><%= f.email_field :email, placeholder: "usuario@exemplo.com", class: "form-control", required: true %></div>
+        <div class="col-md-3"><%= f.label :papel, "Papel", class: "form-label" %><%= f.select :papel, MembroEspaco::PAPEIS.map { |p| [p.humanize, p] }, {}, class: "form-select" %></div>
+        <div class="col-md-3"><%= f.submit "Adicionar membro", class: "btn btn-primary w-100" %></div>
+      <% end %>
+    <% end %>
+  </section>
+</div>

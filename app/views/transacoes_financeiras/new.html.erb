@@ -1,1 +1,1 @@
-<h1>Nova transação</h1><%= render "form" %>
+<% content_for :title, "Nova #{display_tipo(@tipo).downcase}" %><header class="page-header"><div><p class="page-eyebrow"><%= @espaco.nome %></p><h1 class="page-title">Nova <%= display_tipo(@tipo).downcase %></h1><p class="page-subtitle">Preencha os dados e revise a prévia antes de criar o rascunho.</p></div></header><%= render "form" %>

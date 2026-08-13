@@ -1,10 +1,13 @@
-<h1><%= @transacao.tipo.humanize %></h1>
-<dl class="row"><dt class="col-sm-3">Competência</dt><dd class="col-sm-9"><%= @transacao.data_competencia %></dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><%= @transacao.estado %></dd><dt class="col-sm-3">Ordem</dt><dd class="col-sm-9"><%= @transacao.ordem_na_data %></dd></dl>
-<h2>Lançamentos</h2><table class="table"><% @transacao.lancamentos_caixa.each do |l| %><tr><td><%= l.data_efetiva %></td><td><%= l.natureza %></td><td><%= l.valor %></td></tr><% end %></table>
-<% if @transacao.rascunho? %>
-  <% if @previa %><h2>Prévia antes da confirmação</h2><pre><%= JSON.pretty_generate(@previa.to_h) %></pre><% end %>
-  <% if policy(@transacao).update? %><%= link_to "Editar", edit_espaco_transacao_path(@espaco, @transacao), class: "btn btn-secondary" %><%= button_to "Confirmar", confirmar_espaco_transacao_path(@espaco, @transacao), class: "btn btn-primary d-inline" %><%= button_to "Excluir rascunho", espaco_transacao_path(@espaco, @transacao), method: :delete, class: "btn btn-danger d-inline" %><% end %>
-<% elsif policy(@transacao).reverter? %>
-  <%= button_to "Reverter", reverter_espaco_transacao_path(@espaco, @transacao), class: "btn btn-warning" %>
-  <%= link_to "Corrigir", correcao_espaco_transacao_path(@espaco, @transacao), class: "btn btn-outline-warning" %>
-<% end %>
+<% content_for :title, display_tipo(@transacao.tipo) %>
+<nav aria-label="Trilha de navegação"><ol class="breadcrumb"><li class="breadcrumb-item"><%= link_to @espaco.nome, @espaco %></li><li class="breadcrumb-item"><%= link_to "Transações", espaco_transacoes_path(@espaco) %></li><li class="breadcrumb-item active" aria-current="page"><%= display_tipo(@transacao.tipo) %></li></ol></nav>
+<header class="page-header"><div><p class="page-eyebrow">Transação financeira</p><h1 class="page-title"><%= display_tipo(@transacao.tipo) %></h1><p class="page-subtitle"><%= @transacao.investidor.nome %></p></div><div class="page-actions"><%= status_badge(@transacao.estado) %></div></header>
+<section class="surface"><dl class="row mb-0"><dt class="col-sm-3">Competência</dt><dd class="col-sm-9"><%= display_data(@transacao.data_competencia) %></dd><dt class="col-sm-3">Estado</dt><dd class="col-sm-9"><%= display_estado(@transacao.estado) %></dd><dt class="col-sm-3">Ordem no dia</dt><dd class="col-sm-9"><%= @transacao.ordem_na_data || "Automática" %></dd></dl></section>
+
+<section class="surface mt-4"><div class="section-heading"><h2 class="h3">Lançamentos de caixa</h2></div><% if @transacao.lancamentos_caixa.any? %><div class="table-responsive table-shell"><table class="table align-middle"><thead><tr><th>Data</th><th>Natureza</th><th class="numeric">Valor</th></tr></thead><tbody><% @transacao.lancamentos_caixa.each do |lancamento| %><tr><td><%= display_data(lancamento.data_efetiva) %></td><td><%= lancamento.natureza.humanize %></td><td class="numeric"><%= display_numero(lancamento.valor) %></td></tr><% end %></tbody></table></div><% else %><div class="empty-state"><strong>Sem lançamentos de caixa</strong><span>Este tipo de transação não movimenta caixa ou ainda é um rascunho.</span></div><% end %></section>
+
+<%= render "previa", previa: @previa if @previa %>
+
+<div class="d-flex flex-wrap gap-2 mt-4">
+  <% if @transacao.rascunho? && policy(@transacao).update? %><%= link_to "Editar rascunho", edit_espaco_transacao_path(@espaco, @transacao), class: "btn btn-outline-secondary" %><%= button_to "Confirmar transação", confirmar_espaco_transacao_path(@espaco, @transacao), class: "btn btn-primary", form: { data: { turbo_confirm: "Confirmar esta transação? Após a confirmação, o fato financeiro se torna imutável." } } %><%= button_to "Excluir rascunho", espaco_transacao_path(@espaco, @transacao), method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: "Excluir permanentemente este rascunho?" } } %>
+  <% elsif policy(@transacao).reverter? %><%= button_to "Reverter", reverter_espaco_transacao_path(@espaco, @transacao), class: "btn btn-outline-warning", form: { data: { turbo_confirm: "Criar uma reversão para esta transação?" } } %><%= link_to "Corrigir", correcao_espaco_transacao_path(@espaco, @transacao), class: "btn btn-warning" %><% end %>
+</div>

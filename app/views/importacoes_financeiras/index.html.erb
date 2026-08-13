@@ -1,15 +1,10 @@
-<div class="d-flex justify-content-between align-items-center">
-  <h1>Importações financeiras</h1>
-  <% if current_user.pode_editar?(@espaco) && !@espaco.arquivado? %><%= link_to "Analisar arquivos", new_espaco_importacoes_financeira_path(@espaco), class: "btn btn-primary" %><% end %>
-</div>
+<% content_for :title, "Importações" %>
+<nav aria-label="Trilha de navegação"><ol class="breadcrumb"><li class="breadcrumb-item"><%= link_to @espaco.nome, @espaco %></li><li class="breadcrumb-item active" aria-current="page">Importações</li></ol></nav>
+<header class="page-header"><div><p class="page-eyebrow">Entrada assistida</p><h1 class="page-title">Importações financeiras</h1><p class="page-subtitle">Analise notas e extratos, resolva pendências e confirme rascunhos com segurança.</p></div><div class="page-actions"><% if current_user.pode_editar?(@espaco) && !@espaco.arquivado? %><%= link_to "Analisar arquivos", new_espaco_importacoes_financeira_path(@espaco), class: "btn btn-primary" %><% end %></div></header>
+
 <%= form_with url: confirmar_em_lote_espaco_importacoes_financeiras_path(@espaco), method: :post do %>
-  <table class="table align-middle"><thead><tr><th></th><th>Arquivo</th><th>Conta</th><th>Formato</th><th>Estado</th><th>Rascunhos</th></tr></thead><tbody>
-    <% @importacoes.each do |importacao| %><tr>
-      <td><%= check_box_tag "importacao_ids[]", importacao.id, false, disabled: importacao.estado != "concluida" || importacao.pendencias.any? %></td>
-      <td><%= link_to importacao.nome_original, espaco_importacoes_financeira_path(@espaco, importacao) %></td>
-      <td><%= importacao.conta_investimento.nome %></td><td><%= importacao.formato %></td><td><%= importacao.estado %></td>
-      <td><%= importacao.transacoes_financeiras.where(estado: "rascunho").count %></td>
-    </tr><% end %>
-  </tbody></table>
-  <%= submit_tag "Confirmar selecionadas em ordem cronológica", class: "btn btn-warning" %>
+  <% if @importacoes.any? %><div class="table-responsive table-shell"><table class="table align-middle"><thead><tr><th><span class="visually-hidden">Selecionar</span></th><th>Arquivo</th><th>Conta</th><th>Formato</th><th>Estado</th><th class="numeric">Rascunhos</th></tr></thead><tbody>
+    <% @importacoes.each do |importacao| %><% disponivel = importacao.estado == "concluida" && importacao.pendencias.empty? %><tr><td><%= check_box_tag "importacao_ids[]", importacao.id, false, disabled: !disponivel, aria: { label: "Selecionar #{importacao.nome_original}" } %></td><td><%= link_to importacao.nome_original, espaco_importacoes_financeira_path(@espaco, importacao), class: "fw-semibold" %><% if importacao.pendencias.any? %><div class="small text-warning"><%= pluralize(importacao.pendencias.size, "pendência", "pendências") %></div><% end %></td><td><%= importacao.conta_investimento.nome %></td><td><%= importacao.formato.to_s.humanize %></td><td><%= status_badge(importacao.estado) %></td><td class="numeric"><%= importacao.transacoes_financeiras.where(estado: "rascunho").count %></td></tr><% end %>
+  </tbody></table></div><div class="d-flex justify-content-end mt-3"><%= submit_tag "Confirmar selecionadas em ordem cronológica", class: "btn btn-warning", data: { turbo_confirm: "Confirmar todos os rascunhos selecionados em ordem cronológica?" } %></div>
+  <% else %><div class="empty-state"><strong>Nenhuma importação</strong><span>Analise notas ou extratos para criar rascunhos auditáveis.</span></div><% end %>
 <% end %>

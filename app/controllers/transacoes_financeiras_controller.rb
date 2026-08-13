@@ -4,7 +4,7 @@ class TransacoesFinanceirasController < ApplicationController
   rescue_from Financeiro::EstadoInvalido, Financeiro::ConflitoIdempotencia, with: :renderizar_conflito
   before_action :carregar_espaco
   before_action :carregar_transacao, only: %i[show edit update destroy confirmar reverter corrigir correcao]
-  before_action :carregar_opcoes, only: %i[new create edit update corrigir correcao prever]
+  before_action :carregar_opcoes, only: %i[show new create edit update corrigir correcao prever]
 
   def index
     @carteiras = Carteira.joins(:investidor).where(investidores: { espaco_id: @espaco.id }).order(:nome)
@@ -184,9 +184,16 @@ class TransacoesFinanceirasController < ApplicationController
       end
     when "saldo_inicial"
       saldo = transacao.saldo_inicial
-      comum.merge(conta_investimento_id: saldo.conta_investimento_id, ativo_id: saldo.ativo_id,
-        quantidade: saldo.quantidade.to_s("F"), custo_total_local: saldo.custo_total_local.to_s("F"),
-        custo_total_base: saldo.custo_total_base.to_s("F"), data_efetiva: transacao.data_competencia)
+      dados = comum.merge(conta_investimento_id: saldo.conta_investimento_id, ativo_id: saldo.ativo_id,
+        quantidade: saldo.quantidade.to_s("F"), fonte_custo: saldo.fonte_custo,
+        data_efetiva: transacao.data_competencia)
+      if saldo.preco_medio_local_informado
+        dados.merge(preco_medio_local: saldo.preco_medio_local_informado.to_s("F"),
+          preco_medio_base: saldo.preco_medio_base_informado.to_s("F"))
+      else
+        dados.merge(custo_total_local: saldo.custo_total_local.to_s("F"),
+          custo_total_base: saldo.custo_total_base.to_s("F"))
+      end
     when "transferencia_custodia"
       transferencia = transacao.transferencia_custodia
       comum.merge(conta_origem_id: transferencia.conta_origem_id, conta_destino_id: transferencia.conta_destino_id,

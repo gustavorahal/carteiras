@@ -45,14 +45,15 @@ class EspacosTest < ApplicationSystemTestCase
     visit espacos_path
     click_link "Uso pessoal"
     click_link "Transações"
-    click_link "Nova nota"
+    click_button "Nova transação"
+    click_link "Nota de negociação"
     select "Pessoa", from: "investidor_id"
     select "Conta · BRL", from: "atributos_conta_caixa_id"
     select ativo.codigo, from: "atributos[negociacoes][][ativo_id]"
     find("input[name='atributos[negociacoes][][quantidade]']").set("10")
     find("input[name='atributos[negociacoes][][preco_unitario]']").set("10")
     click_button "Criar rascunho"
-    click_button "Confirmar"
+    accept_confirm { click_button "Confirmar transação" }
     url_original = page.current_url
     visit espacos_path
     click_link "Uso pessoal"
@@ -63,10 +64,29 @@ class EspacosTest < ApplicationSystemTestCase
     click_link "Corrigir"
     find("input[name='atributos[negociacoes][][quantidade]']").set("12")
     click_button "Aplicar correção"
-    click_button "Reverter"
+    accept_confirm { click_button "Reverter" }
     visit espacos_path
     click_link "Uso pessoal"
     click_link "Principal"
     assert_no_text "PETR4"
+  end
+
+  test "interface principal se adapta a uma tela móvel sem rolagem horizontal" do
+    user = User.create!(email: "mobile@example.com", password: "segredo123")
+    espaco = Espaco.create!(nome: "Uso móvel")
+    espaco.membros_espaco.create!(user:, papel: "administrador")
+    page.driver.browser.manage.window.resize_to(390, 844)
+
+    visit new_user_session_path
+    assert_selector ".auth-card"
+    fill_in "E-mail", with: user.email
+    fill_in "Senha", with: "segredo123"
+    click_button "Entrar"
+
+    assert_selector ".navbar-toggler"
+    assert_text "Uso móvel"
+    largura = page.evaluate_script("document.documentElement.scrollWidth")
+    viewport = page.evaluate_script("document.documentElement.clientWidth")
+    assert_operator largura, :<=, viewport
   end
 end

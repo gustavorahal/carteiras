@@ -1,0 +1,12 @@
+<% content_for :title, "Definir nova senha" %>
+<section class="card auth-card">
+  <div class="card-body p-4 p-md-5">
+    <p class="page-eyebrow">Recuperação de acesso</p><h1 class="h2">Defina uma nova senha</h1>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "vstack gap-3 mt-4" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %><%= f.hidden_field :reset_password_token %>
+      <div><%= f.label :password, "Nova senha", class: "form-label" %><%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "form-control form-control-lg" %><div class="form-text">Mínimo de <%= @minimum_password_length %> caracteres.</div></div>
+      <div><%= f.label :password_confirmation, "Confirme a nova senha", class: "form-label" %><%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control form-control-lg" %></div>
+      <%= f.submit "Alterar senha", class: "btn btn-primary btn-lg" %>
+    <% end %>
+  </div>
+</section>

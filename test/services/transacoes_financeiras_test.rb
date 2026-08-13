@@ -88,6 +88,43 @@ class TransacoesFinanceirasTest < ActiveSupport::TestCase
     assert_equal venda.id, resultado[:transacao_id]
   end
 
+  test "saldo inicial aceita preço médio informado e preserva sua fonte" do
+    atributos = { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
+      quantidade: "401", preco_medio_local: "103.45", fonte_custo: "xp",
+      data_efetiva: "2026-01-01" }
+    previa = TransacoesFinanceiras.prever(tipo: "saldo_inicial", investidor: @investidor,
+      usuario: @usuario, atributos:)
+
+    assert_equal BigDecimal("41483.45"), previa.detalhe_normalizado[:custo_total_local]
+    assert_equal BigDecimal("41483.45"), previa.detalhe_normalizado[:custo_total_base]
+    assert_equal BigDecimal("103.45"), previa.detalhe_normalizado[:preco_medio_base_informado]
+
+    saldo = criar_e_confirmar("saldo_inicial", atributos).saldo_inicial
+    assert_equal BigDecimal("103.45"), saldo.preco_medio_local_informado
+    assert_equal BigDecimal("103.45"), saldo.preco_medio_base_informado
+    assert_equal "xp", saldo.fonte_custo
+  end
+
+  test "saldo inicial em moeda estrangeira exige preço médio base e não mistura modos" do
+    ativo_usd = Ativo.create!(codigo: "ARGT", mercado: "EUA", tipo: "etf", moeda_negociacao: @usd)
+    base = { conta_investimento_id: @conta.id, ativo_id: ativo_usd.id,
+      quantidade: "2", preco_medio_local: "50", fonte_custo: "avenue", data_efetiva: "2026-01-01" }
+
+    assert_raises(Financeiro::AtributosInvalidos) do
+      TransacoesFinanceiras.prever(tipo: "saldo_inicial", investidor: @investidor, usuario: @usuario,
+        atributos: base)
+    end
+    assert_raises(Financeiro::AtributosInvalidos) do
+      TransacoesFinanceiras.prever(tipo: "saldo_inicial", investidor: @investidor, usuario: @usuario,
+        atributos: base.merge(preco_medio_base: "250", custo_total_local: "100", custo_total_base: "500"))
+    end
+
+    previa = TransacoesFinanceiras.prever(tipo: "saldo_inicial", investidor: @investidor,
+      usuario: @usuario, atributos: base.merge(preco_medio_base: "250"))
+    assert_equal BigDecimal("100"), previa.detalhe_normalizado[:custo_total_local]
+    assert_equal BigDecimal("500"), previa.detalhe_normalizado[:custo_total_base]
+  end
+
   test "saldo inicial não pode ser usado como ajuste recorrente e transferência exige lastro" do
     criar_e_confirmar("saldo_inicial", { conta_investimento_id: @conta.id, ativo_id: @ativo.id,
       quantidade: "10", custo_total_local: "100", custo_total_base: "100", data_efetiva: "2026-01-01" })

@@ -1,3 +1,4 @@
-<%= bootstrap_form_with model: [@espaco, investidor] do |f| %>
-  <%= f.text_field :nome, required: true %><%= f.primary %>
+<%= bootstrap_form_with model: [@espaco, investidor], html: { class: "surface" } do |f| %>
+  <%= f.alert_message "Revise os dados abaixo." %><%= f.text_field :nome, label: "Nome do investidor", autofocus: true %>
+  <div class="d-flex gap-2 mt-4"><%= f.primary investidor.persisted? ? "Salvar alterações" : "Criar investidor" %><%= link_to "Cancelar", @espaco, class: "btn btn-outline-secondary" %></div>
 <% end %>

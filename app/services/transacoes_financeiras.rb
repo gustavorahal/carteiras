@@ -309,14 +309,44 @@ module TransacoesFinanceiras
     end
 
     def normalizar_saldo_inicial(investidor, a)
-      validar_chaves!(a, %i[conta_investimento_id ativo_id quantidade custo_total_local custo_total_base data_efetiva observacao ordem_na_data])
+      validar_chaves!(a, %i[conta_investimento_id ativo_id quantidade custo_total_local custo_total_base
+        preco_medio_local preco_medio_base fonte_custo data_efetiva observacao ordem_na_data],
+        opcionais: %i[custo_total_local custo_total_base preco_medio_local preco_medio_base fonte_custo observacao ordem_na_data])
       conta = conta_investimento!(a[:conta_investimento_id], investidor)
       ativo = ativo_disponivel!(a[:ativo_id])
       data_efetiva = data!(a[:data_efetiva], :data_efetiva)
+      quantidade = decimal!(a[:quantidade], :quantidade, escala: 10, minimo_exclusivo: 0)
+      usa_totais = a[:custo_total_local].present? || a[:custo_total_base].present?
+      usa_precos_medios = a[:preco_medio_local].present? || a[:preco_medio_base].present?
+      unless usa_totais ^ usa_precos_medios
+        raise Financeiro::AtributosInvalidos.new(custo: ["informe os custos totais ou os preços médios, sem misturar os dois modos"])
+      end
+
+      if usa_totais
+        custo_total_local = decimal!(a[:custo_total_local], :custo_total_local, escala: 12, minimo: 0)
+        custo_total_base = decimal!(a[:custo_total_base], :custo_total_base, escala: 12, minimo: 0)
+        preco_medio_local = preco_medio_base = nil
+      else
+        preco_medio_local = decimal!(a[:preco_medio_local], :preco_medio_local, escala: 12, minimo_exclusivo: 0)
+        preco_medio_base = if a[:preco_medio_base].present?
+          decimal!(a[:preco_medio_base], :preco_medio_base, escala: 12, minimo_exclusivo: 0)
+        elsif ativo.moeda_negociacao_id == conta.carteira.moeda_base_id
+          preco_medio_local
+        else
+          raise Financeiro::AtributosInvalidos.new(preco_medio_base: ["é obrigatório quando a moeda do ativo difere da moeda-base"])
+        end
+        custo_total_local = (quantidade * preco_medio_local).round(12)
+        custo_total_base = (quantidade * preco_medio_base).round(12)
+      end
+      fonte_custo = a[:fonte_custo].presence || "manual"
+      unless SaldoInicial::FONTES_CUSTO.include?(fonte_custo)
+        raise Financeiro::AtributosInvalidos.new(fonte_custo: ["inválida"])
+      end
+
       comum(a).merge(conta_investimento_id: conta.id, ativo_id: ativo.id,
-        quantidade: decimal!(a[:quantidade], :quantidade, escala: 10, minimo_exclusivo: 0),
-        custo_total_local: decimal!(a[:custo_total_local], :custo_total_local, escala: 12, minimo: 0),
-        custo_total_base: decimal!(a[:custo_total_base], :custo_total_base, escala: 12, minimo: 0),
+        quantidade:, custo_total_local:, custo_total_base:,
+        preco_medio_local_informado: preco_medio_local,
+        preco_medio_base_informado: preco_medio_base, fonte_custo:,
         data_efetiva:, data_competencia: data_efetiva)
     end
 
@@ -401,7 +431,9 @@ module TransacoesFinanceiras
           conta_caixa_destino_id: d[:conta_caixa_destino_id], valor_origem: d[:valor_origem], valor_destino: d[:valor_destino], data_efetiva: d[:data_efetiva])
       when "saldo_inicial"
         transacao.create_saldo_inicial!(conta_investimento_id: d[:conta_investimento_id], ativo_id: d[:ativo_id],
-          quantidade: d[:quantidade], custo_total_local: d[:custo_total_local], custo_total_base: d[:custo_total_base])
+          quantidade: d[:quantidade], custo_total_local: d[:custo_total_local], custo_total_base: d[:custo_total_base],
+          preco_medio_local_informado: d[:preco_medio_local_informado],
+          preco_medio_base_informado: d[:preco_medio_base_informado], fonte_custo: d[:fonte_custo])
       when "transferencia_custodia"
         transacao.create_transferencia_custodia!(conta_origem_id: d[:conta_origem_id], conta_destino_id: d[:conta_destino_id],
           ativo_id: d[:ativo_id], quantidade: d[:quantidade])
@@ -454,7 +486,10 @@ module TransacoesFinanceiras
         s = t.saldo_inicial or raise Financeiro::AtributosInvalidos.new(detalhe: ["ausente"])
         comum.merge(conta_investimento_id: s.conta_investimento_id, ativo_id: s.ativo_id,
           quantidade: s.quantidade, custo_total_local: s.custo_total_local,
-          custo_total_base: s.custo_total_base, data_efetiva: t.data_competencia)
+          custo_total_base: s.custo_total_base,
+          preco_medio_local_informado: s.preco_medio_local_informado,
+          preco_medio_base_informado: s.preco_medio_base_informado,
+          fonte_custo: s.fonte_custo, data_efetiva: t.data_competencia)
       when "transferencia_custodia"
         c = t.transferencia_custodia or raise Financeiro::AtributosInvalidos.new(detalhe: ["ausente"])
         comum.merge(conta_origem_id: c.conta_origem_id, conta_destino_id: c.conta_destino_id,

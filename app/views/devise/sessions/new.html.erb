@@ -1,0 +1,22 @@
+<% content_for :title, "Entrar" %>
+<section class="card auth-card">
+  <div class="card-body p-4 p-md-5">
+    <p class="page-eyebrow">Acesso seguro</p>
+    <h1 class="h2 mb-2">Bem-vindo de volta</h1>
+    <p class="text-secondary mb-4">Acesse seus espaços, carteiras e conciliações.</p>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "vstack gap-3" }) do |f| %>
+      <div>
+        <%= f.label :email, "E-mail", class: "form-label" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control form-control-lg" %>
+      </div>
+      <div>
+        <div class="d-flex justify-content-between"><%= f.label :password, "Senha", class: "form-label" %><%= link_to "Esqueci a senha", new_password_path(resource_name), class: "small" %></div>
+        <%= f.password_field :password, autocomplete: "current-password", class: "form-control form-control-lg" %>
+      </div>
+      <% if devise_mapping.rememberable? %>
+        <div class="form-check"><%= f.check_box :remember_me, class: "form-check-input" %><%= f.label :remember_me, "Lembrar neste dispositivo", class: "form-check-label" %></div>
+      <% end %>
+      <%= f.submit "Entrar", class: "btn btn-primary btn-lg w-100" %>
+    <% end %>
+  </div>
+</section>
